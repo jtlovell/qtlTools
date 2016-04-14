@@ -6,7 +6,7 @@ calcQtlMeans<-function(cross, mod, covar, ... ){
   if(!is.null(cross$geno[[1]]$draws)){
     cross<-sim.geno(cross, ...)
   }
-  qtlnames<-mod$name
+  qtlnames<-mod$alt.name
   meanse<-lapply(qtlnames[mod$chr!="X"], function(x) {
     if(!is.null(covar)){
       e<-effectplot(cross, mname1="covar", mark1=covar, geno1=unique(covar),
