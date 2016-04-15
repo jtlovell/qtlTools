@@ -1,7 +1,9 @@
-# this is an adjustment of the R/qtl scantwo function, but forces GWERk = 1
-source("/Users/John/Desktop/qtlTools/R/scantwo.GWERk1.r")
-source("https://raw.githubusercontent.com/kbroman/qtl/master/R/util.R")
-source("https://raw.githubusercontent.com/kbroman/qtl/master/R/calc.pairprob.R")
+#' @title Scantwo qtl analysis forcing GWERk = 1 analysis.
+#'
+#' @description
+#' \code{scanone.GWERk}  see qtl::scantwo for details. Forces GWERk = 1.
+#' @import qtl
+#' @export
 scantwo.GWERk1 <-
   function(cross, chr, pheno.col=1,
            model=c("normal","binary"),

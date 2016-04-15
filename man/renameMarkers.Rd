@@ -28,15 +28,4 @@ that have been replaced by the newnames provided.
 \code{renameMarkers} Take a cross object and the corresponding genotype matrix
 and rename a set of specified markers.
 }
-\examples{
-library(qtl)
-data(fake.f2)
-write.cross(fake.f2, format = "csv", filestem = "test") ### Must be "csv" or "csvs" formats.
-old.x <- markernames(fake.f2)[grep("X", markernames(fake.f2))]
-new.x <- c("X1", "X2", "X3")
-renameMarkers(cross = fake.f2, crossfile = "test.csv",
-   oldnames = old.x, newnames = new.x, outputName = "new.fake.f2.csv")
-new.fake.f2 <- read.cross(file = "new.fake.f2.csv", format = "csv")
-cbind(markernames(fake.f2), markernames(new.fake.f2))
-}
 

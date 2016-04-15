@@ -1,6 +1,9 @@
-# this is an adjustment of the R/qtl stepwise function, but with
-# the ability to use qtl*covariate interactions
-source("https://raw.githubusercontent.com/kbroman/qtl/master/R/util.R")
+#' @title stepwise qtl analysis forcing an interactive covariate
+#'
+#' @description
+#' \code{stepwiseqtl.int}  see qtl::stepwiseqtl for details
+#' @import qtl
+#' @export
 stepwiseqtl.int <-
   function(cross, chr, pheno.col=1, qtl, formula, max.qtl=10, covar=NULL,
            method=c("imp", "hk"), model=c("normal", "binary"), incl.markers=TRUE, refine.locations=TRUE,

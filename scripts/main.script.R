@@ -1,0 +1,5 @@
+library(devtools)
+install_github("jtlovell/qtltools")
+library(qtltools)
+source("https://raw.githubusercontent.com/kbroman/qtl/master/R/util.R")
+source("https://raw.githubusercontent.com/kbroman/qtl/master/R/calc.pairprob.R")

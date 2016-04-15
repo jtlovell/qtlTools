@@ -4,6 +4,6 @@
 \alias{calcQtlMeans}
 \title{A set of functions needed to run the main qtlTools functions}
 \usage{
-calcQtlMeans(cross, mod, covar, ...)
+calcQtlMeans(cross, mod, covar, dropstats, ...)
 }
 

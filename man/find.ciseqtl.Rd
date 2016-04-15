@@ -5,7 +5,8 @@
 \title{Find the location of a cis eQTL}
 \usage{
 find.ciseqtl(cross, phe, pos.gene, chr.gene, cmWindow = 10,
-  lodThreshold = 3, outputType = "data.frame", ...)
+  lodThreshold = 3, outputType = "data.frame", runTrans = TRUE,
+  covar = NULL, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
@@ -32,16 +33,5 @@ Either a qtl object or a dataframe, indicating the position of a cis eQTL.
 \description{
 \code{find.ciseqtl} Find the mapping position of the highest lod score
 within a window surrounding the known position of a gene.
-}
-\examples{
-library(qtl)
-data(fake.f2)
-write.cross(fake.f2, format = "csv", filestem = "test") ### Must be "csv" or "csvs" formats.
-old.x <- markernames(fake.f2)[grep("X", markernames(fake.f2))]
-new.x <- c("X1", "X2", "X3")
-renameMarkers(cross = fake.f2, crossfile = "test.csv",
-   oldnames = old.x, newnames = new.x, outputName = "new.fake.f2.csv")
-new.fake.f2 <- read.cross(file = "new.fake.f2.csv", format = "csv")
-cbind(markernames(fake.f2), markernames(new.fake.f2))
 }
 

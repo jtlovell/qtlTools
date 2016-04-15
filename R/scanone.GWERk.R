@@ -1,7 +1,10 @@
-# this is an adjustment of the R/qtl scanone function, but with
-# the ability to run GWERk permutations. setting GWERk = 0 runs standard
-# R/qtl permutations
-source("https://raw.githubusercontent.com/kbroman/qtl/master/R/util.R")
+#' @title Scanone qtl analysis permitting GWERk analysis.
+#'
+#' @description
+#' \code{scanone.GWERk}  see qtl::scanone for details. GWERk = 0 runs normal scanone
+#' permutations. Otherwise GWERk perms are used.
+#' @import qtl
+#' @export
 scanone.GWERk <-
   function(cross, chr, pheno.col=1, model=c("normal","binary","2part","np"),
            method=c("em","imp","hk","ehk","mr","mr-imp","mr-argmax"),

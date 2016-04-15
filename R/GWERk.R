@@ -1,3 +1,5 @@
+#' @import qtl
+#' @export
 GWERk<-function(cross.in, phe, k=1, nperms=1000, permstrata = NULL, batchit=TRUE,...){
   phenos<-pull.pheno(cross.in, pheno.col=phe)
   n.ind<-nind(cross.in)

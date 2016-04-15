@@ -32,7 +32,6 @@
 #'
 #' @return A dataframe of statistics.
 #'
-
 #' @import qtl
 #' @export
 

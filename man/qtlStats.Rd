@@ -53,44 +53,4 @@ This function works for riself, bc, f2 and 4-way mapping populations. It is advi
 to run both sim.geno and calc.genoprob prior to using qtlStats, as this will speed up the analysis.
 Also, it is important to note that this function works best on models generated from stepwiseqtl.
 }
-\examples{
-library(qtl)
-data(fake.f2)
-cross=fake.f2
-fake.f2<-calc.genoprob(fake.f2)
-covar<-matrix(pull.pheno(fake.f2,pheno.col="sex"))
-mod=stepwiseqtl(fake.f2, max.qtl=3, method="hk", covar=covar)
-form = "y ~ covar + Q1 + Q2 + Q3 + Q2:Q3 + Q1:covar"
-colnames(covar)<-"covar"
-qtlStats(cross=fake.f2, mod=mod,covar=covar,form=form,
-         phe="phenotype", cistrans=c(1,30))
-
-data(fake.bc)
-covar<-matrix(pull.pheno(fake.bc,pheno.col="sex"))
-colnames(covar)<-"covar"
-fake.bc<-calc.genoprob(fake.bc)
-mod = stepwiseqtl(fake.bc, pheno.col="pheno1", max.qtl=3, method="hk", covar=covar)
-qtlStats(cross=fake.bc, mod=mod,covar=covar,
-         phe="pheno1", cistrans=c(1,30))
-
-mod = stepwiseqtl(fake.bc, pheno.col="pheno1", max.qtl=3, penalties = c(0,0,0), method="hk", covar=covar)
-qtlStats(cross=fake.bc, mod=mod,covar=covar,
-         phe="pheno1", cistrans=c(2,30))
-data(fake.4way)
-fake.4way<-calc.genoprob(fake.4way)
-fake.4way<-sim.geno(fake.4way)
-covar<-matrix(pull.pheno(fake.4way,pheno.col="sex"))
-colnames(covar)<-"covar"
-fake.bc<-calc.genoprob(fake.4way)
-mod = stepwiseqtl(fake.4way, pheno.col="phenotype", max.qtl=3, penalties = c(3,4,3), method="hk", covar=covar)
-qtlStats(cross=fake.4way, mod=mod,covar=covar,
-         phe="phenotype")
-form="y ~ covar + Q1 + Q2 + Q3 + Q1:Q3 + covar*Q1"
-qtlStats(cross=fake.4way, mod=mod,covar=covar, form=form,
-         phe="phenotype")
-form="y ~ covar + Q1 + covar*Q1"
-mod<-makeqtl(fake.4way, chr=2, pos=15)
-qtlStats(cross=fake.4way, mod=mod,covar=covar, form=form,
-         phe="phenotype")
-}
 
