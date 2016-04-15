@@ -2,31 +2,33 @@
 #'
 #' @import qtl
 #' @export
-calcQtlMeans<-function(cross, mod, covar, ... ){
-  if(!is.null(cross$geno[[1]]$draws)){
-    cross<-sim.geno(cross, ...)
+calcQtlMeans<-function(cross, mod, covar, dropstats, ... ){
+  qtlnames<-mod$name
+  gp<-lapply(mod[[1]], function(x) apply(x,1, function(y) which(y==max(y))))
+  gp2<-do.call(cbind,gp)
+  colnames(gp2)<-qtlnames
+  phe.num<-pull.pheno(cross, pheno.col=phe)
+  rownames(gp2)<-getid(cross)
+
+  if(any(grep(":",rownames(dropstats)))){
+    intnames<-rownames(dropstats)[grep(":",rownames(dropstats))]
+    gpi<-gp2
+    colnames(gpi)<-intnames
+    for(i in colnames(gpi)) gpi[,i]<-paste(gpi[,i], covar, sep="_")
+    gp2<-cbind(gp2, gpi)
   }
-  qtlnames<-mod$alt.name
-  meanse<-lapply(qtlnames[mod$chr!="X"], function(x) {
-    if(!is.null(covar)){
-      e<-effectplot(cross, mname1="covar", mark1=covar, geno1=unique(covar),
-                    mname2=x,draw=F)$Means
-      enames<-unlist(sapply(colnames(e), function(y) {
-        y<-strsplit(y,"[.]")[[1]][2]
-        paste(rownames(e),y, sep="_")}))
-      eout<-data.frame(qtlnames = x, t(as.numeric(e)))
-      colnames(eout)[-1]<-enames
-    }else{
-      eout<-data.frame(qtlnames = x, t(effectplot(cross, pheno.col=phe, mname1=x,draw=F)$Means))
-      enames<-as.character(unlist(sapply(colnames(eout)[-1], function(y) {
-        strsplit(y,"[.]")[[1]][2]
-      })))
-      colnames(eout)[-1]<-enames
-    }
-    return(eout)
-  })
-  meanse<-do.call(rbind, meanse)
-  return(meanse)
+  gp3<-cbind(expand.grid(dimnames(gp2)), expand.grid(gp2), value = as.vector(phe.num))
+  gp3[,1]<-NULL
+  colnames(gp3)<-c("qtlnames","genotype","phe")
+  means<-tapply(gp3$phe, gp3[,c("qtlnames","genotype")], mean, na.rm=T)
+  ses<-tapply(gp3$phe, gp3[,c("qtlnames","genotype")], function(x) sd(x, na.rm=T)/sqrt(length(x)))
+  colnames(means)<-paste("mean",colnames(means), sep=".")
+  means<-data.frame(qtlnames=rownames(means),means)
+  colnames(ses)<-paste("se",colnames(ses), sep=".")
+  ses<-data.frame(qtlnames=rownames(ses),ses)
+  out<-merge(means, ses, by="qtlnames")
+
+  return(out)
 }
 
 calcCis<-function(mod, qtlnames, ci.method, drop, prob){

@@ -1,30 +1,38 @@
-#' @import qtl
-#' @export
-GWERk<-function(cross.in, phe, k=1, nperms=1000, printUpdate=TRUE, sameSeed = TRUE, ...){
+GWERk<-function(cross.in, phe, k=1, nperms=1000, permstrata = NULL, batchit=TRUE,...){
+  phenos<-pull.pheno(cross.in, pheno.col=phe)
+  n.ind<-nind(cross.in)
+  if(is.null(permstrata)){
+    permstrata<-rep(1, n.ind)
+  }
 
-  out<-lapply(phe, function(i){
-    if(sameSeed) set.seed(42)
-    if(printUpdate) cat(i, "\n")
-
-    phe.in<-pull.pheno(cross.in, pheno.col=i)
-
-    make.perm<-lapply(1:nperms, function(x)  sample(phe.in, size=length(phe.in)))
-
-    permd.phe<-data.frame(do.call(cbind,make.perm))
-    colnames(permd.phe)<-paste("perm",1:nperms,sep="_")
-
-    cross2<-cross.in
-    cross2$pheno <- cbind(cross2$pheno, permd.phe)
-
-    perm<-scanone(cross2, pheno.col=colnames(permd.phe), ...)
-
-    sperm<-summary(perm)[,colnames(permd.phe)]
-    sum.perm<-as.numeric(apply(sperm, 2, function(x) {
-      for (i in 1:k) x<-x[-which(x==max(x))]
-      return(max(x))
-    }))
-    return(sum.perm)
-  })
-  names(out)<-phe
-  return(do.call(cbind, out))
+  u <- unique(perm.strata)
+  if(batchit){
+    ord <- matrix(0, n.ind, nperms)
+    for(i in u){
+      for(j in 1:nperms){
+        ord[permstrata==i,j]<-sample(phenos[permstrata==i])
+      }
+    }
+    cross.in$pheno <- cbind(matrix(cross.in$pheno[,phe][ord], nrow=n.ind), cross.in$pheno)
+    tem<-scanone(cross=cross.in, pheno.col = 1:nperms)
+  }else{
+    temp<-list()
+    for(i in 1:nperms){
+      ord <- 1:n.ind
+      for(j in u) {
+        wh <- perm.strata==j
+        if(sum(wh)>1) ord[wh] <- sample(ord[wh])
+      }
+      ord<-matrix(ord, ncol=1)
+      cross.in$pheno <- cross.in$pheno[o,phe,drop=FALSE]
+      temp[[i]] <- scanone(cross=cross.in, pheno.col = phe, ...)
+    }
+    tem<-do.call(cbind, temp)
+  }
+  res <- matrix(apply(tem[,-(1:2),drop=FALSE],2, function(x) {
+    m<-tapply(x,tem$chr,max, na.rm=TRUE)
+    m[order(-m)][k+1]
+  }), ncol=1)
+  colnames(res) <- "lod"
+  return(res)
 }

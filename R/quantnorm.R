@@ -7,18 +7,7 @@
 #' @param x The numeric vector to quantile normalize
 #'
 #' @return a vector of quantile normalized data
-#' @examples
-#' par(mfrow = c(2,1))
-#' hist(x <- sample(1:100, 50), breaks = 12)
-#' hist(quantnorm(x), breaks = 12)
-#'
-#' library(qtl)
-#' data(fake.f2)
-#' hist(pull.pheno(fake.f2, "phenotype"))
-#' hist(quantnorm(pull.pheno(fake.f2, "phenotype")))
-#' fake.f2<-transformPheno(fake.f2, pheno.col = "phenotype", transf = quantnorm)
-#' hist(pull.pheno(fake.f2, "phenotype"))
-#'
+
 #' @export
 quantnorm<-function(x, drop0s=FALSE) {
   x<-as.numeric(x)

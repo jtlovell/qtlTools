@@ -32,46 +32,7 @@
 #'
 #' @return A dataframe of statistics.
 #'
-#' @examples
-#' library(qtl)
-#' data(fake.f2)
-#' cross=fake.f2
-#' fake.f2<-calc.genoprob(fake.f2)
-#' covar<-matrix(pull.pheno(fake.f2,pheno.col="sex"))
-#' mod=stepwiseqtl(fake.f2, max.qtl=3, method="hk", covar=covar)
-#' form = "y ~ covar + Q1 + Q2 + Q3 + Q2:Q3 + Q1:covar"
-#' colnames(covar)<-"covar"
-#' qtlStats(cross=fake.f2, mod=mod,covar=covar,form=form,
-#'          phe="phenotype", cistrans=c(1,30))
-#'
-#' data(fake.bc)
-#' covar<-matrix(pull.pheno(fake.bc,pheno.col="sex"))
-#' colnames(covar)<-"covar"
-#' fake.bc<-calc.genoprob(fake.bc)
-#' mod = stepwiseqtl(fake.bc, pheno.col="pheno1", max.qtl=3, method="hk", covar=covar)
-#' qtlStats(cross=fake.bc, mod=mod,covar=covar,
-#'          phe="pheno1", cistrans=c(1,30))
-#'
-#' mod = stepwiseqtl(fake.bc, pheno.col="pheno1", max.qtl=3, penalties = c(0,0,0), method="hk", covar=covar)
-#' qtlStats(cross=fake.bc, mod=mod,covar=covar,
-#'          phe="pheno1", cistrans=c(2,30))
 
-#' data(fake.4way)
-#' fake.4way<-calc.genoprob(fake.4way)
-#' fake.4way<-sim.geno(fake.4way)
-#' covar<-matrix(pull.pheno(fake.4way,pheno.col="sex"))
-#' colnames(covar)<-"covar"
-#' fake.bc<-calc.genoprob(fake.4way)
-#' mod = stepwiseqtl(fake.4way, pheno.col="phenotype", max.qtl=3, penalties = c(3,4,3), method="hk", covar=covar)
-#' qtlStats(cross=fake.4way, mod=mod,covar=covar,
-#'          phe="phenotype")
-#' form="y ~ covar + Q1 + Q2 + Q3 + Q1:Q3 + covar*Q1"
-#' qtlStats(cross=fake.4way, mod=mod,covar=covar, form=form,
-#'          phe="phenotype")
-#' form="y ~ covar + Q1 + covar*Q1"
-#' mod<-makeqtl(fake.4way, chr=2, pos=15)
-#' qtlStats(cross=fake.4way, mod=mod,covar=covar, form=form,
-#'          phe="phenotype")
 #' @import qtl
 #' @export
 
@@ -113,7 +74,7 @@ qtlStats<-function(cross,
   nterms<-sum(countqtlterms(form, ignore.covar=F)[c(1,4)])
   ncovar<-length(covar)
   nepi<-as.numeric(countqtlterms(form)[4])
-  qtlnames<-mod$name
+  qtlnames<-mod$altname
 
   info<-data.frame(qtlnames,
                    phenotype = phe,
@@ -146,14 +107,17 @@ qtlStats<-function(cross,
   out$type<-ifelse(grepl("[:]",out$form.name) & grepl("covar",out$form.name), "covar.int",
                    ifelse(grepl("[:]",out$form.name),"epi",
                           ifelse(grepl("covar",out$form.name), "covar", "add")))
+  print(out)
 
   if(calcConfint){
     qtlCIs<-calcCis(mod=mod, qtlnames=qtlnames, ci.method=ci.method, drop=drop, prob=prob)
+    print(qtlCIs)
     out<-merge(out, qtlCIs, by="qtlnames", all=T)
   }
 
   if(calcMeans){
-    qtlMeans<-calcQtlMeans(cross=cross, mod=mod, covar=covar)
+    qtlMeans<-calcQtlMeans(cross=cross, mod=mod, covar=covar, dropstats=drop.stats)
+    print(qtlMeans)
     out<-merge(out, qtlMeans, by="qtlnames", all=T)
   }
   if(!is.null(cistrans)){
