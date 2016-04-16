@@ -12,12 +12,14 @@ calcQtlMeans<-function(cross, mod, covar, dropstats, ... ){
 
   if(any(grep(":",rownames(dropstats)))){
     intnames<-rownames(dropstats)[grep(":",rownames(dropstats))]
-    gpi<-gp2
+    hasint<-as.character(sapply(intnames, function(x) strsplit(x, ":")[[1]][1]))
+    gpi<-data.frame(gp2[,colnames(gp2) %in% hasint])
     colnames(gpi)<-intnames
     for(i in colnames(gpi)) gpi[,i]<-paste(gpi[,i], covar, sep="_")
     gp2<-cbind(gp2, gpi)
   }
-  gp3<-cbind(expand.grid(dimnames(gp2)), expand.grid(gp2), value = as.vector(phe.num))
+  gp3<-cbind(covar=covar, gp2, value = as.vector(phe.num))
+  gp3<-cbind(expand.grid(dimnames(gp2)),unlist(gp2), value = as.vector(phe.num))
   gp3[,1]<-NULL
   colnames(gp3)<-c("qtlnames","genotype","phe")
   means<-tapply(gp3$phe, gp3[,c("qtlnames","genotype")], mean, na.rm=T)

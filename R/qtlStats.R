@@ -38,7 +38,7 @@
 qtlStats<-function(cross,
                    mod,
                    phe,
-                   cistrans = NULL,
+                   cisname = NULL,
                    covar=NULL,
                    ci.method="drop",
                    drop=1.5,
@@ -46,7 +46,8 @@ qtlStats<-function(cross,
                    form=NULL,
                    calcConfint=TRUE,
                    calcMeans=TRUE,
-                   cisdist=10,
+                   cisdist=40,
+                   method="hk",
                    ...){
   if(nqtl(mod)==0 | is.null(nqtl(mod))){
     stop("error: supplied qtl object has a null model")
@@ -66,7 +67,7 @@ qtlStats<-function(cross,
   }
 
   if(is.null(attr(mod, "lodprofile"))){
-    mod<-refineqtl(cross, qtl=mod, covar=covar,  verbose=FALSE)
+    mod<-refineqtl(cross, qtl=mod, covar=covar,  verbose=FALSE, formula=form, method = "hk")
   }
 
   nqtls<-nqtl(mod)
@@ -88,7 +89,7 @@ qtlStats<-function(cross,
               qtl=mod,
               formula=form,
               dropone=T,
-              covar=covar)
+              covar=covar, method=method)
 
   model.stats<-data.frame(full.LOD = fit$result.full[,"LOD"][1],
                           full.percentVar = fit$result.full[,"%var"][1],
@@ -106,21 +107,21 @@ qtlStats<-function(cross,
   out$type<-ifelse(grepl("[:]",out$form.name) & grepl("covar",out$form.name), "covar.int",
                    ifelse(grepl("[:]",out$form.name),"epi",
                           ifelse(grepl("covar",out$form.name), "covar", "add")))
-  print(out)
 
   if(calcConfint){
     qtlCIs<-calcCis(mod=mod, qtlnames=qtlnames, ci.method=ci.method, drop=drop, prob=prob)
-    print(qtlCIs)
     out<-merge(out, qtlCIs, by="qtlnames", all=T)
   }
 
   if(calcMeans){
     qtlMeans<-calcQtlMeans(cross=cross, mod=mod, covar=covar, dropstats=drop.stats)
-    print(qtlMeans)
     out<-merge(out, qtlMeans, by="qtlnames", all=T)
   }
-  if(!is.null(cistrans)){
-    out<-defineCisTrans(out=out, cistrans, cisdist=cisdist)
+  if(!is.null(cisname)){
+    out$type = with(out, ifelse(type == "add" & qtlnames == cisname, "cis",
+                                ifelse(type == "covar.int" & grepl(cisname, qtlnames), "cis.covar.int",
+                                       ifelse(type == "add" & qtlnames != cisname, "trans",
+                                              ifelse(type == "covar.int" & !grepl(cisname, qtlnames), "trans.covar.int",type)))))
   }
   return(out)
 }
