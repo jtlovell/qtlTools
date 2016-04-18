@@ -42,36 +42,38 @@ parseTrans<-function(cross, phe,
                           qtl$pos>cis.wind[1] &
                           qtl$pos<cis.wind[2]]
     qtl2check<-qtl$altname[qtl$altname != is.cisqtl]
+    chr2check<-qtl$chr[qtl$altname != is.cisqtl]
+    pos2check<-qtl$pos[qtl$altname != is.cisqtl]
   }else{
     qtl2check<-qtl$altname
   }
 
   # drop non-significant QTL and interactions...
-  for(i in qtl2check){
-    qnames<-rownames(sdrop)[grepl(i, rownames(sdrop), fixed=T)]
-    pvals<-sdrop$Pvalue.F.[grepl(i, rownames(sdrop), fixed=T)]
+  for(i in 1:length(qtl2check)){
+    qn<-qtl$altname[qtl$chr == chr2check[i] & qtl$pos == pos2check[i]]
+    qnames<-rownames(sdrop)[grepl(qn, rownames(sdrop), fixed=T)]
+    pvals<-sdrop$Pvalue.F.[grepl(qn, rownames(sdrop), fixed=T)]
     if(all(pvals>0.05) & length(pvals>0)){
       # for(j in qnames){
       #   form.allint<-gsub(paste(j,"+", sep=" "),"",form.allint, fixed=T)
       # }
       # form.allint<-as.formula(form.allint)
       # print(form.allint)
-      qnamed<-qnames[!grepl(":",qnames, fixed=T)]
       formula <- as.formula(attr(qtl, "formula"))
 
       ts<-terms(as.formula(deparseQTLformula(formula)))
-      todrop<- grep(qnamed, attr( ts, "term.labels") )
+      todrop<- grep(qn, attr( ts, "term.labels") )
       nt <- drop.terms(ts, dropx = todrop, keep.response = TRUE)
       formula<-deparseQTLformula(reformulate(attr( nt, "term.labels"), response = "y"))
 
-      qtl<-dropfromqtl(qtl, qtl.name=qnamed)
+      qtl<-dropfromqtl(qtl, qtl.name=qn)
 
       chr <- qtl$chr
       pos <- qtl$pos
 
-      for(i in 1:nqtl(qtl)){
-        an<-qtl$altname
-        n<-qtl$name
+      for(j in 1:nqtl(qtl)){
+        an<-qtl$altname[j]
+        n<-qtl$name[j]
         formula<-gsub(n,an,formula)
       }
       qtl$name<-qtl$altname
@@ -86,3 +88,4 @@ parseTrans<-function(cross, phe,
 
   return(list(stats=stats, model=qtl))
 }
+
