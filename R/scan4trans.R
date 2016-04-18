@@ -32,6 +32,7 @@ scan4trans<-function(cross,
                      cisWindow = 40,
                      verbose = FALSE,
                      cisname = "Q1",
+                     refine = TRUE,
                      ...){
   if(verbose) cat("scanning for trans eQTL\n")
 
@@ -91,10 +92,9 @@ scan4trans<-function(cross,
 
   sall<-summary(fall)
   sdrop<-data.frame(sall$result.drop)
-  nonsigQTL<-rownames(sdrop)[sdrop$Pvalue.F. == max(sdrop$Pvalue.F.) & sdrop$Pvalue.F. > 0.05 & rownames(sdrop)!="covar"][1]
+  nonsigQTL<<-rownames(sdrop)[sdrop$Pvalue.F. == max(sdrop$Pvalue.F.) & sdrop$Pvalue.F. > 0.05 & rownames(sdrop)!="covar"][1]
 
   while(length(nonsigQTL)>0 & gsub(" ","", form.allint) != "y~covar"){
-    print(nonsigQTL)
 
     if(nonsigQTL %in% mall$name &
        !paste(nonsigQTL, "covar", sep = ":") %in% nonsigQTL &
