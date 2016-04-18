@@ -102,7 +102,6 @@ scan4trans<-function(cross,
     }
 
     form.allint<-gsub(paste(nonsigQTL,"+",sep=" "),"", form.allint, fixed=TRUE)
-    print(form.allint)
 
     if(gsub(" ","", form.allint) == "y~covar"){
       fall<-NULL
