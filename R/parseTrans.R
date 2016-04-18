@@ -46,6 +46,8 @@ parseTrans<-function(cross, phe,
     pos2check<-qtl$pos[qtl$altname != is.cisqtl]
   }else{
     qtl2check<-qtl$altname
+    chr2check<-qtl$chr
+    pos2check<-qtl$pos
   }
   if(length(qtl2check)>0){
     for(i in 1:length(qtl2check)){
