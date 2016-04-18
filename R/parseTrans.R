@@ -1,3 +1,26 @@
+
+#' @title Find the location of a cis eQTL
+#'
+#' @description
+#' \code{parseTrans} Find the mapping position of the highest lod score
+#' within a window surrounding the known position of a gene.
+#'
+#' @param cross The qtl cross object with marker names that need to be changed.
+#' @param phe Character or numeric vector indicating the phenotype to be tested
+#' @param chr.gene The name of the chromosome that contains the focal genes
+#' @param pos.gene The suspected mapping position of the gene - may be inferred from bp2cm
+#' @param cmWindow The distance from pos.gene that the cis eQTL may reside. Default is 10, but
+#' if the confidence of the mapping position is high, a smaller value is suggested.
+#' @param outputType Whether to return a data.frame or qtl object (from makeqtl)
+#' @param lodThreshold If outputType = data.frame, the presence of a cis.eqtl is defined by whether
+#' any marker within cmWindow has a lod score > lodThreshold.
+#' @param lodThreshold
+
+#'
+#' @return Either a qtl object or a dataframe, indicating the position of a cis eQTL.
+#'
+#' @import qtl
+#' @export
 parseTrans<-function(cross, phe,
                      sdrop,
                      formula = NULL,

@@ -3,6 +3,7 @@
 export(GWERk)
 export(calcQtlMeans)
 export(find.ciseqtl)
+export(parseTrans)
 export(qtlStats)
 export(quantnorm)
 export(renameMarkers)
