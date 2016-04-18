@@ -38,7 +38,7 @@
 qtlStats<-function(cross,
                    mod,
                    phe,
-                   cisname = NULL,
+                   cisQTL = NULL,
                    covar=NULL,
                    ci.method="drop",
                    drop=1.5,
@@ -48,6 +48,7 @@ qtlStats<-function(cross,
                    calcMeans=TRUE,
                    cisdist=40,
                    method="hk",
+                   refine=FALSE,
                    ...){
   if(nqtl(mod)==0 | is.null(nqtl(mod))){
     stop("error: supplied qtl object has a null model")
@@ -66,7 +67,7 @@ qtlStats<-function(cross,
     }
   }
 
-  if(is.null(attr(mod, "lodprofile"))){
+  if(is.null(attr(mod, "lodprofile")) & refine){
     mod<-refineqtl(cross, qtl=mod, covar=covar,  verbose=FALSE, formula=form, method = "hk")
   }
 
@@ -117,11 +118,17 @@ qtlStats<-function(cross,
     qtlMeans<-calcQtlMeans(cross=cross, mod=mod, covar=covar, dropstats=drop.stats)
     out<-merge(out, qtlMeans, by="qtlnames", all=T)
   }
-  if(!is.null(cisname)){
-    out$type = with(out, ifelse(type == "add" & qtlnames == cisname, "cis",
-                                ifelse(type == "covar.int" & grepl(cisname, qtlnames), "cis.covar.int",
-                                       ifelse(type == "add" & qtlnames != cisname, "trans",
-                                              ifelse(type == "covar.int" & !grepl(cisname, qtlnames), "trans.covar.int",type)))))
+  if(!is.null(cisQTL)){
+    cis.chr=cisQTL$chr
+    cis.pos=cisQTL$pos
+    cis.wind=c(cis.pos-cisdist, cis.pos+cisdist)
+    is.cis<-with(out, chr==cis.chr & pos>cis.wind[1] & pos<cis.wind[2])
+    is.trans<-!is.cis & !is.na(is.cis)
+    is.cis<-is.cis & !is.na(is.cis)
+    out$type = with(out, ifelse(type == "add" & is.cis, "cis",
+                                ifelse(type == "covar.int" & is.cis, "cis.covar.int",
+                                       ifelse(type == "add" & is.trans, "trans",
+                                              ifelse(type == "covar.int" & is.trans, "trans.covar.int",type)))))
   }
   return(out)
 }

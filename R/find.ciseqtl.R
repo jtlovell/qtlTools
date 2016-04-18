@@ -42,6 +42,6 @@ find.ciseqtl<-function(cross, phe, pos.gene, chr.gene, cmWindow = 10,
       cross<-calc.genoprob(cross)
       m<-makeqtl(cross, chr=chr.gene, pos=best.pos, what = "prob")
     }
-    return(list(cisQTL=m, cisDF=out))
+    return(list(cisQTL=m, cisDF=out, s1=s1))
   }
 }

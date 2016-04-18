@@ -36,7 +36,7 @@ scan4trans<-function(cross,
                      ...){
   if(verbose) cat("scanning for trans eQTL\n")
 
-  if(cisGenotypeCovariate){
+  if(cisGenotypeCovariate & !is.null(cisQTL)){
     gp<-apply(data.frame(cisQTL[[1]]),1,function(x) which(x==max(x)))
     gps<-data.frame(covar=covar$covar, gp)
   }else{
@@ -68,60 +68,24 @@ scan4trans<-function(cross,
   sumtrans<-data.frame(summary(s1.trans, perms=perms, pvalues=T))
   sigtrans<-sumtrans[sumtrans$pval<=0.05,]
 
-  chrs <- c(cisChr, sigtrans$chr)
-  poss <- c(cisPos, sigtrans$pos)
-  qnames<-1:(1+nrow(sigtrans))
-  qnames<-paste("Q", qnames, sep="")
-  mall<-makeqtl(cross, chr=chrs, pos=poss, qtl.name=qnames, what = "prob")
+  chr <- c(cisChr, sigtrans$chr)
+  pos <- c(cisPos, sigtrans$pos)
+  o <- order(factor(chr, levels=names(cross$geno)), chr)
+  qtl <- makeqtl(cross, chr[o], pos[o], what="prob")
 
-  form.allint<-paste("y ~ ",
-                     paste(qnames, collapse=" + "),
-                     " + ",
-                     paste(paste(qnames, "covar", sep = ":"), collapse = " + "),
-                     " + covar",
-                     sep = "")
+  formula<-paste("y ~ ",
+                 paste(qtl$altname, collapse=" + "),
+                 " + ",
+                 paste(paste(qtl$altname, "covar", sep = ":"), collapse = " + "),
+                 " + covar",
+                 sep = "")
+  qtl$name<-qtl$altname
 
-  fall<-fitqtl(cross, pheno.col=phe, formula=form.allint, qtl=mall, covar=covar, method="hk")
+  attr(qtl, "formula") <- deparseQTLformula(formula)
 
-  if(refine){
-    mall<-refineqtl(cross, qtl = mall, formula = form.allint, pheno.col=phe, covar=covar, method = "hk",
-                    verbose=F)
-  }
-
-  #summary(fitqtl(cross, pheno.col = phe, qtl = mall, formula = form.allint, method="hk", covar=covar))
-
+  fall<-fitqtl(cross, pheno.col=phe, formula=formula(qtl), qtl=qtl, covar=covar, method="hk")
   sall<-summary(fall)
   sdrop<-data.frame(sall$result.drop)
-  nonsigQTL<<-rownames(sdrop)[sdrop$Pvalue.F. == max(sdrop$Pvalue.F.) & sdrop$Pvalue.F. > 0.05 & rownames(sdrop)!="covar"][1]
 
-  while(length(nonsigQTL)>0 & gsub(" ","", form.allint) != "y~covar"){
-
-    if(nonsigQTL %in% mall$name &
-       !paste(nonsigQTL, "covar", sep = ":") %in% nonsigQTL &
-       paste(nonsigQTL, "covar", sep = ":") %in% rownames(sdrop)){
-      nonsigQTL<-gsub(nonsigQTL,paste(i, "covar", sep = ":"), nonsigQTL)
-    }
-
-    form.allint<-gsub(paste(nonsigQTL,"+",sep=" "),"", form.allint, fixed=TRUE)
-
-    if(gsub(" ","", form.allint) == "y~covar"){
-      fall<-NULL
-    }else{
-      if(refine){
-        small<-refineqtl(cross, qtl = mall, formula = form.allint,
-                         pheno.col=phe, covar=covar, method = "hk",verbose=F)
-      }
-      fall<-fitqtl(cross, pheno.col=phe, formula=form.allint, qtl=mall, covar=covar, method="hk")
-      sall<-summary(fall)
-      sdrop<-data.frame(sall$result.drop)
-      nonsigQTL<-rownames(sdrop)[sdrop$Pvalue.F. == max(sdrop$Pvalue.F.) & sdrop$Pvalue.F. > 0.05 & rownames(sdrop)!="covar"]
-    }
-  }
-  if(verbose) cat("compiling stats")
-  if(is.null(fall)){
-    return(list(stats=NULL, model = NULL, formula = NULL))
-  }else{
-    stats<-qtlStats(cross, mod=mall, phe=phe, cisname = "Q1", covar = covar, form = form.allint)
-    return(list(stats=stats, model = mall, formula = form.allint))
-  }
+  return(list(model=qtl, dropstats=sdrop, s1 = s1.trans))
 }
