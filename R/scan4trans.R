@@ -92,12 +92,13 @@ scan4trans<-function(cross,
   sall<-summary(fall)
   sdrop<-data.frame(sall$result.drop)
   nonsigQTL<-rownames(sdrop)[sdrop$Pvalue.F. == max(sdrop$Pvalue.F.) & sdrop$Pvalue.F. > 0.05 & rownames(sdrop)!="covar"][1]
+
   while(length(nonsigQTL)>0 & gsub(" ","", form.allint) != "y~covar"){
     print(nonsigQTL)
 
     if(nonsigQTL %in% mall$name &
        !paste(nonsigQTL, "covar", sep = ":") %in% nonsigQTL &
-       paste(i, "covar", sep = ":") %in% rownames(sdrop)){
+       paste(nonsigQTL, "covar", sep = ":") %in% rownames(sdrop)){
       nonsigQTL<-gsub(nonsigQTL,paste(i, "covar", sep = ":"), nonsigQTL)
     }
 
