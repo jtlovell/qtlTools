@@ -2,7 +2,7 @@
 #'
 #' @import qtl
 #' @export
-calcQtlMeans<-function(cross, mod, covar, dropstats, ... ){
+calcQtlMeans<-function(cross, mod, covar, dropstats, phe, ... ){
   qtlnames<-mod$name
   gp<-lapply(mod[[1]], function(x) apply(x,1, function(y) which(y==max(y))))
   gp2<-do.call(cbind,gp)
