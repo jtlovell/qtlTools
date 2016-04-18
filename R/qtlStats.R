@@ -122,13 +122,16 @@ qtlStats<-function(cross,
     cis.chr=cisQTL$chr
     cis.pos=cisQTL$pos
     cis.wind=c(cis.pos-cisdist, cis.pos+cisdist)
-    is.cis<-with(out, chr==cis.chr & pos>cis.wind[1] & pos<cis.wind[2])
-    is.trans<-!is.cis & !is.na(is.cis)
-    is.cis<-is.cis & !is.na(is.cis)
-    out$type = with(out, ifelse(type == "add" & is.cis, "cis",
-                                ifelse(type == "covar.int" & is.cis, "cis.covar.int",
-                                       ifelse(type == "add" & is.trans, "trans",
-                                              ifelse(type == "covar.int" & is.trans, "trans.covar.int",type)))))
+    is.cis<-with(out, chr==cis.chr & pos>=cis.wind[1] & pos<=cis.wind[2] & !is.na(chr))
+    cisq<-out$qtlnames[is.cis & !is.na(is.cis)]
+    is.trans<-with(out, chr!=cis.chr | pos<cis.wind[1] | pos>cis.wind[2] & !is.na(chr))
+    transq<-out$qtlnames[is.trans & !is.na(is.trans)]
+    if(length(cisq) == 0) cisq<-"XXXX"
+    if(length(transq) == 0) transq<-"XXXX"
+    out$type = with(out, ifelse(type == "add" & grepl(cisq, qtlnames), "cis",
+                                ifelse(type == "covar.int" & grepl(cisq, qtlnames), "cis.covar.int",
+                                       ifelse(type == "add" & grepl(transq, qtlnames), "trans",
+                                              ifelse(type == "covar.int" & grepl(transq, qtlnames), "trans.covar.int",type)))))
   }
   return(out)
 }

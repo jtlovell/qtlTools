@@ -47,41 +47,41 @@ parseTrans<-function(cross, phe,
   }else{
     qtl2check<-qtl$altname
   }
+  if(length(qtl2check)>0){
+    for(i in 1:length(qtl2check)){
+      qn<-qtl$altname[qtl$chr == chr2check[i] & qtl$pos == pos2check[i]]
+      qnames<-rownames(sdrop)[grepl(qn, rownames(sdrop), fixed=T)]
+      pvals<-sdrop$Pvalue.F.[grepl(qn, rownames(sdrop), fixed=T)]
+      if(all(pvals>0.05) & length(pvals>0)){
+        # for(j in qnames){
+        #   form.allint<-gsub(paste(j,"+", sep=" "),"",form.allint, fixed=T)
+        # }
+        # form.allint<-as.formula(form.allint)
+        # print(form.allint)
+        formula <- as.formula(attr(qtl, "formula"))
 
-  # drop non-significant QTL and interactions...
-  for(i in 1:length(qtl2check)){
-    qn<-qtl$altname[qtl$chr == chr2check[i] & qtl$pos == pos2check[i]]
-    qnames<-rownames(sdrop)[grepl(qn, rownames(sdrop), fixed=T)]
-    pvals<-sdrop$Pvalue.F.[grepl(qn, rownames(sdrop), fixed=T)]
-    if(all(pvals>0.05) & length(pvals>0)){
-      # for(j in qnames){
-      #   form.allint<-gsub(paste(j,"+", sep=" "),"",form.allint, fixed=T)
-      # }
-      # form.allint<-as.formula(form.allint)
-      # print(form.allint)
-      formula <- as.formula(attr(qtl, "formula"))
+        ts<-terms(as.formula(deparseQTLformula(formula)))
+        todrop<- grep(qn, attr( ts, "term.labels") )
+        nt <- drop.terms(ts, dropx = todrop, keep.response = TRUE)
+        formula<-deparseQTLformula(reformulate(attr( nt, "term.labels"), response = "y"))
 
-      ts<-terms(as.formula(deparseQTLformula(formula)))
-      todrop<- grep(qn, attr( ts, "term.labels") )
-      nt <- drop.terms(ts, dropx = todrop, keep.response = TRUE)
-      formula<-deparseQTLformula(reformulate(attr( nt, "term.labels"), response = "y"))
+        qtl<-dropfromqtl(qtl, qtl.name=qn)
 
-      qtl<-dropfromqtl(qtl, qtl.name=qn)
+        chr <- qtl$chr
+        pos <- qtl$pos
 
-      chr <- qtl$chr
-      pos <- qtl$pos
+        for(j in 1:nqtl(qtl)){
+          an<-qtl$altname[j]
+          n<-qtl$name[j]
+          formula<-gsub(n,an,formula)
+        }
+        qtl$name<-qtl$altname
+        attr(qtl, "formula") <- deparseQTLformula(formula)
 
-      for(j in 1:nqtl(qtl)){
-        an<-qtl$altname[j]
-        n<-qtl$name[j]
-        formula<-gsub(n,an,formula)
+        fall<-fitqtl(cross, pheno.col=phe, formula=formula(qtl), qtl=qtl, covar=covar, method="hk")
+        sall<-summary(fall)
+        sdrop<-data.frame(sall$result.drop)
       }
-      qtl$name<-qtl$altname
-      attr(qtl, "formula") <- deparseQTLformula(formula)
-
-      fall<-fitqtl(cross, pheno.col=phe, formula=formula(qtl), qtl=qtl, covar=covar, method="hk")
-      sall<-summary(fall)
-      sdrop<-data.frame(sall$result.drop)
     }
   }
   stats<-qtlStats(cross, mod=qtl, phe=phe, cisQTL = cisQTL, covar = covar, form = formula(qtl), calcConfint=F)
