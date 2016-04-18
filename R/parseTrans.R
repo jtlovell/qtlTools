@@ -27,7 +27,7 @@ parseTrans<-function(cross, phe,
                      qtl,
                      cisQTL = NULL,
                      covar = NULL,
-                     cisWindow = 40,
+                     cisdist = 40,
                      verbose = FALSE,
                      retainCis = TRUE){
   if(!is.null(formula)){
