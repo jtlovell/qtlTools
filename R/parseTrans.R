@@ -33,8 +33,6 @@ parseTrans<-function(cross, phe,
   if(!is.null(formula)){
     attr(qtl, "formula") <- deparseQTLformula(formula)
   }
-  sdrop<-transs$dropstats
-  qtl<-transs$model
 
   if(retainCis & !is.null(cisQTL)){
     cis.chr=cisQTL$chr
