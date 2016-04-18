@@ -1,7 +1,7 @@
 #' @title Find the location of a cis eQTL
 #'
 #' @description
-#' \code{find.ciseqtl} Find the mapping position of the highest lod score
+#' \code{scan4trans} Find the mapping position of the highest lod score
 #' within a window surrounding the known position of a gene.
 #'
 #' @param cross The qtl cross object with marker names that need to be changed.
@@ -70,22 +70,26 @@ scan4trans<-function(cross,
 
   chr <- c(cisChr, sigtrans$chr)
   pos <- c(cisPos, sigtrans$pos)
-  o <- order(factor(chr, levels=names(cross$geno)), chr)
-  qtl <- makeqtl(cross, chr[o], pos[o], what="prob")
 
-  formula<-paste("y ~ ",
-                 paste(qtl$altname, collapse=" + "),
-                 " + ",
-                 paste(paste(qtl$altname, "covar", sep = ":"), collapse = " + "),
-                 " + covar",
-                 sep = "")
-  qtl$name<-qtl$altname
+  if(length(chr)==0){
+    qtl=NULL; sdrop=NULL;s1.trans=NULL
+  }else{
+    o <- order(factor(chr, levels=names(cross$geno)), chr)
+    qtl <- makeqtl(cross, chr[o], pos[o], what="prob")
 
-  attr(qtl, "formula") <- deparseQTLformula(formula)
+    formula<-paste("y ~ ",
+                   paste(qtl$altname, collapse=" + "),
+                   " + ",
+                   paste(paste(qtl$altname, "covar", sep = ":"), collapse = " + "),
+                   " + covar",
+                   sep = "")
+    qtl$name<-qtl$altname
 
-  fall<-fitqtl(cross, pheno.col=phe, formula=formula(qtl), qtl=qtl, covar=covar, method="hk")
-  sall<-summary(fall)
-  sdrop<-data.frame(sall$result.drop)
+    attr(qtl, "formula") <- deparseQTLformula(formula)
 
+    fall<-fitqtl(cross, pheno.col=phe, formula=formula(qtl), qtl=qtl, covar=covar, method="hk")
+    sall<-summary(fall)
+    sdrop<-data.frame(sall$result.drop)
+  }
   return(list(model=qtl, dropstats=sdrop, s1 = s1.trans))
 }

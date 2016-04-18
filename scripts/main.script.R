@@ -1,6 +1,6 @@
 library(devtools)
 install_github("jtlovell/qtltools")
-library(qtltools)
+library(qtlTools)
 
 library(qtl)
 source("https://raw.githubusercontent.com/kbroman/qtl/master/R/util.R")
@@ -45,7 +45,7 @@ summary(perms2.0)
 set.seed(42)
 perms2.1<-scantwo.GWERk1(fake.f2, chr=c(1,2), pheno.col="phenotype", addcovar=covar,
                        intcovar=covar, perm.strata=covar[,1],
-                       n.perm=50, verbose = F)
+                       n.perm=50, verbose = T)
 summary(perms2.1)
 
 plot(as.numeric(perms2.0$full), as.numeric(perms2.1$full), xlab="standard perms", ylab = "GWER perms")
