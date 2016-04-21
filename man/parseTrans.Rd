@@ -5,7 +5,7 @@
 \title{Find the location of a cis eQTL}
 \usage{
 parseTrans(cross, phe, sdrop, formula = NULL, qtl, cisQTL = NULL,
-  covar = NULL, cisWindow = 40, verbose = FALSE, retainCis = TRUE)
+  covar = NULL, cisdist = 40, verbose = FALSE, retainCis = TRUE)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
