@@ -1,0 +1,82 @@
+#' @title Visualize the positions of QTL on a genetic map.
+#'
+#' @description
+#' \code{segmentsOnMap} A basic function to plot QTL confidence intervals.
+#' Useful for <10 traits
+#'
+#' @param cross The qtl cross object with marker names that need to be changed.
+#' @param phe Character or numeric vector indicating the phenotype to be tested
+#' @param chr Vector of chromosome ids - will be coerced to numeric
+#' @param l The lower confidence interval bound
+#' @param h The upper confidence interval bound
+#' @param seqSpread How far apart (x axis) the semgents are
+#' @param ... Other arguments passed to segments
+#'
+#' @details Pass output from bayesint, lodint, or another confidence
+#' interval estimation program to visualize this.
+#'
+#' @return The plot
+#'
+#' @import qtl
+#' @export
+
+segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,...){
+
+  ### Plot the map ###
+  map<-pull.map(cross, as.table=T)
+  map<-as.data.frame(map, stringsAsFactors=F)
+  map$chr <- as.numeric(map$chr)
+  chrns<-unique(map$chr)
+
+  plot(chrns, rep(0, nchr(cross)), bty="n",type="n",
+       ylim=c(max(chrlen(cross)),0),
+       xlab="chromosome", ylab = "mapping position (cM)",
+       xlim=c(min(chrns), max(chrns)+1),
+       xaxt = "n")
+  axis(1, at = chrns)
+  segments(x0=chrns, x1=chrns, y0=rep(0, nchr(cross)), y1=chrlen(cross))
+  scl<-length(chrns)/100
+  for(i in chrns){
+    dat<-map[map$chr == i,]
+    segments(x0 = i-scl, x1= i+scl, y0= dat$pos, y1=dat$pos)
+  }
+
+  ### Generate the color distributions
+  jColors <- data.frame(phe = unique(phe),
+                        color = rainbow(length(unique(phe))))
+  cols<- jColors$color[match(phe, jColors$phe)]
+
+  temp<-data.frame(phe=as.factor(phe), chr, l, h)
+  temp$qname<-paste(temp$phe, temp$chr, temp$l, sep="_")
+  ### Add confidence interval segments
+  for(i in chrns){
+    if(i %in% chr){
+      tem<-temp[temp$chr == i,]
+      tem$x<-0
+      tem$phe<-as.factor(as.character(tem$phe))
+      cmat<-sapply(levels(tem$phe), function(x) {
+        out<-seq(from=min(map$pos[map$chr==i]), to = max(map$pos[map$chr==i]), by = 1)
+        for(y in 1:nrow(tem[tem$phe==x,])){
+          tem2<-tem[tem$phe==x,][y,]
+          out<-ifelse(out>=floor(tem2$l) & out<=ceiling(tem2$h),99999,out)
+        }
+        out<-ifelse(out==99999,1,0)
+      })
+      poss<-data.frame(t(apply(cmat, 1, cumsum)))
+      poss$index<-seq(from=min(map$pos[map$chr==i]), to = max(map$pos[map$chr==i]), by = 1)
+      tem$phecols<-as.numeric(tem$phe)
+      tem$x<-sapply(1:nrow(tem), function(x) {
+        tem1<-tem[x,]
+        (max(with(tem1,poss[poss$index>=floor(l) & poss$index<=ceiling(h),phecols]))-1)*segSpread
+      })
+      with(tem, segments(x0 = x+i+.1, x1=x+i+.1, y0 = l, y1=h, col = scol, ...))
+    }
+  }
+
+  ### Add legend
+  legend("bottom", jColors$phe, col=jColors$color, pch=19, cex = .8, bty="n")
+}
+
+
+
+

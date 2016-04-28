@@ -33,22 +33,6 @@ calcQtlMeans<-function(cross, mod, covar, dropstats, phe, ... ){
   return(out)
 }
 
-calcCis<-function(mod, qtlnames, ci.method, drop, prob){
-  cis<-data.frame()
-  for (j in 1:nqtl(mod)){
-    if(ci.method=="drop"){ciout<-lodint(mod,qtl.index=j, expandtomarkers=F, drop=drop)
-    }else{
-      if(ci.method=="bayes"){ciout<-bayesint(mod,qtl.index=j, expandtomarkers=F, prob=prob)}
-    }
-    lowmarker<-rownames(ciout)[1]
-    highmarker<-rownames(ciout)[3]
-    lowposition<-ciout[1,2]
-    highposition<-ciout[3,2]
-    cis<-rbind(cis,cbind(lowmarker,highmarker,lowposition,highposition))
-  }
-  return(data.frame(qtlnames, cis))
-}
-
 
 defineCisTrans<-function(out=out, cistrans, cisdist=cisdist){
   out$type[out$type!="epi"]<-"trans"
