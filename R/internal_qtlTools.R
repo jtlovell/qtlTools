@@ -1,12 +1,14 @@
 #' @title A set of functions needed to run the main qtlTools functions
 #'
 #' @import qtl
+#' @import effects
 #' @export
-calcQtlMeans<-function(cross, mod, covar, dropstats, phe, ... ){
-  qtlnames<-mod$name
+calcQtlMeans<-function(cross, mod, covar, dropstats, phe, form, ... ){
   gp<-lapply(mod[[1]], function(x) apply(x,1, function(y) which(y==max(y))))
-  gp2<-do.call(cbind,gp)
-  colnames(gp2)<-qtlnames
+  geno.names<-colnames(mod[[1]][[1]])
+  gp2<-data.frame(do.call(cbind,gp))
+  colnames(gp2)<-mod$altname
+  for(i in mod$altname) gp2[,i]<-as.factor(gp2[,i])
   phe.num<-pull.pheno(cross, pheno.col=phe)
   phe.num<-phe.num[!is.na(phe.num)]
   rownames(gp2)<-getid(cross)
@@ -19,16 +21,14 @@ calcQtlMeans<-function(cross, mod, covar, dropstats, phe, ... ){
     for(i in colnames(gpi)) gpi[,i]<-paste(gpi[,i], covar, sep="_")
     gp2<-cbind(gp2, gpi)
   }
-  gp3<-cbind(expand.grid(colnames(gp2)),as.numeric(unlist(gp2)), value = as.vector(phe.num))
-  colnames(gp3)<-c("qtlnames","genotype","phe")
-  means<-tapply(gp3$phe, gp3[,c("qtlnames","genotype")], mean, na.rm=T)
-  ses<-tapply(gp3$phe, gp3[,c("qtlnames","genotype")], function(x) sd(x, na.rm=T)/sqrt(length(x)))
-  colnames(means)<-paste("mean",colnames(means), sep=".")
-  means<-data.frame(qtlnames=rownames(means),means)
-  colnames(ses)<-paste("se",colnames(ses), sep=".")
-  ses<-data.frame(qtlnames=rownames(ses),ses)
-  out<-merge(means, ses, by="qtlnames")
+  gp4<-cbind(gp2, y = as.vector(phe.num))
 
+  lm.out<-lm(form, data=data.frame(gp4))
+  test<-allEffects(lm.out)
+  effects<-lapply(test,function(x) as.numeric(x$fit))
+  ses<-lapply(test,function(x) as.numeric(x$se))
+  out<-data.frame(qtlnames = mod$name,  do.call(rbind, effects), do.call(rbind, ses))
+  colnames(out)[-1]<-c(paste(geno.names,c("effect"),sep="_"), paste(geno.names,c("se"), sep="_"))
   return(out)
 }
 

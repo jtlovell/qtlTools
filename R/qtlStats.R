@@ -128,7 +128,7 @@ qtlStats<-function(cross,
   }
 
   if(calcMeans){
-    qtlMeans<-calcQtlMeans(cross=cross, mod=mod, covar=covar, dropstats=drop.stats, phe=phe)
+    qtlMeans<-calcQtlMeans(cross=cross, mod=mod, covar=covar, dropstats=drop.stats, phe=phe, form=form)
     out<-merge(out, qtlMeans, by="qtlnames", all=T)
   }
   if(!is.null(cisQTL)){
