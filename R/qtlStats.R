@@ -54,7 +54,14 @@ qtlStats<-function(cross,
     stop("error: supplied qtl object has a null model")
   }
   crossType <- class(cross)[1]
-  if(class(covar) == "data.frame") covar<-as.matrix(covar)
+
+  which.notna<-!is.na(pull.pheno(cross, pheno.col=phe))
+  cross<-subset(cross, ind = which.notna)
+  covar<-covar[which.notna,]
+  if(class(covar)!="data.frame"){
+    covar<-data.frame(covar=covar)
+  }
+
   if(!crossType %in% c("riself", "f2", "bc", "4way")) {
     stop("error, qtlstats is only implemented for f2, bc and ril experimental designs")
   }
@@ -66,7 +73,6 @@ qtlStats<-function(cross,
       form<- attr(mod, "formula")
     }
   }
-
   if(is.null(attr(mod, "lodprofile")) & refine){
     mod<-refineqtl(cross, qtl=mod, covar=covar,  verbose=FALSE, formula=form, method = "hk")
   }
@@ -76,6 +82,8 @@ qtlStats<-function(cross,
   ncovar<-length(covar)
   nepi<-as.numeric(countqtlterms(form)[4])
   qtlnames<-mod$name
+
+  print(covar)
 
   info<-data.frame(qtlnames,
                    phenotype = phe,

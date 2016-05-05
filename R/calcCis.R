@@ -2,7 +2,7 @@
 #'
 #' @import qtl
 #' @export
-calcCis<-function(mod, qtlnames, ci.method, drop, prob, returnChr=FALSE, returnMaxLod=FALSE, ...){
+calcCis<-function(mod, qtlnames, ci.method, drop=1.5, prob=0.95, returnChr=FALSE, returnMaxLod=FALSE, ...){
   cis<-data.frame()
   for (j in 1:nqtl(mod)){
     if(ci.method=="drop"){ciout<-lodint(mod,qtl.index=j, drop=drop, ...)
