@@ -11,6 +11,10 @@
 #' @param l The lower confidence interval bound for each qtl
 #' @param h The upper confidence interval bound for each qtl
 #' @param seqSpread How far apart (x axis) the semgents are
+#' @param legendPosition Where to place the legend. This is passed to the first argument of
+#' the legend function. See legend documentation
+#' @param legendCex The character expansion for the legend. This is passed to the cex argument
+#' of legend.
 #' @param ... Other arguments passed to segments
 #'
 #' @details Pass output from bayesint, lodint, or another confidence
@@ -21,7 +25,7 @@
 #' @import qtl
 #' @export
 
-segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,...){
+segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15, legendPosition = "bottom", legendCex = .8, ...){
 
   ### Plot the map ###
   map<-pull.map(cross, as.table=T)
@@ -76,8 +80,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,...){
   }
 
   ### Add legend
-  print(jColors)
-  legend("bottom", legend=jColors$phe, col=jColors$color, pch=19, cex = .8, bty="n")
+  legend(legendPosition, legend=jColors$phe, col=jColors$color, pch=19, cex = legendCex, bty="n")
 }
 
 
