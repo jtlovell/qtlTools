@@ -15,6 +15,8 @@
 #' the legend function. See legend documentation
 #' @param legendCex The character expansion for the legend. This is passed to the cex argument
 #' of legend.
+#' @param chr.adj How far should the first segment be from the map drawing? Defaults to scale with the
+#' number of chromosomes
 #' @param ... Other arguments passed to segments
 #'
 #' @details Pass output from bayesint, lodint, or another confidence
@@ -25,7 +27,8 @@
 #' @import qtl
 #' @export
 
-segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15, legendPosition = "bottom", legendCex = 1, ...){
+segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
+                        legendPosition = "bottom", legendCex = 1, chr.adj=NULL, ...){
 
   ### Plot the map ###
   map<-pull.map(cross, as.table=T)
@@ -58,24 +61,37 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15, legendPosition 
   for(i in chrns){
     if(i %in% chr){
       tem<-temp[temp$chr == i,]
-      tem$x<-0
-      tem$phe<-as.factor(as.character(tem$phe))
-      cmat<-sapply(levels(tem$phe), function(x) {
-        out<-seq(from=min(map$pos[map$chr==i]), to = max(map$pos[map$chr==i]), by = 1)
-        for(y in 1:nrow(tem[tem$phe==x,])){
-          tem2<-tem[tem$phe==x,][y,]
-          out<-ifelse(out>=floor(tem2$l) & out<=ceiling(tem2$h),99999,out)
+      print(tem)
+      if(nrow(tem)==1){
+        if(is.null(chr.adj)){
+          x<-nchr(cross)*.02
+        }else{
+          x<-chr.adj
         }
-        out<-ifelse(out==99999,1,0)
-      })
-      poss<-data.frame(t(apply(cmat, 1, cumsum)))
-      poss$index<-seq(from=min(map$pos[map$chr==i]), to = max(map$pos[map$chr==i]), by = 1)
-      tem$phecols<-as.numeric(tem$phe)
-      tem$x<-sapply(1:nrow(tem), function(x) {
-        tem1<-tem[x,]
-        (max(with(tem1,poss[poss$index>=floor(l) & poss$index<=ceiling(h),phecols]))-1)*segSpread
-      })
-      with(tem, segments(x0 = x+i+.1, x1=x+i+.1, y0 = l, y1=h, col = tem$color, ...))
+      }else{
+        tem$x<-0
+        tem$phe<-as.factor(as.character(tem$phe))
+        seqs<-seq(from=min(map$pos[map$chr==i]), to = max(map$pos[map$chr==i]), by = 1)
+        out<-seqs
+        cmat<-sapply(levels(tem$phe), function(x) {
+          for(y in 1:nrow(tem[tem$phe==x,])){
+            tem2<-tem[tem$phe==x,][y,]
+            out<-ifelse(out>=floor(tem2$l) & out<=ceiling(tem2$h),99999,out)
+          }
+          out<-ifelse(out==99999,1,0)
+        })
+        poss<-data.frame(t(apply(cmat, 1, cumsum)))
+        poss$index<-seqs
+        tem$phecols<-as.numeric(tem$phe)
+        tem$x<-sapply(1:nrow(tem), function(x) {
+          tem1<-tem[x,]
+          (max(with(tem1,poss[poss$index>=floor(l) & poss$index<=ceiling(h),phecols]))-1)*segSpread
+        })
+      }
+      if(is.null(chr.adj)){
+        chr.adj<-nchr(cross)*.02
+      }
+      with(tem, segments(x0 = x+i+chr.adj, x1=x+i+chr.adj, y0 = l, y1=h, col = tem$color, ...))
     }
   }
 
