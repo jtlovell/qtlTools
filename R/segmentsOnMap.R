@@ -53,6 +53,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15, legendPosition 
 
   temp<-data.frame(phe=as.factor(phe), chr, l, h)
   temp$qname<-paste(temp$phe, temp$chr, temp$l, sep="_")
+  temp<-merge(temp, jColors, by="phe")
   ### Add confidence interval segments
   for(i in chrns){
     if(i %in% chr){
@@ -74,8 +75,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15, legendPosition 
         tem1<-tem[x,]
         (max(with(tem1,poss[poss$index>=floor(l) & poss$index<=ceiling(h),phecols]))-1)*segSpread
       })
-      scols<-merge(tem, jColors, by="phe")
-      with(tem, segments(x0 = x+i+.1, x1=x+i+.1, y0 = l, y1=h, col = scols$color, ...))
+      with(tem, segments(x0 = x+i+.1, x1=x+i+.1, y0 = l, y1=h, col = tem$color, ...))
     }
   }
 
