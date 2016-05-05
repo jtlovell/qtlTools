@@ -13,9 +13,9 @@ segmentsOnMap(cross, phe, chr, l, h, segSpread = 0.15, ...)
 
 \item{chr}{Vector of chromosome ids - will be coerced to numeric}
 
-\item{l}{The lower confidence interval bound}
+\item{l}{The lower confidence interval bound for each qtl}
 
-\item{h}{The upper confidence interval bound}
+\item{h}{The upper confidence interval bound for each qtl}
 
 \item{...}{Other arguments passed to segments}
 
@@ -26,7 +26,8 @@ The plot
 }
 \description{
 \code{segmentsOnMap} A basic function to plot QTL confidence intervals.
-Useful for <10 traits
+Useful for <10 traits. All inputs (excluding cross) must have the same length,
+since each element represents a single segment on the map.
 }
 \details{
 Pass output from bayesint, lodint, or another confidence

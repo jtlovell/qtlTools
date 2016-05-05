@@ -2,13 +2,14 @@
 #'
 #' @description
 #' \code{segmentsOnMap} A basic function to plot QTL confidence intervals.
-#' Useful for <10 traits
+#' Useful for <10 traits. All inputs (excluding cross) must have the same length,
+#' since each element represents a single segment on the map.
 #'
 #' @param cross The qtl cross object with marker names that need to be changed.
 #' @param phe Character or numeric vector indicating the phenotype to be tested
 #' @param chr Vector of chromosome ids - will be coerced to numeric
-#' @param l The lower confidence interval bound
-#' @param h The upper confidence interval bound
+#' @param l The lower confidence interval bound for each qtl
+#' @param h The upper confidence interval bound for each qtl
 #' @param seqSpread How far apart (x axis) the semgents are
 #' @param ... Other arguments passed to segments
 #'
