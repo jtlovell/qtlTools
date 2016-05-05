@@ -25,7 +25,7 @@
 #' @import qtl
 #' @export
 
-segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15, legendPosition = "bottom", legendCex = .8, ...){
+segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15, legendPosition = "bottom", legendCex = 1, ...){
 
   ### Plot the map ###
   map<-pull.map(cross, as.table=T)
