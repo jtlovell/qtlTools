@@ -75,7 +75,7 @@ qtlStats<-function(cross,
   nterms<-sum(countqtlterms(form, ignore.covar=F)[c(1,4)])
   ncovar<-length(covar)
   nepi<-as.numeric(countqtlterms(form)[4])
-  qtlnames<-mod$altname
+  qtlnames<-mod$name
 
   info<-data.frame(qtlnames,
                    phenotype = phe,
@@ -97,10 +97,23 @@ qtlStats<-function(cross,
                           full.pvalue = fit$result.full[,"Pvalue(F)"][1],
                           stringsAsFactors=F)
 
-  drop.stats<-data.frame(qtlnames = rownames(fit$result.drop),
-                         form.name=attr(terms(as.formula(form)), "term.labels"),
-                         fit$result.drop,
-                         stringsAsFactors=F)
+  if(nterms>1){
+    drop.stats<-data.frame(qtlnames = rownames(fit$result.drop),
+                           form.name=attr(terms(as.formula(form)), "term.labels"),
+                           fit$result.drop,
+                           stringsAsFactors=F)
+  }else{
+    drop.stats<-data.frame(qtlnames = mod$name,
+                           form.name=mod$altname,
+                           df=fit$result.full[1,1],
+                           Type.III.SS=fit$result.full[1,2],
+                           LOD=fit$result.full[1,4],
+                           X.var=fit$result.full[1,5],
+                           F.value = NA,
+                           Pvalue.Chi2.=fit$result.full[1,6],
+                           Pvalue.F.=fit$result.full[1,7],
+                           stringsAsFactors=F)
+  }
 
   out<-merge(info, drop.stats, by=c("qtlnames","form.name"), all=T)
   out$formula<-form

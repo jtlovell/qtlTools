@@ -8,6 +8,7 @@ calcQtlMeans<-function(cross, mod, covar, dropstats, phe, ... ){
   gp2<-do.call(cbind,gp)
   colnames(gp2)<-qtlnames
   phe.num<-pull.pheno(cross, pheno.col=phe)
+  phe.num<-phe.num[!is.na(phe.num)]
   rownames(gp2)<-getid(cross)
 
   if(any(grep(":",rownames(dropstats)))){
@@ -18,9 +19,7 @@ calcQtlMeans<-function(cross, mod, covar, dropstats, phe, ... ){
     for(i in colnames(gpi)) gpi[,i]<-paste(gpi[,i], covar, sep="_")
     gp2<-cbind(gp2, gpi)
   }
-  gp3<-cbind(covar=covar, gp2, value = as.vector(phe.num))
-  gp3<-cbind(expand.grid(dimnames(gp2)),unlist(gp2), value = as.vector(phe.num))
-  gp3[,1]<-NULL
+  gp3<-cbind(expand.grid(colnames(gp2)),as.numeric(unlist(gp2)), value = as.vector(phe.num))
   colnames(gp3)<-c("qtlnames","genotype","phe")
   means<-tapply(gp3$phe, gp3[,c("qtlnames","genotype")], mean, na.rm=T)
   ses<-tapply(gp3$phe, gp3[,c("qtlnames","genotype")], function(x) sd(x, na.rm=T)/sqrt(length(x)))
