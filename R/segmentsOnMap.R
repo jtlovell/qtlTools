@@ -75,7 +75,8 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,...){
   }
 
   ### Add legend
-  legend("bottom", jColors$phe, col=jColors$color, pch=19, cex = .8, bty="n")
+  print(jColors)
+  legend("bottom", legend=jColors$phe, col=jColors$color, pch=19, cex = .8, bty="n")
 }
 
 
