@@ -61,13 +61,8 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
   for(i in chrns){
     if(i %in% chr){
       tem<-temp[temp$chr == i,]
-      print(tem)
       if(nrow(tem)==1){
-        if(is.null(chr.adj)){
-          x<-nchr(cross)*.02
-        }else{
-          x<-chr.adj
-        }
+       x=0
       }else{
         tem$x<-0
         tem$phe<-as.factor(as.character(tem$phe))
