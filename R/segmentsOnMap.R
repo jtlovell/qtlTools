@@ -70,7 +70,8 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,...){
         tem1<-tem[x,]
         (max(with(tem1,poss[poss$index>=floor(l) & poss$index<=ceiling(h),phecols]))-1)*segSpread
       })
-      with(tem, segments(x0 = x+i+.1, x1=x+i+.1, y0 = l, y1=h, col = cols, ...))
+      scols<-merge(tem, jColors, by="phe")
+      with(tem, segments(x0 = x+i+.1, x1=x+i+.1, y0 = l, y1=h, col = scols$color, ...))
     }
   }
 
