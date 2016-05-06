@@ -31,18 +31,25 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
                         legendPosition = "bottom", legendCex = 1, chr.adj=NULL, ...){
 
   ### Plot the map ###
-  map<-pull.map(cross, as.table=T)
+  if(class(cross)[1]=="4way"){
+    chrlens<-chrlen(cross)[1,]
+    map<-pull.map(cross, as.table=T)[,1:2]
+    colnames(map)<-c("chr","pos")
+  }else{
+    chrlens<-chrlen(cross)
+    map<-pull.map(cross, as.table=T)
+  }
   map<-as.data.frame(map, stringsAsFactors=F)
   map$chr <- as.numeric(map$chr)
   chrns<-unique(map$chr)
 
   plot(chrns, rep(0, nchr(cross)), bty="n",type="n",
-       ylim=c(max(chrlen(cross)),0),
+       ylim=c(max(chrlens),0),
        xlab="chromosome", ylab = "mapping position (cM)",
        xlim=c(min(chrns), max(chrns)+1),
        xaxt = "n")
   axis(1, at = chrns)
-  segments(x0=chrns, x1=chrns, y0=rep(0, nchr(cross)), y1=chrlen(cross))
+  segments(x0=chrns, x1=chrns, y0=rep(0, nchr(cross)), y1=chrlens)
   scl<-length(chrns)/100
   for(i in chrns){
     dat<-map[map$chr == i,]
