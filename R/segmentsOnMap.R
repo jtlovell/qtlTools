@@ -17,6 +17,9 @@
 #' of legend.
 #' @param chr.adj How far should the first segment be from the map drawing? Defaults to scale with the
 #' number of chromosomes
+#' @param jColors A dataframe with two columns, "phe" and "color". The phe column contains a all unique
+#' phenotypes and the color is the associated color. The default sets the colors to the rainbow color
+#' palette.
 #' @param ... Other arguments passed to segments
 #'
 #' @details Pass output from bayesint, lodint, or another confidence
@@ -28,7 +31,7 @@
 #' @export
 
 segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
-                        legendPosition = "bottom", legendCex = 1, chr.adj=NULL, ...){
+                        legendPosition = "bottom", legendCex = 1, chr.adj=NULL, jColors = NULL, ...){
 
   ### Plot the map ###
   if(class(cross)[1]=="4way"){
@@ -57,8 +60,10 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
   }
 
   ### Generate the color distributions
-  jColors <- data.frame(phe = unique(phe),
-                        color = rainbow(length(unique(phe))))
+  if(is.null(jColors)){
+    jColors <- data.frame(phe = unique(phe),
+                          color = rainbow(length(unique(phe))))
+  }
   cols<- jColors$color[match(phe, jColors$phe)]
 
   temp<-data.frame(phe=as.factor(phe), chr, l, h)
