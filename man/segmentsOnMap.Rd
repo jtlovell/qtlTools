@@ -4,7 +4,8 @@
 \alias{segmentsOnMap}
 \title{Visualize the positions of QTL on a genetic map.}
 \usage{
-segmentsOnMap(cross, phe, chr, l, h, segSpread = 0.15, ...)
+segmentsOnMap(cross, phe, chr, l, h, segSpread = 0.15,
+  legendPosition = "bottom", legendCex = 1, chr.adj = NULL, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
@@ -16,6 +17,15 @@ segmentsOnMap(cross, phe, chr, l, h, segSpread = 0.15, ...)
 \item{l}{The lower confidence interval bound for each qtl}
 
 \item{h}{The upper confidence interval bound for each qtl}
+
+\item{legendPosition}{Where to place the legend. This is passed to the first argument of
+the legend function. See legend documentation}
+
+\item{legendCex}{The character expansion for the legend. This is passed to the cex argument
+of legend.}
+
+\item{chr.adj}{How far should the first segment be from the map drawing? Defaults to scale with the
+number of chromosomes}
 
 \item{...}{Other arguments passed to segments}
 

@@ -83,8 +83,6 @@ qtlStats<-function(cross,
   nepi<-as.numeric(countqtlterms(form)[4])
   qtlnames<-mod$name
 
-  print(covar)
-
   info<-data.frame(qtlnames,
                    phenotype = phe,
                    formula = form,
@@ -136,7 +134,7 @@ qtlStats<-function(cross,
   }
 
   if(calcMeans){
-    qtlMeans<-calcQtlMeans(cross=cross, mod=mod, covar=covar, dropstats=drop.stats, phe=phe, form=form)
+    qtlMeans<-calcQtlMeans(cross=cross, mod=mod, covar=covar, phe=phe, form=form)
     out<-merge(out, qtlMeans, by="qtlnames", all=T)
   }
   if(!is.null(cisQTL)){

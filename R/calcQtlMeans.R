@@ -18,9 +18,9 @@
 #' @return A dataframe of statistics.
 #'
 #' @import qtl
-#' @import effects
+#' @import lsmeans
 #' @export
-calcQtlMeans<-function(cross, mod, covar=NULL, dropstats, phe, form, ... ){
+calcQtlMeans<-function(cross, mod, covar=NULL, phe, form, ... ){
   gp<-lapply(mod[[1]], function(x) apply(x,1, function(y) which(y==max(y))))
   geno.names<-colnames(mod[[1]][[1]])
   gp2<-data.frame(do.call(cbind,gp))
@@ -29,6 +29,7 @@ calcQtlMeans<-function(cross, mod, covar=NULL, dropstats, phe, form, ... ){
   phe.num<-pull.pheno(cross, pheno.col=phe)
   phe.num<-phe.num[!is.na(phe.num)]
   rownames(gp2)<-getid(cross)
+  qtls<-mod$altname
   if(!is.null(covar)) {
     if(class(covar)=="data.frame") covar <- as.numeric(unlist(covar))
     covar<-as.factor(covar)
