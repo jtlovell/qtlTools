@@ -5,7 +5,8 @@
 \title{Visualize the positions of QTL on a genetic map.}
 \usage{
 segmentsOnMap(cross, phe, chr, l, h, segSpread = 0.15,
-  legendPosition = "bottom", legendCex = 1, chr.adj = NULL, ...)
+  legendPosition = "bottom", legendCex = 1, chr.adj = NULL,
+  jColors = NULL, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
@@ -26,6 +27,10 @@ of legend.}
 
 \item{chr.adj}{How far should the first segment be from the map drawing? Defaults to scale with the
 number of chromosomes}
+
+\item{jColors}{A dataframe with two columns, "phe" and "color". The phe column contains a all unique
+phenotypes and the color is the associated color. The default sets the colors to the rainbow color
+palette.}
 
 \item{...}{Other arguments passed to segments}
 
