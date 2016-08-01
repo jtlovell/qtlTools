@@ -97,14 +97,6 @@ bootDens<-function(x, binwidth=5, nboot=1000, thresh=.95){
   }
 }
 
-updateAtInt<-function(n = NULL, vect = NULL, i = NULL, by = 100){
-  if(is.null(n)){
-    n = which (vect == i)
-  }
-  if(n %% by == 0){
-    cat("completed: ",n, " / ", length(vect), "\n", sep = "")
-  }
-}
 
 
 
