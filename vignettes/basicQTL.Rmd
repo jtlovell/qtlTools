@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.width = 7, fig.height = 7)
 library(knitr)
 library(qtl)
 library(qtlTools)
+library(plyr)
 ```
 
 he following is a short description of a general way to analyze QTL experiments. This tutorial assumes that basic quality control, normalization and error checking have been completed. Also, permutations should have been calculated separately. 
@@ -27,7 +28,6 @@ library(devtools)
 install_github("jtlovell/qtlTools")
 library(qtlTools)
 library(qtl)
-library(plyr)
 ```
 
 #### Load the QTL data

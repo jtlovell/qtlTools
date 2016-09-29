@@ -13,15 +13,14 @@
 #' @param outputType Whether to return a data.frame or qtl object (from makeqtl)
 #' @param lodThreshold If outputType = data.frame, the presence of a cis.eqtl is defined by whether
 #' any marker within cmWindow has a lod score > lodThreshold.
-#' @param lodThreshold
-
+#' @param ... Additional arguments passed to scanone.
 #'
 #' @return Either a qtl object or a dataframe, indicating the position of a cis eQTL.
 #'
 #' @import qtl
 #' @export
 find.ciseqtl<-function(cross, phe, pos.gene, chr.gene, cmWindow = 10,
-                       lodThreshold = 3, outputType = "data.frame", runTrans = TRUE, covar=NULL, ...){
+                       lodThreshold = 3, outputType = "data.frame", ...){
   s1<-scanone(cross,
               pheno.col = phe,
               chr = chr.gene, ...)

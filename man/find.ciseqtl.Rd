@@ -5,8 +5,7 @@
 \title{Find the location of a cis eQTL}
 \usage{
 find.ciseqtl(cross, phe, pos.gene, chr.gene, cmWindow = 10,
-  lodThreshold = 3, outputType = "data.frame", runTrans = TRUE,
-  covar = NULL, ...)
+  lodThreshold = 3, outputType = "data.frame", ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
@@ -25,7 +24,7 @@ any marker within cmWindow has a lod score > lodThreshold.}
 
 \item{outputType}{Whether to return a data.frame or qtl object (from makeqtl)}
 
-\item{lodThreshold}{}
+\item{...}{Additional arguments passed to scanone.}
 }
 \value{
 Either a qtl object or a dataframe, indicating the position of a cis eQTL.

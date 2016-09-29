@@ -6,7 +6,7 @@
 \usage{
 findSimilarMarkers(cross, chr = NULL, rf.threshold = 0.02, sd.weight = 1,
   na.weight = 1, drop.similar.markers = TRUE, re.est.map = TRUE,
-  verbose = T, ...)
+  verbose = TRUE, keepEnds = FALSE, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object to search}
@@ -38,5 +38,17 @@ or a new cross object with the similar markers dropped.
 drop the one with combined greater segregation distortion and/or missing data. ***Note:
 if the cross object has many markers (>1000), avoid running this function on more than one
 chromosome at a time. Also make sure to run est.rf first and use re.est.map = FALSE***
+}
+\examples{
+set.seed(42)
+map<-sim.map(len = c(50,20), n.mar = c(10,20), include.x=F)
+cross0<-sim.cross(map, n.ind=50, type="f2", map.function="kosambi", error.prob=.01, missing.prob = .05)
+cross0<-est.rf(cross0)
+cross1<-findSimilarMarkers(cross0, error.prob=0.001, map.function="kosambi", rf.threshold = 0.005)
+cross2<-findSimilarMarkers(cross0, error.prob=0.001, map.function="kosambi", rf.threshold = 0.005, keepEnds=TRUE)
+par(mfrow=c(2,1))
+plot.map(cross0, cross1, main = "comparison of full and culled maps")
+plot.map(cross0, cross2, main = "comparison of full and culled maps")
+
 }
 

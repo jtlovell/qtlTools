@@ -21,6 +21,17 @@
 #' @return Either a character vector of the markers that should be dropped (if drop.similar.markers = FALSE),
 #' or a new cross object with the similar markers dropped.
 #'
+#' @examples
+#' set.seed(42)
+#' map<-sim.map(len = c(50,20), n.mar = c(10,20), include.x=F)
+#' cross0<-sim.cross(map, n.ind=50, type="f2", map.function="kosambi", error.prob=.01, missing.prob = .05)
+#' cross0<-est.rf(cross0)
+#' cross1<-findSimilarMarkers(cross0, error.prob=0.001, map.function="kosambi", rf.threshold = 0.005)
+#' cross2<-findSimilarMarkers(cross0, error.prob=0.001, map.function="kosambi", rf.threshold = 0.005, keepEnds=TRUE)
+#' par(mfrow=c(2,1))
+#' plot.map(cross0, cross1, main = "comparison of full and culled maps")
+#' plot.map(cross0, cross2, main = "comparison of full and culled maps")
+#'
 #' @import qtl
 #' @export
 
@@ -31,7 +42,8 @@ findSimilarMarkers<-function(cross,
                              na.weight=1,
                              drop.similar.markers = TRUE,
                              re.est.map = TRUE,
-                             verbose = T,
+                             verbose = TRUE,
+                             keepEnds = FALSE,
                              ...){
   if(is.null(chr)) chr <- chrnames(cross)
   if(verbose) cat("scanning chr: ", paste(chr, collapse = ","),"\n")
@@ -39,25 +51,30 @@ findSimilarMarkers<-function(cross,
     gt<-geno.table(cross, chr=i)
     ms<-markernames(cross, chr =i)
     rf<-pull.rf(cross, chr = i, what = "rf")
-    rf[lower.tri(rf)]<-NA
-    nondup<-sapply(ms, function(x){
-      wh<-names(which(rf[x,]<rf.threshold))
-      if(length(wh>0)){
-        gtm<-gt[wh,]
+    if(keepEnds){
+      rf<-rf[-1,-1]
+      rf<-rf[-nrow(rf),-ncol(rf)]
+    }
+    rf[!upper.tri(rf)]<-1
+    bads<-vector()
+    if(min(rf)>=rf.threshold){
+      return(NULL)
+    }else{
+      while(min(rf)<rf.threshold){
+        worst<-colnames(rf)[which(rf == min(rf, na.rm=TRUE), arr.ind=T)[1,]]
+        gtm<-gt[worst,]
         ord.missing<-rank(gtm$missing)
         ord.sd<-rank(-gtm$P.value)
         prod<-(ord.missing*sd.weight)+(ord.sd*sd.weight)
-        rownames(gtm)[which.min(prod)]
-      }else{
-        x
+        todrop<-rownames(gtm)[-which.min(prod)]
+        bads<-c(bads, todrop)
+        which.todrop<-which(colnames(rf) == todrop)
+        rf<-rf[-which.todrop,-which.todrop]
       }
-    })
-    nondup<-unique(nondup)
-    nondup<-nondup[order(nondup)]
-    td<-markernames(cross, chr = i)[!markernames(cross, chr = i) %in% nondup]
-    return(td)
+      return(bads)
+    }
   })
-  todrop<-unique(unlist(todrop))
+  todrop<-unlist(todrop)
   if(drop.similar.markers){
     cross<-drop.markers(cross, markers = todrop)
     if(re.est.map){

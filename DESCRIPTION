@@ -9,7 +9,8 @@ Description: eQTL visualization and processing, including pipelines to conduct
 License: GPL-3
 LazyData: TRUE
 Depends:
-    qtl
+    qtl,
+    lsmeans
 RoxygenNote: 5.0.1
 Suggests: knitr,
     rmarkdown
