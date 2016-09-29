@@ -5,7 +5,8 @@
 \title{Method to improve a genetic map.}
 \usage{
 findSimilarMarkers(cross, chr = NULL, rf.threshold = 0.02, sd.weight = 1,
-  na.weight = 1, drop.similar.markers = TRUE, re.est.map = TRUE, ...)
+  na.weight = 1, drop.similar.markers = TRUE, re.est.map = TRUE,
+  verbose = T, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object to search}

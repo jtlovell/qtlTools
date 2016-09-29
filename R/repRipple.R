@@ -1,7 +1,7 @@
 #' @title Method to improve a genetic map.
 #'
 #' @description
-#' \code{repeatRipple} Iteratively run ripple.
+#' \code{repRipple} Iteratively run ripple.
 #'
 #' @param cross The qtl cross object to search
 #' @param chr The chromosome to scan. Can be a vector of chromosome names or a single name.
@@ -17,7 +17,7 @@
 #'
 #' @import qtl
 #' @export
-repeatRipple<-function(cross, chr = NULL, window=6, repeatloop = TRUE, makePlots = FALSE, method = "countxo",
+repRipple<-function(cross, chr = NULL, window=6, repeatloop = TRUE, makePlots = FALSE, method = "countxo",
                        re.est.map = TRUE, map.function = "kosambi", error.prob = 0.001,
                        ...){
   if(is.null(chr)) chr <- chrnames(cross)
