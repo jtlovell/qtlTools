@@ -6,7 +6,7 @@
 \usage{
 repRipple(cross, chr = NULL, window = 6, repeatloop = TRUE,
   makePlots = FALSE, method = "countxo", re.est.map = TRUE,
-  map.function = "kosambi", error.prob = 0.001, ...)
+  map.function = "kosambi", error.prob = 0.001, verbose = T, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object to search}
