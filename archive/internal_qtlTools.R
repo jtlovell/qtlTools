@@ -83,19 +83,6 @@ makeCumPos<-function(chr, pos, gap = NULL, return.centers=FALSE){
   }
 }
 
-bootDens<-function(x, binwidth=5, nboot=1000, thresh=.95){
-  out<-sapply(1:nboot, function(i){
-    n=length(x)
-    values=unique(x)
-    booted<-sample(values, n, replace=T)
-    max(hist(booted, breaks=ceiling(max(values)/binwidth), plot=F)$counts)
-  })
-  if(!is.null(thresh)){
-    quantile(out, thresh)
-  }else{
-    out
-  }
-}
 
 
 

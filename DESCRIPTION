@@ -13,7 +13,6 @@ Depends:
     plyr,
     reshape2,
     data.table,
-    effects,
     lsmeans
 RoxygenNote: 5.0.1
 Suggests: knitr,

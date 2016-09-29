@@ -22,7 +22,7 @@ he following is a short description of a general way to analyze QTL experiments.
 
 #### Load the necessary packages, install qtlTools from github
 
-```{r env.set.up}
+```{r env.set.up, eval = FALSE}
 library(devtools)
 install_github("jtlovell/qtltools")
 library(qtlTools)
