@@ -12,10 +12,5 @@ Depends:
     qtl
 RoxygenNote: 5.0.1
 Suggests: knitr,
-    rmarkdown,
-    table,
-    plyr,
-    reshape2,
-    data.table,
-    lsmeans
+    rmarkdown
 VignetteBuilder: knitr
