@@ -1,7 +1,6 @@
 #' @title Find mutual ranks between gene expression data
 #'
 #' @import qtl
-#' @import data.table
 #' @export
 mutual.rank<-function(x, verbose = TRUE, format = "clusterone", corThresh = NULL, expdecay = 25){
 

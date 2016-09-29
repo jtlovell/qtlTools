@@ -9,12 +9,13 @@ Description: eQTL visualization and processing, including pipelines to conduct
 License: GPL-3
 LazyData: TRUE
 Depends:
-    qtl,
+    qtl
+RoxygenNote: 5.0.1
+Suggests: knitr,
+    rmarkdown,
+    table,
     plyr,
     reshape2,
     data.table,
     lsmeans
-RoxygenNote: 5.0.1
-Suggests: knitr,
-    rmarkdown
 VignetteBuilder: knitr
