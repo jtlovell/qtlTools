@@ -18,7 +18,7 @@
 #' @import qtl
 #' @export
 repRipple<-function(cross, chr = NULL, window=6, repeatloop = TRUE, makePlots = FALSE, method = "countxo",
-                       re.est.map = TRUE, map.function = "kosambi", error.prob = 0.001,
+                       re.est.map = TRUE, map.function = "kosambi", error.prob = 0.001, verbose = T,
                        ...){
   if(is.null(chr)) chr <- chrnames(cross)
   for(i in chr){
