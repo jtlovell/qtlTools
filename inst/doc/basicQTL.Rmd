@@ -1,0 +1,137 @@
+---
+title: "A general pipeline for QTL mapping, using R/qtl and qtlTools"
+author: "JT Lovell"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 7, fig.height = 7)
+library(knitr)
+library(qtl)
+library(qtlTools)
+```
+
+he following is a short description of a general way to analyze QTL experiments. This tutorial assumes that basic quality control, normalization and error checking have been completed. Also, permutations should have been calculated separately. 
+
+### Part 1: Set up the environment.
+
+#### Load the necessary packages, install qtlTools from github
+
+```{r env.set.up}
+library(devtools)
+install_github("jtlovell/qtltools")
+library(qtlTools)
+library(qtl)
+library(plyr)
+```
+
+#### Load the QTL data
+For the purposes of this tutorial, we use the pre-loaded "multitrait" data from R/qtl. However, this would be the place to read in the cross object, permutations etc. 
+
+```{r}
+data(multitrait)
+cross<-multitrait
+cross<-calc.genoprob(cross)
+```
+
+#### Make a vector of phenotype names. These are the traits on which you want to run QTL analyses.
+
+```{r}
+phes <- c("X3.Hydroxypropyl", "X3.Butenyl", "X3.Methylsulfinylpropyl", "X5.Methylsulfinylpentyl", "X6.Methylthiohexyl", "X4.Benzoyloxybutyl", "Quercetin.deoxyhexosyl.dihexoside")
+```
+
+
+### Part 2: Generate QTL models.
+#### Manual approach:
+
+Generate qtl models, the chromosomes and positions of QTL peaks must be defined from some other analysis, such as scanone, addqtl, stepwiseqtl etc. 
+
+```{r}
+modlist<-list(X3.Hydroxypropyl=makeqtl(cross, chr = c(4,5), pos=c(7,35), what="prob"),
+              X3.Butenyl=makeqtl(cross, chr = c(4,5), pos=c(7,35), what="prob"),
+              X3.Methylsulfinylpropyl=makeqtl(cross, chr = c(4,5), pos=c(0,35), what="prob"),
+              X5.Methylsulfinylpentyl=makeqtl(cross, chr = c(1,5), pos=c(105,40), what="prob"),
+              X6.Methylthiohexyl=makeqtl(cross, chr = c(4,5), pos=c(9,35), what="prob"),
+              X4.Benzoyloxybutyl=makeqtl(cross, chr = c(5), pos=c(35), what="prob"),
+              Quercetin.deoxyhexosyl.dihexoside=makeqtl(cross, chr = c(4,5), pos=c(13,35), what="prob"))
+```
+
+Refine the position of the QTL so that we generate lod profiles. This lets us estimate confidence intervals. 
+
+```{r}
+refout<-lapply(phes, function(x){
+  refineqtl(cross, qtl=modlist[[x]], pheno.col=x, method="hk", verbose=F)
+})
+names(refout)<-phes
+models.out<-refout
+```
+
+
+#### Stepwise approach:
+This code loops through the phenotypes in the phes object. The penalties here are an estimate. Use qtl::calc.penalties to generate the penalties from scantwo permutations.
+
+```{r}
+stepout<-lapply(phes, function(i) {
+  stepwiseqtl(cross, pheno.col=i, method="hk", max.qtl=4, 
+              additive.only=TRUE, penalties = c(2.5,3.5,1.5), verbose=F)
+})
+names(stepout)<-phes
+models.out<-stepout
+```
+
+
+### Part III: Generate confidence intervals from the models
+This function takes the qtl models generated above and calculates confidence intervals for each. 
+
+```{r}
+cis<-lapply(models.out, function(x) {
+  calcCis(mod=x, qtlnames=x$altname, ci.method="bayes",  prob=0.99, returnChr=TRUE, returnMaxLod=TRUE, expandtomarkers=T)
+})
+```
+
+lapply here returns a list, so we need to bind these into a dataframe
+```{r}
+cis.df<-ldply(cis, data.frame)
+colnames(cis.df)[1]<-"phe"
+```
+
+We also need to convert the confidence interval bounds to numbers, as the ldply function forces them to be character
+```{r}
+for(i in c("lowposition","highposition")) cis.df[,i]<-as.numeric(cis.df[,i])
+```
+
+### Part IV: Plot the confidence intervals on a map. 
+
+#### Thick lines
+
+```{r}
+segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
+              lwd = 8, segSpread=.1)
+```
+
+#### Thinner lines
+
+```{r}
+segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
+              lwd = 5, segSpread=.1)
+```
+
+#### Closer together
+
+```{r}
+segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
+              lwd = 5, segSpread=.05)
+```
+
+#### Smaller legend
+
+```{r}
+segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
+              lwd = 5, segSpread=.05,  legendCex=.8)
+```
+

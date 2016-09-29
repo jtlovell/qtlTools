@@ -1,0 +1,72 @@
+---
+title: "Working with messy genetic maps in R/qtl"
+author: "JT Lovell"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 5, fig.height = 5)
+library(knitr)
+library(qtl)
+library(qtlTools)
+```
+
+```{r get qtlTools, eval = FALSE}
+library(qtl)
+
+library(devtools)
+install_github("jtlovell/qtlTools")
+library(qtlTools)
+```
+
+Before begining QTL mapping, we must generate a genetic map. This is often the hardest part of the whole analysis. For example, we may start with a badly ordered map, with far more markers than are necessary - such genotype matrices are typical of RAD or other NGS data. 
+
+Below is a short workflow to go from a map that has bad marker order and several regions with more markers than are necessary to one that is smaller and correctly ordered. 
+
+To do this, we employ the tools of R/qtl and a few wrapper tools from the package qtlTools. The following tutorial gives an example of this, and complements the very helpful tutorial from R/qtl: `http://www.rqtl.org/tutorials/geneticmaps.pdf`
+
+### Part 1: Make a map with some marker order and marker density problems and 
+```{r make a messy map}
+set.seed(42)
+map<-sim.map(len = c(50,50,20,20), n.mar = c(25, 10, 10, 40), include.x=F)
+plot(map)
+cross0<-sim.cross(map, n.ind=50, type="f2",
+          error.prob=0.001, missing.prob=0.001, map.function="kosambi")
+plot.rf(cross0)
+
+##########
+jitterMarkerOrder<-function(cross, chr){
+  mars<-1:nmar(cross)[chr]
+  set.seed(42)
+  badorder<-order(jitter(mars, factor = 10))
+  cross<-switch.order(cross, chr = chr, order = badorder, 
+                      error.prob=0.001, map.function="kosambi")
+}
+##########
+cross1<-cross0
+for(i in 1:nchr(cross1))   cross1<-jitterMarkerOrder(cross=cross1, chr = i)
+plot.rf(cross1)
+
+newmap<-est.map(cross1, error.prob=0.001, map.function="kosambi")
+cross1 <- replace.map(cross1, newmap)
+cross1<-est.rf(cross1)
+```
+
+### Part 2: Toss out markers that are not informative
+```{r findSimilar markers}
+cross2<-findSimilarMarkers(cross1, error.prob=0.001, map.function="kosambi", rf.threshold = 0.005)
+plot.map(cross1, cross2, main = "comparison of full and culled maps")
+```
+
+### Part 3: Reorder markers iteratively
+```{r repRipple markers}
+cross3<-repRipple(cross2, error.prob=0.001, map.function="kosambi",window = 6)
+plot.rf(cross2, main = "recombination fractions before ripple")
+plot.rf(cross3, main = "recombination fractions after ripple")
+```
+
