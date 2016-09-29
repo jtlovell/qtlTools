@@ -31,30 +31,37 @@ findSimilarMarkers<-function(cross,
                              na.weight=1,
                              drop.similar.markers = TRUE,
                              re.est.map = TRUE,
+                             verbose = T,
                              ...){
   if(is.null(chr)) chr <- chrnames(cross)
-  gt<-geno.table(cross, chr=chr)
-  ms<-markernames(cross, chr =chr)
-  rf<-pull.rf(cross, chr = chr, what = "rf")
-  rf[lower.tri(rf)]<-NA
-  nondup<-sapply(ms, function(x){
-    wh<-names(which(rf[x,]<rf.threshold))
-    if(length(wh>0)){
-      gtm<-gt[wh,]
-      ord.missing<-rank(gtm$missing)
-      ord.sd<-rank(-gtm$P.value)
-      prod<-(ord.missing*sd.weight)+(ord.sd*sd.weight)
-      rownames(gtm)[which.min(prod)]
-    }else{
-      x
-    }
+  if(verbose) cat("scanning chr: ", paste(chr, collapse = ","),"\n")
+  todrop<-lapply(chr, function(i){
+    gt<-geno.table(cross, chr=i)
+    ms<-markernames(cross, chr =i)
+    rf<-pull.rf(cross, chr = i, what = "rf")
+    rf[lower.tri(rf)]<-NA
+    nondup<-sapply(ms, function(x){
+      wh<-names(which(rf[x,]<rf.threshold))
+      if(length(wh>0)){
+        gtm<-gt[wh,]
+        ord.missing<-rank(gtm$missing)
+        ord.sd<-rank(-gtm$P.value)
+        prod<-(ord.missing*sd.weight)+(ord.sd*sd.weight)
+        rownames(gtm)[which.min(prod)]
+      }else{
+        x
+      }
+    })
+    nondup<-unique(nondup)
+    nondup<-nondup[order(nondup)]
+    td<-markernames(cross, chr = i)[!markernames(cross, chr = i) %in% nondup]
+    return(td)
   })
-  nondup<-unique(nondup)
-  nondup<-nondup[order(nondup)]
-  todrop<-markernames(cross, chr = chr)[!markernames(cross, chr = chr) %in% nondup]
+  todrop<-unique(unlist(todrop))
   if(drop.similar.markers){
     cross<-drop.markers(cross, markers = todrop)
     if(re.est.map){
+      if(verbose) cat("re-estimating genetic map\n")
       em<-est.map(cross, ...)
       cross<-replace.map(cross, map = em)
     }

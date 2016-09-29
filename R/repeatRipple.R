@@ -14,11 +14,16 @@
 #'
 #' @import qtl
 #' @export
-repeatRipple<-function(cross, chr, window=6, repeatloop = TRUE, makePlots = FALSE, method = "countxo", ...){
+function(cross, chr = NULL, window=6, repeatloop = TRUE, makePlots = FALSE, method = "countxo", verbose = T,...){
+  if(is.null(chr)) chr <- chrnames(cross)
   for(i in chr){
+    if(verbose) cat("running ripple for chromosome: ", i,"\n")
     diff<-1
+    reps<-1
     if(repeatloop){
       while(diff>0){
+        if(verbose) cat("ripple run #", reps, "... ")
+        reps<-reps+1
         if(makePlots) plot.rf(cross,
                               chr = i,
                               main = paste("chr",i,"before ripple"))
@@ -27,11 +32,16 @@ repeatRipple<-function(cross, chr, window=6, repeatloop = TRUE, makePlots = FALS
                     chr = i,
                     window = window,
                     method = method,
+                    verbose = F,
                     ...)
-
-        cross <- switch.order(cross, i, rip[2,])
         index<-nmar(cross)[which(chrnames(cross)==i)]+1
         diff<-rip[1,index] - rip[2,index]
+        if(diff>0){
+          cross <- switch.order(cross, i, rip[2,])
+          if(verbose) cat("n crossovers reduced by", diff,"\n")
+        }else{
+          if(verbose) cat("n crossovers not reduced\n")
+        }
 
         if(makePlots) plot.rf(cross,
                               chr = i,
@@ -46,6 +56,7 @@ repeatRipple<-function(cross, chr, window=6, repeatloop = TRUE, makePlots = FALS
                   chr = i,
                   window = window,
                   method = method,
+                  verbose = F,
                   ...)
 
       cross <- switch.order(cross, i, rip[2,])
