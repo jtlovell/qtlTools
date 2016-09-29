@@ -1,7 +1,8 @@
 #' @title Using a QTL model, calcuate conditional QTL genotype effects
 #'
 #' @description
-#' \code{lsmeans4qtl} Takes a QTL model, formula and returns SAS - style LSMeans
+#' \code{lsmeans4qtl} Takes a QTL model, formula and returns SAS - style LSMeans.
+#' *** Note: to use this function, the "lsmeans" package must be installed and loaded.
 #'
 #' @param cross The qtl cross object with marker names that need to be changed.
 #' @param phe Character or numeric vector indicating the phenotype to be tested
@@ -12,7 +13,6 @@
 #' @return A dataframe of statistics.
 #'
 #' @import qtl
-#' @importFrom lsmeans lsmeans
 #' @export
 lsmeans4qtl<-function(cross, phe, form, mod, covar){
   # 1. parse the formula

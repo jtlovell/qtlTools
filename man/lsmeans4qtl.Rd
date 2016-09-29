@@ -21,7 +21,8 @@ lsmeans4qtl(cross, phe, form, mod, covar)
 A dataframe of statistics.
 }
 \description{
-\code{lsmeans4qtl} Takes a QTL model, formula and returns SAS - style LSMeans
+\code{lsmeans4qtl} Takes a QTL model, formula and returns SAS - style LSMeans.
+*** Note: to use this function, the "lsmeans" package must be installed and loaded.
 }
 \details{
 This function iterates through the terms in the formula, pulling out lsmeans.
