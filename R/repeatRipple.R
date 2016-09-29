@@ -14,7 +14,8 @@
 #'
 #' @import qtl
 #' @export
-repeatRipple<-function(cross, chr, window=6, repeatloop = TRUE, makePlots = FALSE, method = "countxo", ...){
+repeatRipple<-function(cross, chr = NULL, window=6, repeatloop = TRUE, makePlots = FALSE, method = "countxo", ...){
+  if(is.null(chr)) chr <- chrnames(cross)
   for(i in chr){
     diff<-1
     if(repeatloop){
