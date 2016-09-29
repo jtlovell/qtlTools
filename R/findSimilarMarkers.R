@@ -22,7 +22,6 @@
 #' or a new cross object with the similar markers dropped.
 #'
 #' @import qtl
-#' @import lsmeans
 #' @export
 
 findSimilarMarkers<-function(cross,

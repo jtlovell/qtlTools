@@ -1,7 +1,7 @@
 #' @title Using a QTL model, calcuate conditional QTL genotype effects
 #'
 #' @description
-#' \code{calcQtlMeans} Takes a QTL model, formula
+#' \code{lsmeans4qtl} Takes a QTL model, formula and returns SAS - style LSMeans
 #'
 #' @param cross The qtl cross object with marker names that need to be changed.
 #' @param phe Character or numeric vector indicating the phenotype to be tested

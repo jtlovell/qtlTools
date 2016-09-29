@@ -32,7 +32,7 @@
 #' gives the permutation results as a second list element.
 #'
 #' @import qtl
-#' @importsfrom reshape2 melt
+#' @import reshape2
 #' @export
 covScanQTL<-function(cross, pheno.y, pheno.candidates, experimental.covar = NULL,
                      mod = NULL, QTLxE = TRUE,

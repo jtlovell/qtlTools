@@ -1,34 +1,28 @@
-geneID="Pahal.C00854"
-
-# gff should have the following column names:
-# chr, type, start, end, orientation, info
-
-# the vcf needs to have the column names:
-# CHR, POS, INFO
-setwd("/Users/John/Desktop/Hal2_Vs_Fil2")
-library(data.table)
-indel<-fread("Hal2_indels_ann.vcf")
-snp<-fread("Hal2_snps_ann2.vcf")
-setnames(indel,1,"CHR")
-setnames(snp,1,"CHR")
-snp<-snp[snp$CHR == "Chr03",]
-indel<-indel[indel$CHR == "Chr03",]
-#windel<-data.frame(indel[grep("Pahal.C00854",indel$INFO),])
-#wsnp<-data.frame(snp[grep("Pahal.C00854",snp$INFO),])
-setnames(indel,10,"HAL2")
-allw<-rbind(indel,snp)
-snpEffVCF=allw
-
-
-info<-fread("filipesV2_annotation.txt")
-gff=data.frame(info[,c(1,3,4,5,7,9), with=F])
-names(gff)<-c("chr", "type", "start", "end", "orientation", "info")
-st<-grep("stop",snpEffVCF$INFO)
-sta<-grep("start",snpEffVCF$INFO)
-sev<-snpEffVCF
-gf<-gff
-
-plotGeneModel(gff = gf, snpEffVCF = sev, geneID = "Pahal.C00786", windowSize=200, stepSize = 5)
+#' @title A plotting method for gene models
+#'
+#' @description
+#' \code{plotGeneModel} Using an annotated vcf and gff file, plot the gene model with
+#' mutations.
+#'
+#' @param gff A gene annotation in gff / gff3 format
+#' @param snpEffVCF A simple vcf file that has been annotated by the SNPeff program
+#' @param geneID The gff / vcf id of the gene of interest
+#' @param upstreamBuffer How far upstream of the gene should be plotted / extracted?
+#' @param downstreamBuffer  How far downstream of the gene should be plotted / extracted?
+#' @param features2plot What features (in the gff) should be plotted?
+#' @param colors What colors should the features be?
+#' @param mutations2annotate What types of mutations should be annoted in the plot?
+#' These keywords must appear in the "INFO" column of the vcf file
+#' @param pchMutation What shape should the annotations be?
+#' @param colMutation What color should the annotations be?
+#' @param orientation What is the orientation of the gene? If NULL, determined from the
+#' gff.
+#' @param windowSize What window size should be used in the mutation sliding window plot?
+#' @param stepSize What step size should be used in the mutation sliding window plot?
+#' @param scaleBar Should a scale bar be plotted?
+#' @return A data.frame containing all mutations in the plot.
+#'
+#' @export
 plotGeneModel<-function(gff, snpEffVCF, geneID, upstreamBuffer = 1000, downstreamBuffer = 500,
                         features2plot = c("exon","five_prime_UTR","three_prime_UTR"),
                         colors = c("steelblue3","lightsteelblue1","lightsteelblue1"),

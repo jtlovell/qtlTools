@@ -1,4 +1,3 @@
-#' @import ggplot2
 #' @export
 theme_jtl <- function(base_size = 10, base_family = "")
 {

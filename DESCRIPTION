@@ -10,5 +10,9 @@ License: GPL-3
 LazyData: TRUE
 Depends:
     qtl,
-    plyr
+    plyr,
+    reshape2,
+    data.table,
+    effects,
+    lsmeans
 RoxygenNote: 5.0.1
