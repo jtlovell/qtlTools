@@ -1,6 +1,12 @@
+#' @title simple custom theme
+#'
+#' @description
+#' \code{theme_jtl}  a theme for ggplot similar to theme bw, but better (i think)
 #' @export
-theme_jtl <- function(base_size = 10, base_family = "")
+theme_jtl <- function()
 {
+  base_size = 10
+  base_family = ""
   txt.8 <- element_text(size = 8, colour = "black", face = "plain")
   txt.10 <- element_text(size = 10, colour = "black", face = "plain")
 
