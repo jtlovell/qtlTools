@@ -12,7 +12,7 @@
 #' @return A dataframe of statistics.
 #'
 #' @import qtl
-#' @importfrom importFrom lsmeans
+#' @importFrom lsmeans lsmeans
 #' @export
 lsmeans4qtl<-function(cross, phe, form, mod, covar){
   # 1. parse the formula
