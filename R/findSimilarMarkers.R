@@ -45,7 +45,7 @@ findSimilarMarkers<-function(cross,
                              verbose = TRUE,
                              keepEnds = FALSE,
                              ...){
-  if(is.null(chr)) chr <- chrnames(cross)
+  if(length(chr)>1) stop("findSimilarMarkers only works for 1 chromosome at a time\n")
   if(verbose) cat("scanning chr: ", paste(chr, collapse = ","),"\n")
   todrop<-lapply(chr, function(i){
     gt<-geno.table(cross, chr=i)
