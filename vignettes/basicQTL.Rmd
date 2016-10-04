@@ -90,7 +90,7 @@ This function takes the qtl models generated above and calculates confidence int
 
 ```{r}
 cis<-lapply(models.out, function(x) {
-  calcCis(mod=x, ci.method="bayes",  prob=0.99, expandtomarkers=T)
+  calcCis(mod=x, lodint=FALSE,  prob=0.99, expandtomarkers=T)
 })
 ```
 
