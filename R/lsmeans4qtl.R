@@ -52,9 +52,14 @@ lsmeans4qtl<-function(cross, phe = 1, form = NULL, mod, covar = NULL, prob.thres
   if(length(phe) != 1)
     stop("phe (pheno.col) must be a numeric or character vector of length 1")
 
-  # 1. parse the formula
+  # 1. parse the formula and subset the cross
   form<-as.formula(form)
   terms<-attr(terms(form), "term.labels")
+
+  if(mod$n.ind != nind(cross)){
+    warning("n individuals in cross does not match the model, subsetting the cross accordingly\n")
+    cross<-subset(cross, ind = !is.na(pull.pheno(cross, pheno.col=phe)))
+  }
 
   # 2. infer the genotype for each individual at each qtl
   gp<-lapply(mod[[1]], function(x) apply(x,1, function(y) {
@@ -69,7 +74,10 @@ lsmeans4qtl<-function(cross, phe = 1, form = NULL, mod, covar = NULL, prob.thres
 
   # 3. add in phenotype and covariate data
   gp$y<-pull.pheno(cross, pheno.col=phe)
-  gp<-data.frame(gp, covar)
+  if(!is.null(covar)){
+    gp<-data.frame(gp, covar)
+  }
+
 
   # 4. calculate lsmeans for each term in model
   lm.out<-lm(form,gp)

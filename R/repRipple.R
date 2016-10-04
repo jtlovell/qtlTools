@@ -28,64 +28,44 @@
 #' newmap<-est.map(cross0, error.prob=0.001, map.function="kosambi")
 #' cross0 <- replace.map(cross0, newmap)
 #' cross0<-est.rf(cross0)
-#' cross1<-repRipple(cross1, chr = 1, error.prob=0.001, map.function="kosambi",window = 6)
+#' cross1<-repRipple(cross0, chr = 1, error.prob=0.001, map.function="kosambi",window = 6)
 #' plot.rf(cross0, chr = 1, main = "recombination fractions before ripple")
 #' plot.rf(cross1, chr = 1, main = "recombination fractions after ripple")
 #'
 #' @import qtl
 #' @export
 repRipple<-function(cross, chr = NULL, window=6, repeatloop = TRUE, makePlots = FALSE, method = "countxo",
-                       re.est.map = TRUE, map.function = "kosambi", error.prob = 0.001, verbose = T,
-                       ...){
+                    re.est.map = TRUE, map.function = "kosambi", error.prob = 0.001, verbose = T,
+                    ...){
   if(is.null(chr)) chr <- chrnames(cross)
   for(i in chr){
     if(verbose) cat("running ripple for chromosome: ", i,"\n")
     diff<-1
     reps<-1
-    if(repeatloop){
-      while(diff>0){
-        if(verbose) cat("ripple run #", reps, "... ")
-        reps<-reps+1
-        if(makePlots) plot.rf(cross,
-                              chr = i,
-                              main = paste("chr",i,"before ripple"))
 
-        rip<-ripple(cross,
-                    chr = i,
-                    window = window,
-                    method = method,
-                    verbose = F,
-                    ...)
-        index<-nmar(cross)[which(chrnames(cross)==i)]+1
-        diff<-rip[1,index] - rip[2,index]
-        if(diff>0){
-          cross <- switch.order(cross, i, rip[2,])
-          if(verbose) cat("n crossovers reduced by", diff,"\n")
-        }else{
-          if(verbose) cat("n crossovers not reduced\n")
-        }
-
-        if(makePlots) plot.rf(cross,
-                              chr = i,
-                              main = paste("chr",i,"after ripple"))
-      }
-    }else{
+    while(diff>0){
+      if(verbose & repeatloop) cat("ripple run #", reps, "... ")
       if(makePlots) plot.rf(cross,
                             chr = i,
                             main = paste("chr",i,"before ripple"))
-
-      rip<-ripple(cross,
-                  chr = i,
-                  window = window,
-                  method = method,
-                  verbose = F,
-                  ...)
-
-      cross <- switch.order(cross, i, rip[2,])
-
-      if(makePlots) plot.rf(cross,
-                            chr = i,
-                            main = paste("chr",i,"after ripple"))
+      rip<-summary(ripple(cross,
+                          chr = i,
+                          window = window,
+                          method = method,
+                          verbose = F,
+                          ...))
+      diff<-rip[1,ncol(rip)] - rip[2,ncol(rip)]
+      if(diff>0){
+        cross <- switch.order(cross, i, rip[2,-ncol(rip)])
+        if(verbose) cat("n crossovers reduced by", diff,"\n")
+        if(makePlots) plot.rf(cross,
+                              chr = i,
+                              main = paste("chr",i,"after ripple"))
+      }else{
+        if(verbose) cat("n crossovers not reduced\n")
+      }
+      reps<-reps+1
+      if(!repeatloop) diff <- 0
     }
   }
   if(re.est.map){

@@ -90,7 +90,7 @@ This function takes the qtl models generated above and calculates confidence int
 
 ```{r}
 cis<-lapply(models.out, function(x) {
-  calcCis(mod=x, qtlnames=x$altname, ci.method="bayes",  prob=0.99, returnChr=TRUE, returnMaxLod=TRUE, expandtomarkers=T)
+  calcCis(mod=x, ci.method="bayes",  prob=0.99, expandtomarkers=T)
 })
 ```
 
@@ -100,32 +100,12 @@ cis.df<-ldply(cis, data.frame)
 colnames(cis.df)[1]<-"phe"
 ```
 
-We also need to convert the confidence interval bounds to numbers, as the ldply function forces them to be character
-```{r}
-for(i in c("lowposition","highposition")) cis.df[,i]<-as.numeric(cis.df[,i])
-```
-
 ### Part IV: Plot the confidence intervals on a map. 
-
-#### Thick lines
-
-```{r}
-segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
-              lwd = 8, segSpread=.1)
-```
-
 #### Thinner lines
 
 ```{r}
 segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
               lwd = 5, segSpread=.1)
-```
-
-#### Closer together
-
-```{r}
-segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
-              lwd = 5, segSpread=.05)
 ```
 
 #### Smaller legend
@@ -134,4 +114,17 @@ segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowpositio
 segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
               lwd = 5, segSpread=.05,  legendCex=.8)
 ```
+
+### Part V: Get model statistics
+```{r}
+mod<-models.out[["X3.Methylsulfinylpropyl"]]
+qtlStats(cross, pheno.col = "X3.Methylsulfinylpropyl", form = formula(mod), mod = mod)
+qtlStats(cross, pheno.col = "X3.Methylsulfinylpropyl", form = "y ~ Q1 + Q2 + Q1*Q2", mod = mod)
+```
+
+### Part VI: Get model lsmeans
+```{r}
+lsmeans4qtl(cross, phe = "X3.Methylsulfinylpropyl",form = "y ~ Q1 + Q2 + Q1*Q2", mod = mod, covar=NULL)
+```
+
 

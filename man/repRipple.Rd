@@ -48,7 +48,7 @@ cross0<-switch.order(cross0, chr = 1, order = badorder,
 newmap<-est.map(cross0, error.prob=0.001, map.function="kosambi")
 cross0 <- replace.map(cross0, newmap)
 cross0<-est.rf(cross0)
-cross1<-repRipple(cross1, chr = 1, error.prob=0.001, map.function="kosambi",window = 6)
+cross1<-repRipple(cross0, chr = 1, error.prob=0.001, map.function="kosambi",window = 6)
 plot.rf(cross0, chr = 1, main = "recombination fractions before ripple")
 plot.rf(cross1, chr = 1, main = "recombination fractions after ripple")
 
