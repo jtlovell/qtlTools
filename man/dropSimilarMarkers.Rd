@@ -28,8 +28,6 @@ of 0 removes sd as a factor in choosing the best marker.}
 \item{doNotDrop}{Character vector of markers to retain no matter their rfs.}
 
 \item{verbose}{Logical, should updates be printed?}
-
-\item{...}{Additional arguments passed to est.map if re.est.map = TRUE}
 }
 \value{
 A new cross object with the similar markers dropped.
