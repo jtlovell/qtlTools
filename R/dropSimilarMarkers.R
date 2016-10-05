@@ -18,7 +18,6 @@
 #' @param keepEnds Logical, should markers on the ends of the chromosomes always be retained?
 #' @param doNotDrop Character vector of markers to retain no matter their rfs.
 #' @param verbose Logical, should updates be printed?
-#' @param ... Additional arguments passed to est.map if re.est.map = TRUE
 #' @return A new cross object with the similar markers dropped.
 #'
 #' @examples
