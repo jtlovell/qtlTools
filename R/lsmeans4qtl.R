@@ -25,6 +25,7 @@
 #'
 #' @examples
 #' library(qtlTools)
+#' library(lsmeans)
 #' cross<-fake.bc
 #' cross <- calc.genoprob(cross, step=2.5)
 #' mod <- makeqtl(cross, chr = c(2,5), pos = c(40,25), what = "prob")
@@ -33,7 +34,6 @@
 #' lsmeans4qtl(cross, phe = "pheno1",form = nform, mod = mod, covar=sex)
 #'
 #' @import qtl
-#' @importFrom lsmeans lsmeans
 #' @export
 lsmeans4qtl<-function(cross, phe = 1, form = NULL, mod, covar = NULL, prob.thresh = 0, ...){
 
