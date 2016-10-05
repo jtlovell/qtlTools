@@ -5,8 +5,8 @@
 \title{Method to improve a genetic map.}
 \usage{
 dropSimilarMarkers(cross, chr = NULL, rf.threshold = 0.02, sd.weight = 1,
-  na.weight = 1, re.est.map = TRUE, keepEnds = FALSE, doNotDrop = NULL,
-  verbose = TRUE, ...)
+  na.weight = 1, keepEnds = FALSE, doNotDrop = NULL, verbose = TRUE,
+  ...)
 }
 \arguments{
 \item{cross}{The qtl cross object to search}
@@ -21,18 +21,18 @@ not been run on cross, it will be done so automatically. See qtl::est.rf for det
 Higher values relative to na.weight increase the weight of the sd rank. Setting a value
 of 0 removes sd as a factor in choosing the best marker.}
 
-\item{na.weight}{Same as sd.weight, but for the number of nas.}
+\item{na.weight}{Same as sd.weight, but for the number of NAs.}
 
-\item{re.est.map}{Should the map be re-estimated after drop.similar.markers?}
+\item{keepEnds}{Logical, should markers on the ends of the chromosomes always be retained?}
+
+\item{doNotDrop}{Character vector of markers to retain no matter their rfs.}
+
+\item{verbose}{Logical, should updates be printed?}
 
 \item{...}{Additional arguments passed to est.map if re.est.map = TRUE}
-
-\item{drop.similar.markers}{Should the similar markers be dropped and a subsetted cross
-be returned?}
 }
 \value{
-Either a character vector of the markers that should be dropped (if drop.similar.markers = FALSE),
-or a new cross object with the similar markers dropped.
+A new cross object with the similar markers dropped.
 }
 \description{
 \code{dropSimilarMarkers} Find markers that have a small recombination fraction and
@@ -42,11 +42,11 @@ chromosome at a time. Also make sure to run est.rf first and use re.est.map = FA
 }
 \examples{
 set.seed(42)
-map<-sim.map(len = c(50,20), n.mar = c(10,20), include.x=F)
+map<-sim.map(len = c(50,20), n.mar = c(20,30), include.x=F)
 cross0<-sim.cross(map, n.ind=50, type="f2", map.function="kosambi", error.prob=.01, missing.prob = .05)
 cross0<-est.rf(cross0)
-cross1<-findSimilarMarkers(cross0, error.prob=0.001, map.function="kosambi", rf.threshold = 0.005)
-cross2<-findSimilarMarkers(cross0, error.prob=0.001, map.function="kosambi", rf.threshold = 0.005, keepEnds=TRUE)
+cross1<-dropSimilarMarkers(cross0)
+cross2<-dropSimilarMarkers(cross0, keepEnds=T)
 par(mfrow=c(2,1))
 plot.map(cross0, cross1, main = "comparison of full and culled maps")
 plot.map(cross0, cross2, main = "comparison of full and culled maps")

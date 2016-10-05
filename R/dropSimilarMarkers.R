@@ -14,21 +14,20 @@
 #' @param sd.weight The weighting of segregation distortion rank in dropping a marker.
 #' Higher values relative to na.weight increase the weight of the sd rank. Setting a value
 #' of 0 removes sd as a factor in choosing the best marker.
-#' @param na.weight Same as sd.weight, but for the number of nas.
-#' @param drop.similar.markers Should the similar markers be dropped and a subsetted cross
-#' be returned?
-#' @param re.est.map Should the map be re-estimated after drop.similar.markers?
+#' @param na.weight Same as sd.weight, but for the number of NAs.
+#' @param keepEnds Logical, should markers on the ends of the chromosomes always be retained?
+#' @param doNotDrop Character vector of markers to retain no matter their rfs.
+#' @param verbose Logical, should updates be printed?
 #' @param ... Additional arguments passed to est.map if re.est.map = TRUE
-#' @return Either a character vector of the markers that should be dropped (if drop.similar.markers = FALSE),
-#' or a new cross object with the similar markers dropped.
+#' @return A new cross object with the similar markers dropped.
 #'
 #' @examples
 #' set.seed(42)
-#' map<-sim.map(len = c(50,20), n.mar = c(10,20), include.x=F)
+#' map<-sim.map(len = c(50,20), n.mar = c(20,30), include.x=F)
 #' cross0<-sim.cross(map, n.ind=50, type="f2", map.function="kosambi", error.prob=.01, missing.prob = .05)
 #' cross0<-est.rf(cross0)
-#' cross1<-findSimilarMarkers(cross0, error.prob=0.001, map.function="kosambi", rf.threshold = 0.005)
-#' cross2<-findSimilarMarkers(cross0, error.prob=0.001, map.function="kosambi", rf.threshold = 0.005, keepEnds=TRUE)
+#' cross1<-dropSimilarMarkers(cross0)
+#' cross2<-dropSimilarMarkers(cross0, keepEnds=T)
 #' par(mfrow=c(2,1))
 #' plot.map(cross0, cross1, main = "comparison of full and culled maps")
 #' plot.map(cross0, cross2, main = "comparison of full and culled maps")
@@ -41,7 +40,6 @@ dropSimilarMarkers<-function(cross,
                              rf.threshold=0.02,
                              sd.weight=1,
                              na.weight=1,
-                             re.est.map = TRUE,
                              keepEnds = FALSE,
                              doNotDrop = NULL,
                              verbose=TRUE,
