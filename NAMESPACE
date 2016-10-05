@@ -2,6 +2,7 @@
 
 export(calcCis)
 export(covScanQTL)
+export(dropSimilarMarkers)
 export(find.ciseqtl)
 export(findSimilarMarkers)
 export(lsmeans4qtl)
