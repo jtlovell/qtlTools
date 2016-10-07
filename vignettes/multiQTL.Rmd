@@ -20,8 +20,13 @@ library(plyr)
 ```{r env.set.up, eval = FALSE}
 library(devtools)
 install_github("jtlovell/qtlTools")
+```
+
+```{r env.set.up2}
 library(qtlTools)
 library(qtl)
+library(ggplot2)
+library(lsmeans)
 ```
 
 #### Load the QTL models from "basicQTL" tutorial
@@ -59,8 +64,18 @@ allstats<-lapply(phes, function(i){
 allstats<-do.call(rbind, allstats)
 ```
 
+### Part VI: Get QTL effects as [ls]means and plot
 ```{r}
-lsmeans4qtl(cross, phe = "X3.Methylsulfinylpropyl",form = "y ~ Q1 + Q2 + Q1*Q2", mod = mod, covar=NULL)
+lsms<-lsmeans4qtl(cross, phe = "X3.Methylsulfinylpropyl",form = "y ~ Q1 + Q2 + Q1*Q2", mod = mod, covar=NULL)
+
+lsms<-lsms[!is.na(lsms$Q1) & !is.na(lsms$Q2),c("Q1","Q2","lsmean","SE","mean","sem")]
+ggplot(lsms, aes(x = Q1, y = lsmean, shape = Q2,
+   color = Q2, group = Q2))+
+   geom_point()+
+   geom_line()+
+   theme_jtl()+
+   geom_errorbar(aes(ymin = lsmean - SE, ymax = lsmean+SE), width = .1)+
+   ggtitle("sas-style LSMeans")
 ```
 
 
