@@ -20,19 +20,56 @@
 #' @param ... additional arguments passed on to lsmeans.
 #' @details This function iterates through the terms in the formula, pulling out lsmeans.
 #' It calls the function lsmeans from the lsmeans package, which calculates SAS-style
-#' least square means.
-#' @return A dataframe of least square means statistics.
+#' least square means. Regular means are calculated by aggregate.
+#' @return A dataframe of least square means and standard mean statistics.
 #'
 #' @examples
 #' library(qtlTools)
 #' library(lsmeans)
+#' data(fake.bc)
 #' cross<-fake.bc
 #' cross <- calc.genoprob(cross, step=2.5)
+#'
+#' # Make a QTL Model
 #' mod <- makeqtl(cross, chr = c(2,5), pos = c(40,25), what = "prob")
 #' nform <- "y ~ Q1 + Q2 + Q1*sex + sex"
 #' sex <- data.frame(sex = as.factor(cross$phe$sex))
-#' lsmeans4qtl(cross, phe = "pheno1",form = nform, mod = mod, covar=sex)
+#' summary(fitqtl(cross, pheno.col = "pheno1", covar = data.frame(sex = cross$phe$sex),
+#'    method = "hk", qtl = mod, formula = nform))
+#' sex1<-pull.pheno(cross, "sex")
 #'
+#' # Standard Effect plot
+#' effectplot(cross, pheno.col = "pheno1", mname2 = "2@40",
+#'    mname1 = "Sex", mark1 = sex1, geno1 = c("F","M"))
+#'
+#' # Calculate lsmeans and regular means
+#' sex2<-ifelse(sex1 == 0, "F","M")
+#' lsms<-lsmeans4qtl(cross, phe = "pheno1",form = nform, mod = mod, covar=data.frame(sex = sex2))
+#'
+#' # Cull to lsmeans and regular means
+#' lsms<-lsms[!is.na(lsms$Q1) & !is.na(lsms$sex),c("Q1","sex","lsmean","SE","mean","sem")]
+#' library(ggplot2)
+#' lms<-lsms[,c("Q1","sex","mean","sem")]
+#' lms$type <- "mean"
+#' lsm<-lsms[,c("Q1","sex","lsmean","SE")]
+#' lsm$type<-"lsmean"
+#'
+#' # Put the two on top of eachother to plot in the same graph
+#' colnames(lsm)[3:4]<-c("mean","se")
+#' colnames(lms)[3:4]<-c("mean","se")
+#' tp<-rbind(lsm,lms)
+#'
+#' # Make the plot
+#' library(ggplot2)
+#' pos<-position_dodge(.1)
+#' ggplot(tp, aes(x = Q1, y = mean, shape = sex,
+#'    color = sex, linetype = type, group = interaction(sex,type)))+
+#'    geom_point(position = pos)+
+#'    geom_line(position = pos)+
+#'    theme_jtl()+
+#'    geom_errorbar(aes(ymin = mean - se, ymax = mean+se), width = .1,position = pos)+
+#'    ggtitle("sas-style LSMeans")
+
 #' @import qtl
 #' @export
 lsmeans4qtl<-function(cross, phe = 1, form = NULL, mod, covar = NULL, prob.thresh = 0, ...){
@@ -86,15 +123,33 @@ lsmeans4qtl<-function(cross, phe = 1, form = NULL, mod, covar = NULL, prob.thres
   })
 
   # 5. reformat output so that it can be combined into a dataframe
+  addterms<-terms[-grep(":",terms, fixed=T)]
   out<-lapply(out, function(x){
     x<-data.frame(summary(x))
-    addterms<-terms[-grep(":",terms, fixed=T)]
     naterms<-addterms[!addterms %in% colnames(x)]
     for(i in naterms) x[,i]<-NA
     x<-x[,c(addterms,"lsmean", "SE", "df", "lower.CL","upper.CL")]
   })
 
-  # 6. combine into data.frame and return
+  # 6. combine into data.frame
   out<-do.call(rbind, out)
-  return(out)
+
+  # 7. Get generic means and ses
+
+  sem<-function(a) sd(a, na.rm = TRUE)/sqrt(sum(!is.na(a)))
+  out.mean<-lapply(terms, function(y){
+    term.names = strsplit(y,":",fixed=T)[[1]]
+    term = lapply(term.names, function(x) gp[,x])
+    names(term)<-term.names
+    am<-aggregate(gp[,"y"], term, mean)
+    as<-aggregate(gp[,"y"], term, sem)
+    colnames(am)[which(colnames(am)=="x")]<-"mean"
+    colnames(as)[which(colnames(as)=="x")]<-"sem"
+    oa<-merge(as,am, by=term.names)
+    for(x in addterms[!addterms %in% colnames(oa)]) oa[,x]<-NA
+    oa[,c(addterms,"mean","sem")]
+  })
+  out.mean<-do.call(rbind, out.mean)
+
+  return(merge(out, out.mean, by = addterms))
 }

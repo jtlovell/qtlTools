@@ -1,0 +1,66 @@
+---
+title: "A general pipeline for looking at multiple qtl models"
+author: "JT Lovell"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 7, fig.height = 7)
+library(knitr)
+library(qtl)
+library(qtlTools)
+library(plyr)
+```
+
+```{r env.set.up, eval = FALSE}
+library(devtools)
+install_github("jtlovell/qtlTools")
+library(qtlTools)
+library(qtl)
+```
+
+#### Load the QTL models from "basicQTL" tutorial
+
+```{r get models, include=FALSE}
+data(multitrait)
+cross<-multitrait
+cross<-calc.genoprob(cross)
+phes <- c("X3.Hydroxypropyl", "X3.Butenyl", "X3.Methylsulfinylpropyl", "X5.Methylsulfinylpentyl", "X6.Methylthiohexyl", "X4.Benzoyloxybutyl", "Quercetin.deoxyhexosyl.dihexoside")
+
+stepout<-lapply(phes, function(i) {
+  stepwiseqtl(cross, pheno.col=i, method="hk", max.qtl=4, 
+              additive.only=TRUE, penalties = c(2.5,3.5,1.5), verbose=F)
+})
+names(stepout)<-phes
+models.out<-stepout
+```
+
+### Part V: Get model statistics for a single phenotype
+```{r}
+mod<-models.out[["X3.Methylsulfinylpropyl"]]
+qtlStats(cross, pheno.col = "X3.Methylsulfinylpropyl", form = formula(mod), mod = mod)
+qtlStats(cross, pheno.col = "X3.Methylsulfinylpropyl", form = "y ~ Q1 + Q2 + Q1*Q2", mod = mod)
+```
+
+### Part V: Get model statistics for multiple phenotypes
+```{r}
+allstats<-lapply(phes, function(i){
+  print(i)
+  mod<-models.out[[i]]
+  qstats<-qtlStats(cross, pheno.col = i, form = formula(mod), mod = mod)
+  qstats$pheno<-i
+  return(qstats)
+})
+allstats<-do.call(rbind, allstats)
+```
+
+```{r}
+lsmeans4qtl(cross, phe = "X3.Methylsulfinylpropyl",form = "y ~ Q1 + Q2 + Q1*Q2", mod = mod, covar=NULL)
+```
+
+
