@@ -137,11 +137,12 @@ lsmeans4qtl<-function(cross, phe = 1, form = NULL, mod, covar = NULL, prob.thres
   # 7. Get generic means and ses
 
   sem<-function(a) sd(a, na.rm = TRUE)/sqrt(sum(!is.na(a)))
+  m<-function(a) mean(a, na.rm = TRUE)
   out.mean<-lapply(terms, function(y){
     term.names = strsplit(y,":",fixed=T)[[1]]
     term = lapply(term.names, function(x) gp[,x])
     names(term)<-term.names
-    am<-aggregate(gp[,"y"], term, mean)
+    am<-aggregate(gp[,"y"], term, m)
     as<-aggregate(gp[,"y"], term, sem)
     colnames(am)[which(colnames(am)=="x")]<-"mean"
     colnames(as)[which(colnames(as)=="x")]<-"sem"
