@@ -60,6 +60,7 @@ qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
   }
 
   # 1. parse the formula
+  form1<-form
   form<-as.formula(form)
   terms<-attr(terms(form), "term.labels")
   out<-data.frame(qtlnames = mod$name, altnames = mod$altname, stringsAsFactors=F)
@@ -70,13 +71,23 @@ qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
   form.out<-data.frame(altnames = terms, terms = terms2, stringsAsFactors=F)
   out<-merge(form.out,out , by = "altnames", all=T)
   out$phenotype = pheno.col
+  out$formula <- form1
 
   # 2. Get the dropone stats and merge
   f<-summary(fitqtl(cross, qtl = mod, formula = form, pheno.col = pheno.col,
                     covar = covar, method = method.qtl, model=model,
             dropone = TRUE, get.ests = estEffects))
-  out.drop<-data.frame(f$result.drop)
-  out.drop$terms = rownames(out.drop)
+  if("result.drop" %in% names(f)){
+    out.drop<-data.frame(f$result.drop)
+    out.drop$terms = rownames(out.drop)
+  }else{
+    out.drop<-with(data.frame(f$result.full),
+                   data.frame(df = df[1], Type.III.SS = SS[1], LOD = LOD[1],
+                              X.var = X.var[1], F.value = NA,
+                              Pvalue.Chi2.=Pvalue.Chi2.[1],
+                              Pvalue.F. = Pvalue.F.[1], terms = terms2))
+  }
+
   out<-merge(out, out.drop, by = "terms")
   out$modelLod<-f$lod
   out$modelPercVar<-f$result.full[1,5]
