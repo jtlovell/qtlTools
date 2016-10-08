@@ -4,14 +4,14 @@
 \alias{lsmeans4qtl}
 \title{Using a QTL model, calcuate conditional QTL genotype effects}
 \usage{
-lsmeans4qtl(cross, phe = 1, form = NULL, mod, covar = NULL,
+lsmeans4qtl(cross, pheno.col = 1, form = NULL, mod, covar = NULL,
   prob.thresh = 0, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object used to generate the model. Must contain genotype
 probabilities, calculated via calc.genoprob.}
 
-\item{phe}{Character or numeric vector indicating the phenotype to be tested.
+\item{pheno.col}{Character or numeric vector indicating the phenotype to be tested.
 Only 1 phenotype can be tested at a time.}
 
 \item{form}{Character formula that must match the QTL in the fitted QTL (mod) object.}
@@ -62,7 +62,7 @@ effectplot(cross, pheno.col = "pheno1", mname2 = "2@40",
 
 # Calculate lsmeans and regular means
 sex2<-ifelse(sex1 == 0, "F","M")
-lsms<-lsmeans4qtl(cross, phe = "pheno1",form = nform, mod = mod, covar=data.frame(sex = sex2))
+lsms<-lsmeans4qtl(cross, pheno.col = "pheno1",form = nform, mod = mod, covar=data.frame(sex = sex2))
 
 # Cull to lsmeans and regular means
 lsms<-lsms[!is.na(lsms$Q1) & !is.na(lsms$sex),c("Q1","sex","lsmean","SE","mean","sem")]

@@ -6,7 +6,7 @@
 \usage{
 repRipple(cross, chr = NULL, window = 6, repeatloop = TRUE,
   makePlots = FALSE, method = "countxo", re.est.map = TRUE,
-  map.function = "kosambi", error.prob = 0.001, verbose = T, ...)
+  map.function = "kosambi", error.prob = 0.001, verbose = TRUE, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object to search}
@@ -33,7 +33,8 @@ repRipple(cross, chr = NULL, window = 6, repeatloop = TRUE,
 A new cross object with the optimal rippled marker order
 }
 \description{
-\code{repRipple} Iteratively run ripple.
+\code{repRipple} iteratively runs ripple,
+returning a cross object with the best order.
 }
 \examples{
 set.seed(42)

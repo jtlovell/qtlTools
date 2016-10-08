@@ -5,9 +5,23 @@
 #' of data. Useful if assuming identical distributions across many response variables
 #'
 #' @param x The numeric vector to quantile normalize
+#' @param drop0s Logical, should 0's be transformed to NAs
 #'
 #' @return a vector of quantile normalized data
-
+#'
+#' @examples
+#' library(qtlTools)
+#' data(fake.bc)
+#' cross<-fake.bc
+#' par(mfrow = c(2,1))
+#' hist(pull.pheno(cross, pheno.col = "pheno2"), breaks=20,
+#'    main = "before quantile normalization",
+#'    xlab = "raw pheno1")
+#' cross<-transformPheno(cross, pheno.col = "pheno1", quantnorm)
+#' hist(pull.pheno(cross, pheno.col = "pheno1"), breaks=20,
+#'    main = "after quantile normalization",
+#'    xlab = "qn pheno1")
+#'
 #' @export
 quantnorm<-function(x, drop0s=FALSE) {
   x<-as.numeric(x)

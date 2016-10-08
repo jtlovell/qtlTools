@@ -1,7 +1,7 @@
 #' @title Find the effect of candidate genes based on gene expression.
 #'
 #' @description
-#' \code{covScanQTL} Employ the covariate scan approach (Lovell et al. (2015),
+#' \code{covScanQTL} Employs the covariate scan approach (Lovell et al. (2015),
 #' Plant Cell), to rank the potential of candidate genes based on their effect
 #' on QTL morphology. Can be run for a single phenotype (e.g. Lovell et al. (2015)),
 #' or on a set of QTL underlying a trand-band. In the latter case, a boxplot of ranks
@@ -31,11 +31,16 @@
 #' chromosome chr and position pos for each phenotype and covariate. If nperm > 0, also
 #' gives the permutation results as a second list element.
 #'
+#' @examples
+#' # See tutorial - findingCandidateGenes
+#'
 #' @import qtl
 #' @export
-covScanQTL<-function(cross, pheno.y, pheno.candidates, experimental.covar = NULL,
+covScanQTL<-function(cross, pheno.y, pheno.candidates,
+                     experimental.covar = NULL,
                      mod = NULL, QTLxE = TRUE,
-                     chr, pos, qtl.method = "hk", nperm = 0, plotit=TRUE){
+                     chr, pos, qtl.method = "hk",
+                     nperm = 0, plotit=TRUE){
 
   if(!is.null(mod)){
     covBase<-extractGenoCalls(cross, model=mod, covar = experimental.covar, threshold = 0)

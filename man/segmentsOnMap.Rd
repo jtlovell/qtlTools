@@ -48,4 +48,8 @@ since each element represents a single segment on the map.
 Pass output from bayesint, lodint, or another confidence
 interval estimation program to visualize this.
 }
+\examples{
+# See basicQTL tutorial
+
+}
 

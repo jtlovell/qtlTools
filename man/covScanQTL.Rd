@@ -45,10 +45,14 @@ chromosome chr and position pos for each phenotype and covariate. If nperm > 0, 
 gives the permutation results as a second list element.
 }
 \description{
-\code{covScanQTL} Employ the covariate scan approach (Lovell et al. (2015),
+\code{covScanQTL} Employs the covariate scan approach (Lovell et al. (2015),
 Plant Cell), to rank the potential of candidate genes based on their effect
 on QTL morphology. Can be run for a single phenotype (e.g. Lovell et al. (2015)),
 or on a set of QTL underlying a trand-band. In the latter case, a boxplot of ranks
 can be output.
+}
+\examples{
+# See tutorial - findingCandidateGenes
+
 }
 

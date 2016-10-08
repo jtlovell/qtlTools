@@ -1,8 +1,8 @@
 #' @title Method to improve a genetic map.
 #'
 #' @description
-#' \code{dropSimilarMarkers} Find markers that have a small recombination fraction and
-#' drop the one with combined greater segregation distortion and/or missing data. ***Note:
+#' \code{dropSimilarMarkers} finds markers that have a small recombination fraction and
+#' drops the one with combined greater segregation distortion and/or missing data. ***Note:
 #' if the cross object has many markers (>1000), avoid running this function on more than one
 #' chromosome at a time. Also make sure to run est.rf first and use re.est.map = FALSE***
 #'
@@ -18,6 +18,9 @@
 #' @param keepEnds Logical, should markers on the ends of the chromosomes always be retained?
 #' @param doNotDrop Character vector of markers to retain no matter their rfs.
 #' @param verbose Logical, should updates be printed?
+#' @param ... if recombination fractions are not included in the cross object,
+#' pass on additional arguments to est.rf.
+#'
 #' @return A new cross object with the similar markers dropped.
 #'
 #' @examples
@@ -43,14 +46,17 @@ dropSimilarMarkers<-function(cross,
                              doNotDrop = NULL,
                              verbose=TRUE,
                              ...){
+  # 1. Get the rfs, geno table and chromosomes in order
   if(is.null(chr)) chr<-chrnames(cross)
   gt<-geno.table(cross, chr = chr)
   if(!"rf" %in% names(cross)){
     if(verbose) cat("running est.rf\n")
-    cross<-est.rf(cross, chr = chr)
+    cross<-est.rf(cross, chr = chr, ...)
   }
   rf<-pull.rf(cross, chr = chr, what = "rf")
   rf[!upper.tri(rf)]<-1
+
+  # 2. drop the markers to retain from the matrix
   if(!is.null(doNotDrop)){
     if(verbose) cat("retaining markers: ",paste(doNotDrop, collapse=", "),"\n")
     dnd.index<-which(colnames(rf) %in% doNotDrop)
@@ -65,6 +71,9 @@ dropSimilarMarkers<-function(cross,
     ends.index<-which(colnames(rf) %in% tokeep)
     rf<-rf[-ends.index, -ends.index]
   }
+
+  # 3. Loop through the rf matrix, dropping one of the two markers with the lowest
+  # recombination fraction.
   nmarstart<-sum(nmar(cross))
   if(verbose) cat("initial n markers: ",nmarstart,"\n")
   while(min(rf)<rf.threshold){

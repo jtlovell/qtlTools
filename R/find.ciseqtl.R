@@ -1,11 +1,11 @@
 #' @title Find the location of a cis eQTL
 #'
 #' @description
-#' \code{find.ciseqtl} Find the mapping position of the highest lod score
+#' \code{find.ciseqtl} finda the mapping position of the highest QTL peak
 #' within a window surrounding the known position of a gene.
 #'
 #' @param cross The qtl cross object with marker names that need to be changed.
-#' @param phe Character or numeric vector indicating the phenotype to be tested
+#' @param pheno.col Character or numeric vector indicating the phenotype to be tested
 #' @param chr.gene The name of the chromosome that contains the focal genes
 #' @param pos.gene The suspected mapping position of the gene - may be inferred from bp2cm
 #' @param cmWindow The distance from pos.gene that the cis eQTL may reside. Default is 10, but
@@ -19,10 +19,10 @@
 #'
 #' @import qtl
 #' @export
-find.ciseqtl<-function(cross, phe, pos.gene, chr.gene, cmWindow = 10,
+find.ciseqtl<-function(cross, pheno.col, pos.gene, chr.gene, cmWindow = 10,
                        lodThreshold = 3, outputType = "data.frame", ...){
   s1<-scanone(cross,
-              pheno.col = phe,
+              pheno.col = pheno.col,
               chr = chr.gene, ...)
   best.pos <- s1[s1$pos <= pos.gene + cmWindow &
                    s1$pos >= pos.gene - cmWindow, ]
@@ -30,7 +30,7 @@ find.ciseqtl<-function(cross, phe, pos.gene, chr.gene, cmWindow = 10,
   best.pos <- best.pos$pos[best.pos$lod == max(best.pos$lod)]
 
   has.cis.qtl <- ifelse(best.lod > lodThreshold, "yes", "no")
-  out<-data.frame(phe, chr.gene, pos.gene, best.pos, best.lod, has.cis.qtl)
+  out<-data.frame(pheno.col, chr.gene, pos.gene, best.pos, best.lod, has.cis.qtl)
   colnames(out)<-c("phenotype","chr","pos.gene","pos.cis.qtl","lod","has.cis.qtl")
   if(!is.null(cross$geno[[1]]$draws)){
     m<-makeqtl(cross, chr=chr.gene, pos=best.pos, what = "draws")
