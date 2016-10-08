@@ -115,16 +115,4 @@ segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowpositio
               lwd = 5, segSpread=.05,  legendCex=.8)
 ```
 
-### Part V: Get model statistics
-```{r}
-mod<-models.out[["X3.Methylsulfinylpropyl"]]
-qtlStats(cross, pheno.col = "X3.Methylsulfinylpropyl", form = formula(mod), mod = mod)
-qtlStats(cross, pheno.col = "X3.Methylsulfinylpropyl", form = "y ~ Q1 + Q2 + Q1*Q2", mod = mod)
-```
-
-### Part VI: Get model lsmeans
-```{r}
-lsmeans4qtl(cross, phe = "X3.Methylsulfinylpropyl",form = "y ~ Q1 + Q2 + Q1*Q2", mod = mod, covar=NULL)
-```
-
 
