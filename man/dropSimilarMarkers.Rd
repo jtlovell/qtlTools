@@ -28,13 +28,16 @@ of 0 removes sd as a factor in choosing the best marker.}
 \item{doNotDrop}{Character vector of markers to retain no matter their rfs.}
 
 \item{verbose}{Logical, should updates be printed?}
+
+\item{...}{if recombination fractions are not included in the cross object,
+pass on additional arguments to est.rf.}
 }
 \value{
 A new cross object with the similar markers dropped.
 }
 \description{
-\code{dropSimilarMarkers} Find markers that have a small recombination fraction and
-drop the one with combined greater segregation distortion and/or missing data. ***Note:
+\code{dropSimilarMarkers} finds markers that have a small recombination fraction and
+drops the one with combined greater segregation distortion and/or missing data. ***Note:
 if the cross object has many markers (>1000), avoid running this function on more than one
 chromosome at a time. Also make sure to run est.rf first and use re.est.map = FALSE***
 }

@@ -4,13 +4,13 @@
 \alias{find.ciseqtl}
 \title{Find the location of a cis eQTL}
 \usage{
-find.ciseqtl(cross, phe, pos.gene, chr.gene, cmWindow = 10,
+find.ciseqtl(cross, pheno.col, pos.gene, chr.gene, cmWindow = 10,
   lodThreshold = 3, outputType = "data.frame", ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
 
-\item{phe}{Character or numeric vector indicating the phenotype to be tested}
+\item{pheno.col}{Character or numeric vector indicating the phenotype to be tested}
 
 \item{pos.gene}{The suspected mapping position of the gene - may be inferred from bp2cm}
 
@@ -30,7 +30,7 @@ any marker within cmWindow has a lod score > lodThreshold.}
 Either a qtl object or a dataframe, indicating the position of a cis eQTL.
 }
 \description{
-\code{find.ciseqtl} Find the mapping position of the highest lod score
+\code{find.ciseqtl} finda the mapping position of the highest QTL peak
 within a window surrounding the known position of a gene.
 }
 

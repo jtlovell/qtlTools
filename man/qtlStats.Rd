@@ -39,7 +39,7 @@ A dataframe of statistics.
 \details{
 A simple method to produce stats from a fitted model. Calls several R/qtl
 functions depending on the user specifications. These include fitqtl, summary.fitqtl,
-bayesint, dropint. The method of QTL inference is extracted from the QTL model.
+bayesint, dropint, and qtlTools::calcCis. The method of QTL inference is extracted from the QTL model.
 }
 \examples{
 library(qtlTools)

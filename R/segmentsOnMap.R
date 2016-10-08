@@ -25,6 +25,9 @@
 #' @details Pass output from bayesint, lodint, or another confidence
 #' interval estimation program to visualize this.
 #'
+#' @examples
+#' # See basicQTL tutorial
+#'
 #' @return The plot
 #'
 #' @import qtl

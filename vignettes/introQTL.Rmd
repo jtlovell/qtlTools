@@ -1,0 +1,89 @@
+---
+title: "Introduction to QTL mapping"
+author: "JT Lovell"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 5, fig.height = 5)
+library(knitr)
+library(qtl)
+library(qtlTools)
+```
+
+```{r get qtlTools, eval = FALSE}
+library(qtl)
+
+library(devtools)
+install_github("jtlovell/qtlTools")
+library(qtlTools)
+```
+
+### First, lets simulate some data
+```{r sim map}
+
+# Set the seed so that all our maps are identical
+set.seed(42) 
+
+# Simulate a 2-chromosome map with 25 markers on each 100cM linkage group
+map<-sim.map(len = c(100,100), n.mar = c(25,25), include.x=F)
+
+# Simulate 1 QTL on each chromosome
+# Here, we set the bigger one on Chr 1 to be purely additive
+#       the second, smaller one is dominant
+cross<-sim.cross(map, n.ind=200, type="f2", map.function="kosambi",
+                 model = rbind(c(1,10,10,1),c(2,90,5,5)))
+```
+
+### To do QTL mapping, we need to calculate conditional genotype probabilities
+```{r}
+cross<-calc.genoprob(cross, 
+                     step = 0, # This means that we only want 
+                               # geno probs at each marker
+                     error.prob = 0.001)
+```
+
+
+s1<-scanone(cross)
+m<-makeqtl(cross, chr = pull.map(cross, as.table=T)$chr, 
+           pos = pull.map(cross, as.table=T)$pos, 
+           what="prob")
+form<-paste0("y ~ ",paste(paste0("Q",1:totmar(cross)), collapse = " + "))
+ms<-simpleQTLmeans(cross, pheno.col = "phenotype",form = form, mod = m)
+for(i in colnames(ms)[2:4])  s1[,i]<-ms[,i]
+
+plot(s1, lodcolumn = 2, ylim = c(min(as.matrix(ms[,2:4])), max(as.matrix(ms[,2:4]))))
+plot(s1, lodcolumn = 3, add = T, col = "orange")
+plot(s1, lodcolumn = 4, add = T, col = "blue")
+legend("topright", names(ms)[2:4], col = c("black","orange","blue"), lty=c(1,1,1), inset=0.01, bty="n")
+
+geno.image(cross, chr = 1, reorder = TRUE)
+par(mfrow = c(2,1))
+effectscan(sim.geno(cross), main = "plot of QTL effects")
+s1<-scanone(cross)
+plot(s1, main = "one-way QTL scan")
+
+perms<-scanone(cross, n.perm=100)
+add.threshold(out=s1, perms=perms, alpha = 0.05, col = "red", lty=2)
+
+summary(s1, perms = perms, pvalues=T, lodcolumn =1)
+
+effectplot(sim.geno(cross), mname1 = "D1M2")
+effectplot(sim.geno(cross), mname1 = "D2M21")
+
+step<-stepwiseqtl(cross, max.qtl = 2, method = "hk", additive.only=T)
+summary(step)
+plotLodProfile(step, ylim = c(0,120))
+plot(step)
+
+lodint(step, qtl.index = 1, drop = 5)
+lodint(step, qtl.index = 2, drop = 5)
+
+summary(fitqtl(cross, qtl = step, formula = formula(step), method = "hk", get.ests=T))
+```
+

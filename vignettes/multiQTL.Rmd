@@ -6,7 +6,7 @@ output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}
@@ -88,7 +88,7 @@ allstats<-do.call(rbind, allstats)
 ### Part VI: Get QTL effects as [ls]means and plot
 ```{r lsms, warning = FALSE}
 alllsms<-lsmeans4qtl(cross, 
-                     phe = "X3.Methylsulfinylpropyl",
+                     pheno.col = "X3.Methylsulfinylpropyl",
                      form = "y ~ Q1 + Q2 + Q1*Q2", 
                      mod = mod, 
                      covar=NULL)
