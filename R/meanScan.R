@@ -30,6 +30,11 @@
 #' cross<-fake.bc
 #' cross<-calc.genoprob(cross)
 #' meanScan(cross, covar = NULL)
+#'
+#' # Some simple customization
+#' meanScan(cross, covar = NULL, cols = c("black","orange"), ltys = c(1,2),
+#'    leg.pos = "top", leg.inset = 0.02, ylab = "mean phenotype")
+#'
 #' sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
 #' meanScan(cross, covar = sex, chr = c(2,7))
 #'
@@ -64,6 +69,7 @@ meanScan<-function(cross, pheno.col = 1,  covar = NULL,
   if(length(pheno.col) != 1)
     stop("pheno.col (pheno.col) must be a numeric or character vector of length 1.")
 
+  # 1. get the covariate data in order
   if(is.null(covar)){
     covar<-factor(rep(1, nind(cross)))
     covar.name<-levels(covar)
@@ -79,11 +85,14 @@ meanScan<-function(cross, pheno.col = 1,  covar = NULL,
     }
     covar.name<-levels(covar)
   }
+
+  # 2. Extract the genotype probabilities
   s1<-scanone(cross, method = "hk")
   m<-makeqtl(cross, chr = s1$chr,
              pos = s1$pos,
              what="prob")
-  # 2. infer the genotype for each individual at each qtl
+
+  # 3. infer the genotypes for each individuals * (pseudo)marker
   gp<-lapply(m[[1]], function(x) apply(x,1, function(y) {
     if(max(y) < prob.thresh){
       return(NA)
@@ -98,11 +107,11 @@ meanScan<-function(cross, pheno.col = 1,  covar = NULL,
   gp<-data.frame(do.call(cbind,gp))
   for(i in colnames(gp)) gp[,i]<-as.character(gp[,i])
 
-  # 3. add in phenotype and covariate data
+  # 4. add in phenotype and covariate data
   y<-pull.pheno(cross, pheno.col=pheno.col)
-
   if(set.mfrow) par(mfrow = c(length(unique(covar)),1))
 
+  # 5. Loop through the covariates, plotting the effects for each.
   for(i in covar.name){
     tmp<-gp[covar == i,]
     tmp.y<-y[covar == i]
@@ -123,7 +132,6 @@ meanScan<-function(cross, pheno.col = 1,  covar = NULL,
 
 
     plot(s1, type = "n", ylim = c(min(as.matrix(out[,cnames])), max(as.matrix(out[,cnames]))), main = covar.title,...)
-    abline(h = 0)
     s1$lod<-NULL
 
     if(is.null(cols)){

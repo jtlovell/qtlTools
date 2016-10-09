@@ -25,7 +25,7 @@ he following is a short description of a general way to analyze QTL experiments.
 
 ```{r env.set.up, eval = FALSE}
 library(devtools)
-install_github("jtlovell/qtlTools")
+install_github("jtlovell/qtlTools", build_vignettes = TRUE)
 library(qtlTools)
 library(qtl)
 ```
