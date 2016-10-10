@@ -6,7 +6,7 @@
 \usage{
 segmentsOnMap(cross, phe, chr, l, h, segSpread = 0.15,
   legendPosition = "bottom", legendCex = 1, chr.adj = NULL,
-  jColors = NULL, ...)
+  jColors = NULL, leg.inset = 0.01, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}

@@ -34,7 +34,8 @@
 #' @export
 
 segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
-                        legendPosition = "bottom", legendCex = 1, chr.adj=NULL, jColors = NULL, ...){
+                        legendPosition = "bottom", legendCex = 1, chr.adj=NULL, jColors = NULL,
+                        leg.inset = 0.01, ...){
 
   ### Plot the map ###
   if(class(cross)[1]=="4way"){
@@ -90,7 +91,11 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
           }
           out<-ifelse(out==99999,1,0)
         })
-        poss<-data.frame(t(apply(cmat, 1, cumsum)))
+        if(ncol(cmat)==1){
+          poss<-data.frame(apply(cmat, 1, cumsum))
+        }else{
+          poss<-data.frame(t(apply(cmat, 1, cumsum)))
+        }
         poss$index<-seqs
         tem$phecols<-as.numeric(tem$phe)
         tem$x<-sapply(1:nrow(tem), function(x) {
@@ -106,7 +111,11 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
   }
 
   ### Add legend
-  legend(legendPosition, legend=jColors$phe, col=jColors$color, pch=19, cex = legendCex, bty="n")
+  if(!is.null(legendPosition)){
+    legend(legendPosition, legend=jColors$phe, col=jColors$color, pch=19, cex = legendCex, bty="n",
+           inset = leg.inset)
+  }
+
 }
 
 

@@ -97,12 +97,14 @@ qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
     out.est<-data.frame(f$ests)
     out.est<-out.est[-which(rownames(out.est)=="Intercept"),]
     out.est$terms = rownames(out.est)
-    out<-merge(out, out.est, by = "terms")
+    if(nrow(out.est) == nrow(out)){
+      out<-merge(out, out.est, by = "terms")
+    }
   }
 
   # 4. Get Cis and merge
   if(calcConfint){
-    cis<-calcCis(mod, qtlnames = NULL, ...)
+    cis<-calcCis(mod, qtlnames = NULL)
     colnames(cis)[1]<-"terms"
     out<-merge(out, cis, by = "terms", all=T)
   }
