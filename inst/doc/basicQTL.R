@@ -3,13 +3,13 @@ knitr::opts_chunk$set(echo = TRUE, fig.width = 7, fig.height = 7)
 library(knitr)
 library(qtl)
 library(qtlTools)
-
-## ----env.set.up----------------------------------------------------------
-library(devtools)
-install_github("jtlovell/qtltools")
-library(qtlTools)
-library(qtl)
 library(plyr)
+
+## ----env.set.up, eval = FALSE--------------------------------------------
+#  library(devtools)
+#  install_github("jtlovell/qtlTools", build_vignettes = TRUE)
+#  library(qtlTools)
+#  library(qtl)
 
 ## ------------------------------------------------------------------------
 data(multitrait)
@@ -45,7 +45,7 @@ models.out<-stepout
 
 ## ------------------------------------------------------------------------
 cis<-lapply(models.out, function(x) {
-  calcCis(mod=x, qtlnames=x$altname, ci.method="bayes",  prob=0.99, returnChr=TRUE, returnMaxLod=TRUE, expandtomarkers=T)
+  calcCis(mod=x, lodint=FALSE,  prob=0.99, expandtomarkers=T)
 })
 
 ## ------------------------------------------------------------------------
@@ -53,19 +53,8 @@ cis.df<-ldply(cis, data.frame)
 colnames(cis.df)[1]<-"phe"
 
 ## ------------------------------------------------------------------------
-for(i in c("lowposition","highposition")) cis.df[,i]<-as.numeric(cis.df[,i])
-
-## ------------------------------------------------------------------------
-segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
-              lwd = 8, segSpread=.1)
-
-## ------------------------------------------------------------------------
 segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
               lwd = 5, segSpread=.1)
-
-## ------------------------------------------------------------------------
-segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
-              lwd = 5, segSpread=.05)
 
 ## ------------------------------------------------------------------------
 segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
