@@ -1,0 +1,294 @@
+---
+title: "Introduction to QTL mapping"
+author: "JT Lovell"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 5, fig.height = 5)
+library(knitr)
+library(qtl)
+library(qtlTools)
+```
+
+```{r get qtlTools, eval = FALSE}
+library(qtl)
+library(devtools)
+install_github("jtlovell/qtlTools")
+library(qtlTools)
+```
+
+### First, lets simulate some data
+```{r sim map}
+# Set the seed so that all our maps are identical
+set.seed(42) 
+
+# Simulate a 2-chromosome map with 25 markers on each 100cM linkage group
+map<-sim.map(len = c(100,100), n.mar = c(25,25), include.x=F)
+
+# Simulate 1 QTL on each chromosome
+# Here, we set the bigger one on Chr 1 to be purely additive
+#       the second, smaller one is dominant
+cross<-sim.cross(map, n.ind=200, type="f2", map.function="kosambi",
+                 model = rbind(c(1,10,10,1),c(2,90,5,5)))
+```
+
+### `cross` is an R object containing the genetic map, genotype and phenotype matrices
+The genetic map is an array of genetic markers, where markers are ordered
+by their similarity. This should reflect a) the recombination rate and b) the 
+physical position of the markers in the genome. A centimorgan (cM) is a
+measure of the distance between genetic markers, referring to the
+probability of a recombination event happening for 1/100 individuals between
+a pair of markers
+
+#### This is a genetic map, where each horizontal bar represents a marker
+```{r}
+plot.map(cross)
+```
+
+#### Here, we have plotted the relationship among markers in the map:
+Yellow indicates low recombination fractions (fewer cross-overs),
+which means that those markers should be closer to eachother on the genetic map. 
+See the tutorial on improving genetic maps for more details.
+```{r}
+plot.rf(cross)
+```
+
+### Calculating conditional genotype probabilities
+QTL mapping in experimental populations was traditionally limitted by
+the number of markers that could be feasibly genotyped. With NGS data,
+this is less of a problem; however, we still need to calculate conditional
+genotype probabilities to satisfy various statistical assumptions, and to
+fix genotyping errors. R/qtl has two functions, `sim.geno` and `calc.genoprob` 
+that do this. Here, we only focus on `calc.genoprob` because it is better for
+complete genotype matrices with low error rate, and it is much faster. 
+```{r}
+cross<-calc.genoprob(cross, 
+                     step = 2, # This means that we want 
+                               # pseudomarkers every 2cM
+                     error.prob = 0.001)
+```
+
+
+### QTL mapping is simply the correlation of the genotype and phenotype
+In our simulated `cross` object, we placed two QTL, one on the top of Chr1 and another on the tail of Chr2.
+This is what the genotype means look like across the genome:
+```{r}
+meanScan(cross, pheno.col = "phenotype")
+```
+
+Another way to think about the effects of QTL is to order the individuals in a cross by their
+phenotypic value - where structure exists in this ordered matrix, a QTL is likely present. 
+
+The randomly ordered Chr1 genotype matrix
+```{r}
+geno.image(cross, chr = 1, reorder = FALSE)
+```
+
+The Chr1 genotype matrix, ordered by the phenotype. Note the structure on the top of Chr1. 
+```{r}
+geno.image(cross, chr = 1, reorder = TRUE)
+```
+
+### Basic QTL Mapping
+Now that we have the general idea of QTL mapping, lets simulate a more realistic cross
+with QTL that have smaller effect sizes. 
+```{r}
+set.seed(42) 
+map<-sim.map(len = c(100,100), n.mar = c(25,25), include.x=F)
+cross<-sim.cross(map, n.ind=200, type="f2", map.function="kosambi",
+                 model = rbind(c(1,10,1,1),c(1,90,.5,0),c(2,90,.5,1)))
+cross<-calc.genoprob(cross, step=2, error.prob = 0.001)
+```
+
+### Scanone - the QTL package's simplest test for QTL
+Scanone makes a statistical test at each point in the (pseudo)marker grid. 
+The LOD statistic (log of the odds of the likelihood ratio) tests the hypothesis that
+there is no QTL versus the presence of a single qtl. 
+```{r}
+s1<-scanone(cross, method = "hk")
+summary(s1)
+plot(s1, main = "one-way QTL scan")
+```
+
+### Permutations allow inference of significance
+By permuting (randomizing) the phenotype matrix, while keeping the
+phenotype matrix constant, we can define the null distribution of the
+LOD score. The number of times a permuted LOD excedes that of a QTL peak 
+(out of 100) is the P-value.
+```{r}
+perms<-scanone(cross, n.perm=100, verbose=F, method = "hk")
+plot(perms)
+abline(v = quantile(perms,.95), col = "red", lty=2)
+summary(s1, perms = perms, pvalues=T)
+
+plot(s1, main = "one-way QTL scan with significance threshold")
+add.threshold(out=s1, perms=perms, alpha = 0.05, col = "red", lty=2)
+```
+
+### Scanone has its limitations
+Note that we simulated this cross with 3 QTL, 2 on Chr1, 1 on Chr2. 
+Yet `summary(s1, perms = perms, pvalues=T)` returns only the top peaks
+per chromosome. In fact, scanone can only define the best QTL on a 
+chromosome.
+
+### Multiple QTL modeling - basics
+To get a better picture of what is actually going on, esspecially where
+multiple QTL exist on a chromosome, we have to build multiple QTL models.
+This can be done manually... 
+See: `addqtl`, `addtoqtl`, `refineqtl`
+
+To begin, we start with the best QTL peak
+```{r}
+maxS1 <- max(s1)
+s1chr <- as.numeric(as.character(maxS1$chr))
+s1pos <- as.numeric(as.character(maxS1$pos))
+```
+
+We use `makeqtl` to generate a qtl model containing the genotype probabilities
+at the chosen QTL position
+```{r}
+qtl1 <- makeqtl(cross, chr=s1chr, pos=s1pos, what="prob")
+plot(qtl1)
+```
+
+Given the presence of this first QTL, we look for a second and add it to the model using
+`addqtl` and `addtoqtl`.
+```{r}
+form1 <- "y ~ Q1"
+s2 <- addqtl(cross, qtl=qtl1, formula=form1, method="hk")
+plot(s2)
+s2chr <- max(s2)$chr
+s2pos <- max(s2)$pos
+qtl2 <- addtoqtl(cross, qtl=qtl1, chr=s2chr, pos=s2pos)
+```
+
+Now, with two qtl, it is important to make sure out positions are correct, conditional
+on the previously defined QTL. 
+```{r}
+form2 <- "y ~ Q1 + Q2"
+qtl2 <- refineqtl(cross, formula=form2, qtl=qtl2, method="hk", verbose=F)
+plotLodProfile(qtl2)
+```
+
+Lets finally repeat this process looking for that minor QTL on chr1
+```{r}
+plot(s3 <- addqtl(cross, qtl=qtl2, formula=form2, method="hk"))
+plot(qtl3 <- addtoqtl(cross, qtl=qtl2, chr=max(s3)$chr, pos=max(s3)$pos))
+form3 <- "y ~ Q1 + Q2 + Q3"
+plotLodProfile(qtl.model <- refineqtl(cross, formula=form3, qtl=qtl3, method="hk", verbose=F))
+```
+
+### Automated stepwise QTL model selection
+Here, we can do all of the steps described above, in one line. Follow the output to see how it works.
+```{r}
+step.model<-stepwiseqtl(cross, max.qtl = 3, method = "hk", additive.only = T)
+plotLodProfile(step.model)
+plot(step.model)
+```
+
+### Fitting a multiple QTL model.
+The most important function is `fitqtl` which fits an analysis of variance to the conditional
+genotype probabilities in the qtl model. 
+```{r}
+print(fit<-summary(fitqtl(cross, qtl = step.model, formula = formula(step.model), 
+                    dropone = T, get.ests = T, method = "hk")))
+```
+
+### Getting confidence intervals.
+It is also useful to understand the size of the interval that contains the QTL.
+There are two methods to get confidence intervals: `lodint` assesses the interval by the
+relative drop in LOD score from the QTL peak; `bayesint` uses the area under the peak to 
+determine confidence intervals
+```{r}
+lodint(step.model, qtl.index = 1, drop = 1.5) # LOD drop of 1.5
+lodint(step.model, qtl.index = 1, drop = 4) # LOD drop of 4
+bayesint(step.model, qtl.index = 1, prob = .80)
+bayesint(step.model, qtl.index = 1, prob = .99)
+```
+
+Since we have multiple QTL, we would have to do this calculation for each QTL peak.
+However, we can use `qtlTools::calcCis`, which loops through the QTL and puts the
+output into a dataframe.
+```{r}
+print(cis<-calcCis(step.model, lodint = TRUE, drop = 1.5))
+```
+
+### Plotting confidence intervals
+For publication, reviewers often want to see the position of QTL intervals on a genetic map.
+`qtlTools::segmentsOnMap` provides one method to do this.
+```{r}
+cis$phenotype<-"fake"
+segmentsOnMap(cross=cross, phe=cis$phenotype, 
+              chr=cis$chr, 
+              l = cis$lowposition, 
+              h =cis$highposition, 
+              lwd = 5, legendPosition = "right", leg.inset=.1)
+```
+
+### Compiling statistics
+While R/qtl provides many functions to conduct qtl mapping, it is often difficult to
+extract and manipulate statical outputs. `qtlTools::qtlStats` provides a simple
+method to get statistics from a qtl model.
+```{r}
+qtlStats(cross,  pheno.col = "phenotype",
+         form = formula(step.model), 
+         mod = step.model)
+```
+
+### Extracting and Plotting qtl effects
+`lsmeans4qtl produces a dataframe with SAS-style LSMeans, and also includes
+standard means, and se.
+```{r}
+library(lsmeans)
+alllsms<-lsmeans4qtl(cross, 
+                     pheno.col = "phenotype",
+                     form = "y ~ Q1 + Q2 + Q3", 
+                     mod = step.model, 
+                     covar=NULL)
+print(alllsms)
+```
+
+Often we may be interested in some interaction among QTL (epistasis) or
+with a covariate. Lets add in one arbitrarily, then cull to the LSmeans of 
+Q1 and Q3, averaging across values at Q2. 
+```{r}
+alllsms<-lsmeans4qtl(cross, 
+                     pheno.col = "phenotype",
+                     form = "y ~ Q1 + Q2 + Q3 + Q1*Q3", 
+                     mod = step.model, 
+                     covar=NULL)
+lsms<-alllsms[!is.na(alllsms$Q1) & 
+                !is.na(alllsms$Q3),]
+lsms<-lsms[,c("Q1","Q3","lsmean","SE","mean","sem")]
+
+library(ggplot2)
+pos<-position_dodge(.1)
+ggplot(lsms, aes(x = Q1, y = lsmean, shape = Q3,
+   color = Q3, group = Q3))+
+   geom_point(position = pos)+
+   geom_line(position = pos)+
+   theme_jtl()+
+   geom_errorbar(aes(ymin = lsmean - SE, ymax = lsmean+SE), width = .1,position = pos)+
+   ggtitle("sas-style LSMeans")
+```
+
+### Summary
+Here, we went over QTL mapping basics, including:
+- the effects of QTL
+- one-way QTL scans
+- building multiple QTL models
+- Fitting statistics to multiple QTL models
+
+We have ignored many complexities in QTL mapping, including:
+- Epistasis
+- QTL*covariate interactions
+- Multiple phenotypes
+- Generating genetic maps
+
+For more information on complex parts of QTL mapping, see [R/qtl's website](http://www.rqtl.org/).

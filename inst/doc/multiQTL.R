@@ -1,0 +1,86 @@
+## ----setup, include=FALSE------------------------------------------------
+knitr::opts_chunk$set(echo = TRUE, fig.width = 7, fig.height = 7)
+library(knitr)
+library(qtl)
+library(qtlTools)
+library(plyr)
+
+## ----env.set.up, eval = FALSE--------------------------------------------
+#  library(devtools)
+#  install_github("jtlovell/qtlTools")
+
+## ----env.set.up2---------------------------------------------------------
+library(qtlTools)
+library(qtl)
+library(ggplot2)
+library(lsmeans)
+
+## ----get models, include=FALSE-------------------------------------------
+data(multitrait)
+cross<-multitrait
+cross<-calc.genoprob(cross)
+phes <- c("X3.Hydroxypropyl", 
+          "X3.Butenyl", 
+          "X3.Methylsulfinylpropyl", 
+          "X5.Methylsulfinylpentyl", 
+          "X6.Methylthiohexyl", 
+          "X4.Benzoyloxybutyl", 
+          "Quercetin.deoxyhexosyl.dihexoside")
+
+stepout<-lapply(phes, function(i) {
+  stepwiseqtl(cross, 
+              pheno.col=i, 
+              method="hk", 
+              max.qtl=4, 
+              additive.only=TRUE, 
+              penalties = c(2.5,3.5,1.5), 
+              verbose=F)
+})
+names(stepout)<-phes
+models.out<-stepout
+
+## ------------------------------------------------------------------------
+mod<-models.out[["X3.Methylsulfinylpropyl"]]
+qtlStats(cross, 
+         pheno.col = "X3.Methylsulfinylpropyl", 
+         form = formula(mod), 
+         mod = mod)
+qtlStats(cross, 
+         pheno.col = "X3.Methylsulfinylpropyl", 
+         form = "y ~ Q1 + Q2 + Q1*Q2", 
+         mod = mod)
+
+## ----qtlstats, warning = FALSE-------------------------------------------
+allstats<-lapply(phes, function(i){
+  print(i)
+  mod<-models.out[[i]]
+  qstats<-qtlStats(cross, 
+                   pheno.col = i, 
+                   form = formula(mod), 
+                   mod = mod)
+  qstats$pheno<-i
+  return(qstats)
+})
+
+allstats<-do.call(rbind, allstats)
+
+## ----lsms, warning = FALSE-----------------------------------------------
+alllsms<-lsmeans4qtl(cross, 
+                     pheno.col = "X3.Methylsulfinylpropyl",
+                     form = "y ~ Q1 + Q2 + Q1*Q2", 
+                     mod = mod, 
+                     covar=NULL)
+
+lsms<-alllsms[!is.na(alllsms$Q1) & 
+                !is.na(alllsms$Q2),]
+
+lsms<-lsms[,c("Q1","Q2","lsmean","SE","mean","sem")]
+
+ggplot(lsms, aes(x = Q1, y = lsmean, shape = Q2,
+   color = Q2, group = Q2))+
+   geom_point()+
+   geom_line()+
+   theme_jtl()+
+   geom_errorbar(aes(ymin = lsmean - SE, ymax = lsmean+SE), width = .1)+
+   ggtitle("sas-style LSMeans")
+

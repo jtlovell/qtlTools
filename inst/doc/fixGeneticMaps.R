@@ -37,7 +37,7 @@ cross1 <- replace.map(cross1, newmap)
 cross1<-est.rf(cross1)
 
 ## ----findSimilar markers-------------------------------------------------
-cross2<-findSimilarMarkers(cross1, error.prob=0.001, map.function="kosambi", rf.threshold = 0.005)
+cross2<-dropSimilarMarkers(cross1, rf.threshold = 0.03)
 plot.map(cross1, cross2, main = "comparison of full and culled maps")
 
 ## ----repRipple markers---------------------------------------------------

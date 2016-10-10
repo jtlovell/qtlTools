@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.width = 7, fig.height = 7)
 library(knitr)
 library(qtl)
 library(qtlTools)
+library(plyr)
 ```
 
 he following is a short description of a general way to analyze QTL experiments. This tutorial assumes that basic quality control, normalization and error checking have been completed. Also, permutations should have been calculated separately. 
@@ -22,12 +23,11 @@ he following is a short description of a general way to analyze QTL experiments.
 
 #### Load the necessary packages, install qtlTools from github
 
-```{r env.set.up}
+```{r env.set.up, eval = FALSE}
 library(devtools)
-install_github("jtlovell/qtltools")
+install_github("jtlovell/qtlTools", build_vignettes = TRUE)
 library(qtlTools)
 library(qtl)
-library(plyr)
 ```
 
 #### Load the QTL data
@@ -90,7 +90,7 @@ This function takes the qtl models generated above and calculates confidence int
 
 ```{r}
 cis<-lapply(models.out, function(x) {
-  calcCis(mod=x, qtlnames=x$altname, ci.method="bayes",  prob=0.99, returnChr=TRUE, returnMaxLod=TRUE, expandtomarkers=T)
+  calcCis(mod=x, lodint=FALSE,  prob=0.99, expandtomarkers=T)
 })
 ```
 
@@ -100,32 +100,12 @@ cis.df<-ldply(cis, data.frame)
 colnames(cis.df)[1]<-"phe"
 ```
 
-We also need to convert the confidence interval bounds to numbers, as the ldply function forces them to be character
-```{r}
-for(i in c("lowposition","highposition")) cis.df[,i]<-as.numeric(cis.df[,i])
-```
-
 ### Part IV: Plot the confidence intervals on a map. 
-
-#### Thick lines
-
-```{r}
-segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
-              lwd = 8, segSpread=.1)
-```
-
 #### Thinner lines
 
 ```{r}
 segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
               lwd = 5, segSpread=.1)
-```
-
-#### Closer together
-
-```{r}
-segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
-              lwd = 5, segSpread=.05)
 ```
 
 #### Smaller legend
@@ -134,4 +114,5 @@ segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowpositio
 segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
               lwd = 5, segSpread=.05,  legendCex=.8)
 ```
+
 
