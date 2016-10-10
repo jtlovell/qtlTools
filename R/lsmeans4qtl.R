@@ -123,7 +123,7 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   })
 
   # 5. reformat output so that it can be combined into a dataframe
-  addterms<-terms[-grep(":",terms, fixed=T)]
+  addterms<-terms[!grepl(":",terms, fixed=T)]
   out<-lapply(out, function(x){
     x<-data.frame(summary(x))
     naterms<-addterms[!addterms %in% colnames(x)]
