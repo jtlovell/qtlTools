@@ -109,6 +109,7 @@ stats<-lapply(names(mods), function(x){
          mod = mod)
 })
 stats<-do.call(rbind, stats)
+print(head(stats))
 ```
 
 ### Plotting multiple QTL models
@@ -119,5 +120,5 @@ segmentsOnMap(cross=cross, phe=stats$phenotype,
               chr=stats$chr, 
               l = stats$lowposition, 
               h =stats$highposition, segSpread = .05,legendCex=.5,
-              lwd = 2, legendPosition = "bottom", leg.inset=.01)
+              lwd = 2, legendPosition = "bottomright", leg.inset=.01)
 ```
