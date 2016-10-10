@@ -1,5 +1,5 @@
 ---
-title: "A general pipeline for looking at multiple qtl models"
+title: "A general pipeline for looking at mutli-trait multiple-qtl models"
 author: "JT Lovell"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.width = 7, fig.height = 7)
+knitr::opts_chunk$set(echo = TRUE, fig.width = 7, fig.height = 7, warning = FALSE)
 library(knitr)
 library(qtl)
 library(qtlTools)
@@ -27,84 +27,97 @@ library(qtlTools)
 library(qtl)
 library(ggplot2)
 library(lsmeans)
+library(qtlpvl)
 ```
 
-#### Load the QTL models from "basicQTL" tutorial
-
-```{r get models, include=FALSE}
+### Simulate a few phenotypes in a five-chromosome map
+For this tutorial, we will use the dataset `multitrait` from R/qtl. 
+```{r}
 data(multitrait)
 cross<-multitrait
 cross<-calc.genoprob(cross)
-phes <- c("X3.Hydroxypropyl", 
-          "X3.Butenyl", 
-          "X3.Methylsulfinylpropyl", 
-          "X5.Methylsulfinylpentyl", 
-          "X6.Methylthiohexyl", 
-          "X4.Benzoyloxybutyl", 
-          "Quercetin.deoxyhexosyl.dihexoside")
-
-stepout<-lapply(phes, function(i) {
-  stepwiseqtl(cross, 
-              pheno.col=i, 
-              method="hk", 
-              max.qtl=4, 
-              additive.only=TRUE, 
-              penalties = c(2.5,3.5,1.5), 
-              verbose=F)
-})
-names(stepout)<-phes
-models.out<-stepout
+phes<-phenames(cross)
 ```
 
-### Part V: Get model statistics for a single phenotype
+In R/qtl there is a pipeline to analyze [multiple traits in a single model](http://www.rqtl.org/tutorials/MQM-tour.pdf). Here, we will discuss analyzing them independently, then concatenating the results
+
+### Scanones
+In the simplest case, we can run a bunch of scanones
 ```{r}
-mod<-models.out[["X3.Methylsulfinylpropyl"]]
+s1<-scanone(cross, pheno.col = phes, method = "hk")
+cols<-rainbow(length(phes))
+plot(s1, type="n", ylim = c(0,max(as.matrix(s1[,-c(1:2)]))), 
+     ylab = "LOD Score", main = "all phenotypes plotted together")
+for(i in 1:length(phes)) plot(s1, add=T, lodcolumn = i, col = cols[i])
+```
+
+### QTL peaks from scanones
+This simplest way to look at these data is to pull out only the significant QTL peaks 
+```{r}
+perms<-scanone(cross, pheno.col = phes, method = "hk", n.perm = 100, verbose=F)
+print(pullSigQTL(cross, pheno.col=phes,
+                 s1.output = s1,  perm.output = perms, 
+                 returnQTLModel=FALSE, alpha = 0.05,
+                 controlAcrossCol = TRUE))
+```
+
+However, if we want to look at model statistics etc. it is best to create multiple qtl models for each phenotype
+```{r}
+mods<-pullSigQTL(cross, pheno.col=phes,
+                 s1.output = s1,  perm.output = perms, 
+                 returnQTLModel=TRUE, alpha = 0.05,
+                 controlAcrossCol = TRUE)
+```
+
+This returns a list of fitted QTL models, which we could use to calculate confidence intervals etc. 
+```{r}
+print(mods[1:5])
+```
+
+### Multiple QTL models
+The approach above is nice because it is super fast, but it does not necessarily produce the best models (e.g. there can only be one QTL/chromosome). One could use stepwiseqtl to generate the models instead, however, scantwo permutations are needed for this appraoch, which is slow for many traits. 
+
+For the purposes of this tutorial, we will use the models generated through scanones to make statistical inference. 
+The function `qtlStats` takes a qtl model and returns fitted statistics. 
+For a single phenotype, we'd run it as follows:
+```{r, warning = FALSE}
+mod<-mods[["X3.Methylsulfinylpropyl"]]
+form<-paste("y ~",paste(mod$altname, collapse = " + "))
+mod<-refineqtl(cross, qtl = mod, formula = form, verbose=F, method="hk")
 qtlStats(cross, 
          pheno.col = "X3.Methylsulfinylpropyl", 
-         form = formula(mod), 
-         mod = mod)
-qtlStats(cross, 
-         pheno.col = "X3.Methylsulfinylpropyl", 
-         form = "y ~ Q1 + Q2 + Q1*Q2", 
+         form = form, 
          mod = mod)
 ```
 
-### Part V: Get model statistics for multiple phenotypes
-```{r qtlstats, warning = FALSE}
-allstats<-lapply(phes, function(i){
-  print(i)
-  mod<-models.out[[i]]
-  qstats<-qtlStats(cross, 
-                   pheno.col = i, 
-                   form = formula(mod), 
-                   mod = mod)
-  qstats$pheno<-i
-  return(qstats)
+Since mods is a list, we can loop through it using lapply
+First toss out an NULL QTL models
+```{r}
+mods<-mods[sapply(mods,length)!=1] # a NULL QTL model has length = 1, toss these
+```
+
+Next do the loop, where `x` represents each phenotype. 
+```{r, warning = FALSE}
+stats<-lapply(names(mods), function(x){
+  mod<-mods[[x]]
+  form<-paste("y ~",paste(mod$altname, collapse = " + "))
+  mod<-refineqtl(cross, qtl = mod, formula = form, 
+                verbose=F, method="hk", pheno.col = x)
+  qtlStats(cross, 
+         pheno.col = x, 
+         form = form, 
+         mod = mod)
 })
-
-allstats<-do.call(rbind, allstats)
+stats<-do.call(rbind, stats)
 ```
 
-### Part VI: Get QTL effects as [ls]means and plot
-```{r lsms, warning = FALSE}
-alllsms<-lsmeans4qtl(cross, 
-                     pheno.col = "X3.Methylsulfinylpropyl",
-                     form = "y ~ Q1 + Q2 + Q1*Q2", 
-                     mod = mod, 
-                     covar=NULL)
-
-lsms<-alllsms[!is.na(alllsms$Q1) & 
-                !is.na(alllsms$Q2),]
-
-lsms<-lsms[,c("Q1","Q2","lsmean","SE","mean","sem")]
-
-ggplot(lsms, aes(x = Q1, y = lsmean, shape = Q2,
-   color = Q2, group = Q2))+
-   geom_point()+
-   geom_line()+
-   theme_jtl()+
-   geom_errorbar(aes(ymin = lsmean - SE, ymax = lsmean+SE), width = .1)+
-   ggtitle("sas-style LSMeans")
+### Plotting multiple QTL models
+The most basic way to present these data is to show the position of QTL intervals on a genetic map.
+`qtlTools::segmentsOnMap` provides one method to do this.
+```{r}
+segmentsOnMap(cross=cross, phe=stats$phenotype, 
+              chr=stats$chr, 
+              l = stats$lowposition, 
+              h =stats$highposition, segSpread = .05,legendCex=.5,
+              lwd = 2, legendPosition = "bottom", leg.inset=.01)
 ```
-
-

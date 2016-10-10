@@ -19,7 +19,7 @@ library(qtlTools)
 ```{r get qtlTools, eval = FALSE}
 library(qtl)
 library(devtools)
-install_github("jtlovell/qtlTools")
+install_github("jtlovell/qtlTools", build_vignettes = TRUE)
 library(qtlTools)
 ```
 
