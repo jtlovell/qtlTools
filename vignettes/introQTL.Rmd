@@ -245,6 +245,7 @@ qtlStats(cross,  pheno.col = "phenotype",
 `lsmeans4qtl produces a dataframe with SAS-style LSMeans, and also includes
 standard means, and se.
 ```{r}
+library(lsmeans)
 alllsms<-lsmeans4qtl(cross, 
                      pheno.col = "phenotype",
                      form = "y ~ Q1 + Q2 + Q3", 
