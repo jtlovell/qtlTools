@@ -66,7 +66,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
   ### Generate the color distributions
   if(is.null(jColors)){
     jColors <- data.frame(phe = unique(phe),
-                          color = rainbow(length(unique(phe))))
+                          color = highContrastColors(length(unique(phe))))
   }
   cols<- jColors$color[match(phe, jColors$phe)]
 
