@@ -103,7 +103,11 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
     if(max(y) < prob.thresh){
       return(NA)
     }else{
-      return(colnames(x)[which(y==max(y))])
+      if(length(colnames(x)[which(y==max(y))])>1){
+        return(NA)
+      }else{
+        return(colnames(x)[which(y==max(y))])
+      }
     }
   }))
   names(gp)<-mod$altname
