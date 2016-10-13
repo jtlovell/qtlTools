@@ -33,32 +33,64 @@
 #' @import qtl
 #' @export
 
-calcCis<-function(mod, qtlnames = NULL,
-                  lodint = TRUE, drop=1.5, prob=0.95,
+calcCis<-function(mod = NULL, s1.output = NULL, perm.output = NULL, qtlnames = NULL,
+                  lodint = TRUE, drop=1.5, prob=0.95, expandtomarkers = FALSE,
                   ...){
-  if(is.null(attr(mod, "lodprofile")))
-    stop("LOD profiles must be included in the QTL model\n")
+  if(is.null(mod) & is.null(s1.output))
+    stop("either scanone peaks, or qtl models must be supplied\n")
+  if(is.null(s1.output) & is.null(perm.output))
+    stop("if scanones are provided, permutation results must also be included\n")
+  if(!is.null(mod)){
+    if(is.null(attr(mod, "lodprofile")))
+      stop("LOD profiles must be included in the QTL model\n")
+    if(is.null(qtlnames))  qtlnames <- mod$name
+    out<-lapply(1:nqtl(mod), function(j){
+      if(lodint){
+        ciout<-lodint(mod,qtl.index=j, drop=drop, expandtomarkers=expandtomarkers)
+      }else{
+        ciout<-bayesint(mod,qtl.index=j, prob=prob, expandtomarkers=expandtomarkers)
+      }
+      lowmarker<-rownames(ciout)[1]
+      highmarker<-rownames(ciout)[3]
+      lowposition<-as.numeric(ciout[1,2])
+      highposition<-as.numeric(ciout[3,2])
+      maxLod<-as.numeric(sapply(attr(mod, "lodprofile"), function(x)
+        max(x$lod))[[j]])
 
-  if(is.null(qtlnames))  qtlnames <- mod$name
-  out<-lapply(1:nqtl(mod), function(j){
-    if(lodint){
-      ciout<-lodint(mod,qtl.index=j, drop=drop, ...)
-    }else{
-      ciout<-bayesint(mod,qtl.index=j, prob=prob, ...)
-    }
-    lowmarker<-rownames(ciout)[1]
-    highmarker<-rownames(ciout)[3]
-    lowposition<-as.numeric(ciout[1,2])
-    highposition<-as.numeric(ciout[3,2])
-    maxLod<-as.numeric(sapply(attr(mod, "lodprofile"), function(x)
-      max(x$lod))[[j]])
+      chr=mod$chr[j]
+      pos=mod$pos[j]
+      return(data.frame(qtlname = qtlnames[j],
+                        chr, pos, maxLod,
+                        lowmarker,highmarker,
+                        lowposition,highposition))
+    })
+  }else{
+    qtl.peaks <- pullSigQTL(cross, pheno.col=phes,
+                            s1.output = s1.output,
+                            perm.output = perm.output, returnQTLModel = FALSE, ...)
+    print(qtl.peaks)
+    out<-lapply(1:nrow(qtl.peaks), function(j){
+      dat<-qtl.peaks[j,]
+      phe<-dat$pheno
+      lodcolumn <- which(names(s1.output) == phe)-2
+      chr<-dat$chr
+      pos<-dat$pos
+      if(lodint){
+        ciout<-lodint(s1.output,chr=chr,lodcolumn=lodcolumn, drop=drop, expandtomarkers=expandtomarkers)
+      }else{
+        ciout<-bayesint(s1.output,chr=chr,lodcolumn=lodcolumn, prob=prob, expandtomarkers=expandtomarkers)
+      }
+      lowmarker<-rownames(ciout)[1]
+      highmarker<-rownames(ciout)[3]
+      lowposition<-as.numeric(ciout[1,2])
+      highposition<-as.numeric(ciout[3,2])
+      maxLod<-dat$lod1
 
-    chr=mod$chr[j]
-    pos=mod$pos[j]
-    return(data.frame(qtlname = qtlnames[j],
-                      chr, pos, maxLod,
-                      lowmarker,highmarker,
-                      lowposition,highposition))
-  })
+      return(data.frame(pheno = phe,
+                        chr, pos, maxLod,
+                        lowmarker,highmarker,
+                        lowposition,highposition))
+    })
+  }
   return(data.frame(do.call(rbind, out)))
 }

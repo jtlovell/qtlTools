@@ -26,18 +26,79 @@
 #' interval estimation program to visualize this.
 #'
 #' @examples
-#' # See basicQTL tutorial
+#' data(multitrait)
+#'
+#' cross <- multitrait
+#' cross <- calc.genoprob(cross)
+#' phes <- phenames(cross)
+#' s1 <- scanone(cross, pheno.col = phes, method = "hk")
+#' perms <- scanone(cross, pheno.col = phes, method = "hk",
+#'    n.perm = 100, verbose=F)
+#' cis<-calcCis(s1.output = s1, perm.output = perms)
+#' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr, l = lowposition,
+#'    h = highposition, legendCex = .5))
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, orderByLOD = FALSE)
 #'
 #' @return The plot
 #'
 #' @import qtl
 #' @export
 
-segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
-                        legendPosition = "bottom", legendCex = 1, chr.adj=NULL, jColors = NULL,
-                        leg.inset = 0.01, ...){
+segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL,
+                        legendPosition = "bottom", legendCex = 0.8, col = NULL,
+                        palette = highContrastColors, lwd = "byLod", max.lwd = 5, min.lwd = 1,
+                        leg.inset = 0.01, orderByLOD = TRUE, ...){
 
-  ### Plot the map ###
+  ############
+  # 1. Combine the results into a dataframe
+  if(!is.null(calcCisResults)){
+    dat<-calcCisResults[,c("pheno","chr","maxLod","lowposition","highposition")]
+    colnames(dat)<-c("phe","chr","lod","l","h")
+  }else{
+    dat<-data.frame(phe = phe, chr = chr, lod = peaklod, l = l, h = h, stringsAsFactors=F)
+  }
+  dat$phenonum<-as.numeric(as.factor(dat$phe))
+  dat$col<-NA
+
+  for(i in c("chr","l","lod","h")) dat[,i]<-as.numeric(as.character(dat[,i]))
+
+  ############
+  # 2. Get the colors in order
+  if(!is.null(col)){
+    if(!any(length(col) == max(dat$phenonum), length(col) == 1))
+      stop("provide a color vector of length 1 or with the same length as unique phenotypes\n")
+    if(length(col) == 1) col<-rep(col, length(unique(dat$phenonum)))
+    for(i in 1:max(dat$phenonum)){
+      dat$col[dat$phenonum == i]<-col[i]
+    }
+  }else{
+    cols<-palette(max(dat$phenonum))
+    for(i in 1:max(dat$phenonum)){
+      dat$col[dat$phenonum == i]<-cols[i]
+    }
+  }
+
+  ############
+  # 3. Get the line weights in order
+  if(!any(length(lwd) == 1 & is.numeric(lwd) | lwd == "byLod"))
+    stop("lwd, if specified, must be a numeric vector of length 1\n or with the same length as the numbe of unique phenotypes\n")
+  if(lwd == "byLod"){
+    dat$lwd<-log2(dat$lod)
+  }else{
+    if(length(lwd) == 1){
+      dat$lwd<-rep(lwd, max(dat$phenonum))
+    }
+  }
+  dat$lwd[dat$lwd>5]<-5
+  dat$lwd<-dat$lwd-min(dat$lwd)
+  dat$lwd<-dat$lwd/(max(dat$lwd))
+  dat$lwd<-dat$lwd*(max.lwd-min.lwd)
+  dat$lwd<-dat$lwd+min.lwd
+  dat.ci<-dat
+
+  ############
+  # 4. Plot the map
   if(class(cross)[1]=="4way"){
     chrlens<-chrlen(cross)[1,]
     map<-pull.map(cross, as.table=T)[,1:2]
@@ -63,61 +124,70 @@ segmentsOnMap<-function(cross, phe, chr, l, h, segSpread = 0.15,
     segments(x0 = i-scl, x1= i+scl, y0= dat$pos, y1=dat$pos)
   }
 
-  ### Generate the color distributions
-  if(is.null(jColors)){
-    jColors <- data.frame(phe = unique(phe),
-                          color = highContrastColors(length(unique(phe))))
-  }
-  cols<- jColors$color[match(phe, jColors$phe)]
+  ## 5. Figure out how tightly to pack the segments
+  max.nq<-max(table(dat.ci$chr))
+  min.st<-scl
+  max.st<-1-sepdist-scl
+  compress<-max.nq/(max.st-min.st)
 
-  temp<-data.frame(phe=as.factor(phe), chr, l, h)
-  temp$qname<-paste(temp$phe, temp$chr, temp$l, sep="_")
-  temp<-merge(temp, jColors, by="phe")
   ### Add confidence interval segments
   for(i in chrns){
-    if(i %in% chr){
-      tem<-temp[temp$chr == i,]
+    if(i %in% dat.ci$chr){
+      tem<-dat.ci[dat.ci$chr == i,]
       if(nrow(tem)==1){
-       x=0
+        tem$x=0
       }else{
-        tem$x<-0
-        tem$phe<-as.factor(as.character(tem$phe))
-        seqs<-seq(from=min(map$pos[map$chr==i]), to = max(map$pos[map$chr==i]), by = 1)
-        out<-seqs
-        cmat<-sapply(levels(tem$phe), function(x) {
-          for(y in 1:nrow(tem[tem$phe==x,])){
-            tem2<-tem[tem$phe==x,][y,]
-            out<-ifelse(out>=floor(tem2$l) & out<=ceiling(tem2$h),99999,out)
-          }
-          out<-ifelse(out==99999,1,0)
-        })
-        if(ncol(cmat)==1){
-          poss<-data.frame(apply(cmat, 1, cumsum))
+        if(orderByLOD){
+          tem<-tem[order(-tem$lod),]
         }else{
-          poss<-data.frame(t(apply(cmat, 1, cumsum)))
+          tem<-tem[order(tem$l),]
         }
-        poss$index<-seqs
-        tem$phecols<-as.numeric(tem$phe)
-        tem$x<-sapply(1:nrow(tem), function(x) {
-          tem1<-tem[x,]
-          (max(with(tem1,poss[poss$index>=floor(l) & poss$index<=ceiling(h),phecols]))-1)*segSpread
-        })
+        tem$x<-c(0,sapply(2:nrow(tem),function(x){
+          a<-tem[x,]
+          o<-tem[1:(x-1),]
+          ho<-o$h>=a$l & o$h<=a$h
+          lo<-o$l>=a$l & o$l<=a$h
+          bo<-o$l<=a$l & o$h>=a$h
+          no<-o$l>=a$l & o$h<=a$h
+          sum(sapply(1:length(ho), function(y){
+            any(ho[y],lo[y],no[y],bo[y])
+          }))
+        }))
       }
-      if(is.null(chr.adj)){
-        chr.adj<-nchr(cross)*.02
+      xs<-0:max(tem$x)
+      if(!all(xs %in% tem$x)){
+        wh<-xs[-which(xs %in% tem$x)]
+        wh2<-which(tem$x>max(wh))
+        tem$x[wh2]<-tem$x[wh2]-length(wh)
       }
-      with(tem, segments(x0 = x+i+chr.adj, x1=x+i+chr.adj, y0 = l, y1=h, col = tem$color, ...))
+      tem$x<-(tem$x/compress)+i+min.st
+      with(tem, segments(x0 = x, x1=x, y0 = l, y1=h, col = col, lwd=lwd))
     }
   }
 
   ### Add legend
   if(!is.null(legendPosition)){
-    legend(legendPosition, legend=jColors$phe, col=jColors$color, pch=19, cex = legendCex, bty="n",
-           inset = leg.inset)
+    leg.dat<-dat.ci[!duplicated(dat.ci$phe),]
+    leg.dat<-leg.dat[order(leg.dat$phenonum),c("phe","col","lwd")]
+    leg.dat$lwd = leg.lwd
+    if(lwd == "byLod"){
+      leg.dat<-rbind(leg.dat,
+                     with(dat.ci,
+                          data.frame(phe = paste0("LOD = ",
+                                                  floor(c(min(lod),
+                                                          mean(lod),
+                                                          max(lod)))),
+                                     col = "black",
+                                     lwd = c(min(lwd),
+                                             mean(lwd),
+                                             max(lwd)))))
+    }else{
+
+    }
+
+    with(leg.dat,
+         legend(legendPosition, legend=phe, col=col, lty = 1,lwd =lwd, cex = legendCex, bty="n",
+                inset = leg.inset))
   }
 
 }
-
-
-
-
