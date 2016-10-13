@@ -10,6 +10,7 @@
 #'
 #' @export
 highContrastColors<-function(n){
+  if(n %% 1 != 0) stop("n must be an integer between 1 and 256")
   if(n>256) stop("choose n colors <= 256")
   cols<-c("#B88183","#922329","#5A0007","#D7BFC2","#D86A78","#FF8A9A","#3B000A",
           "#E20027","#943A4D","#5B4E51","#B05B6F","#FEB2C6","#D83D66","#895563","#FF1A59",
