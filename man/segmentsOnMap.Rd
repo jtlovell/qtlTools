@@ -4,9 +4,11 @@
 \alias{segmentsOnMap}
 \title{Visualize the positions of QTL on a genetic map.}
 \usage{
-segmentsOnMap(cross, phe, chr, l, h, segSpread = 0.15,
-  legendPosition = "bottom", legendCex = 1, chr.adj = NULL,
-  jColors = NULL, leg.inset = 0.01, ...)
+segmentsOnMap(cross, phe, chr, l, h, peaklod = NA, calcCisResults = NULL,
+  legendPosition = "bottom", legendCex = 0.8, col = NULL,
+  palette = highContrastColors, lwd = "byLod", leg.lwd = 2, max.lwd = 5,
+  min.lwd = 1, leg.inset = 0.01, orderByLOD = TRUE, chrBuffer = 0.15,
+  ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
@@ -19,22 +21,40 @@ segmentsOnMap(cross, phe, chr, l, h, segSpread = 0.15,
 
 \item{h}{The upper confidence interval bound for each qtl}
 
+\item{peaklod}{Optional - if provided, permits segments width to be weighted by significance.}
+
+\item{calcCisResults}{A shortcut that allows results from calcCis to be piped directly into
+the plotting function. If provided, l, h, chr, phe and peaklod are ignored}
+
 \item{legendPosition}{Where to place the legend. This is passed to the first argument of
 the legend function. See legend documentation}
 
 \item{legendCex}{The character expansion for the legend. This is passed to the cex argument
 of legend.}
 
-\item{chr.adj}{How far should the first segment be from the map drawing? Defaults to scale with the
-number of chromosomes}
+\item{col}{Optional. A vector of colors for segments}
 
-\item{jColors}{A dataframe with two columns, "phe" and "color". The phe column contains a all unique
-phenotypes and the color is the associated color. The default sets the colors to the rainbow color
-palette.}
+\item{palette}{Optional. A color palette with which to draw segment colors}
+
+\item{lwd}{Either the specification "byLod", where segment weights are calculated from LOD
+score data, or a numeric vector of length 1 that is passed to segments lwd}
+
+\item{leg.lwd}{The lineweights of the legend.}
+
+\item{max.lwd}{If scaling by LOD, what should the maximum lwd be?}
+
+\item{min.lwd}{If scaling by LOD, what should the minimum lwd be?}
+
+\item{leg.inset}{How far should the legend be away from the plot border?}
+
+\item{orderByLOD}{Logical, Should the x position of the segments be ordered
+by their LOD score? If false, the segments are ordered by the position of the
+lower confidence interval bound.}
+
+\item{chrBuffer}{How much space should be provided between the adjacent chromosome
+and the last segment of the stack with the most QTL.}
 
 \item{...}{Other arguments passed to segments}
-
-\item{seqSpread}{How far apart (x axis) the semgents are}
 }
 \value{
 The plot
@@ -49,7 +69,25 @@ Pass output from bayesint, lodint, or another confidence
 interval estimation program to visualize this.
 }
 \examples{
-# See basicQTL tutorial
+library(qtlTools)
+data(multitrait)
+
+cross <- multitrait
+cross <- calc.genoprob(cross)
+phes <- phenames(cross)
+s1 <- scanone(cross, pheno.col = phes, method = "hk")
+perms <- scanone(cross, pheno.col = phes, method = "hk",
+   n.perm = 100, verbose=F)
+cis<-calcCis(s1.output = s1, perm.output = perms)
+with(cis, segmentsOnMap(cross, phe = pheno, chr = chr, l = lowposition,
+   h = highposition, legendCex = .5))
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, orderByLOD = FALSE)
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, col = terrain.colors(length(unique(cis$phe))))
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, max.lwd=6, min.lwd=.5)
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, max.lwd=4, min.lwd=2)
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, lwd = 2)
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, palette = rainbow)
 
 }
 
