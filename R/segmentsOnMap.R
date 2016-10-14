@@ -52,7 +52,7 @@
 
 segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL,
                         legendPosition = "bottom", legendCex = 0.8, col = NULL,
-                        palette = highContrastColors, lwd = "byLod", max.lwd = 5, min.lwd = 1,
+                        palette = highContrastColors, lwd = "byLod", leg.lwd=2, max.lwd = 5, min.lwd = 1,
                         leg.inset = 0.01, orderByLOD = TRUE, chrBuffer =.15, ...){
 
   ############
@@ -174,6 +174,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
   if(!is.null(legendPosition)){
     leg.dat<-dat.ci[!duplicated(dat.ci$phe),]
     leg.dat<-leg.dat[order(leg.dat$phenonum),c("phe","col","lwd")]
+    leg.dat$lwd = leg.lwd
     if(lwd == "byLod"){
       leg.dat<-rbind(leg.dat,
                      with(dat.ci,
