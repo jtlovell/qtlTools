@@ -1,5 +1,5 @@
 ## ----setup, include=FALSE------------------------------------------------
-knitr::opts_chunk$set(echo = TRUE, fig.width = 5, fig.height = 5)
+knitr::opts_chunk$set(echo = TRUE, fig.width = 5, fig.height = 5, warning = FALSE)
 library(knitr)
 library(qtl)
 library(qtlTools)
@@ -13,7 +13,7 @@ library(qtlTools)
 
 ## ----make a messy map----------------------------------------------------
 set.seed(42)
-map<-sim.map(len = c(50,50,20,20), n.mar = c(25, 10, 10, 40), include.x=F)
+map<-sim.map(len = c(50,50,20,30), n.mar = c(25, 10, 10, 50), include.x=F)
 plot(map)
 cross0<-sim.cross(map, n.ind=50, type="f2",
           error.prob=0.001, missing.prob=0.001, map.function="kosambi")

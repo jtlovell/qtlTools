@@ -74,6 +74,19 @@ This returns a list of fitted QTL models, which we could use to calculate confid
 print(mods[1:5])
 ```
 
+We can also plot confidence intervals directly from scanone data, however, it is important to note that multiple peaks on a single chromosome can violate assumptions of such intervals. 
+```{r}
+cis<-calcCis(s1.output=s1, perm.output=perms)
+head(cis)
+```
+
+We might be interested in where these QTL are - we can plot these on the genetic map
+```{r}
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .35)
+```
+
+
+
 ### Multiple QTL models
 The approach above is nice because it is super fast, but it does not necessarily produce the best models (e.g. there can only be one QTL/chromosome). One could use stepwiseqtl to generate the models instead, however, scantwo permutations are needed for this appraoch, which is slow for many traits. 
 
