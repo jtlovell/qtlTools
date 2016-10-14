@@ -16,6 +16,14 @@
 #' @return Either QTL models or simplified and converted scanone summary.
 #'
 #' @examples
+#' library(qtlTools)
+#' data(fake.bc)
+#' cross<-fake.bc
+#' cross <- calc.genoprob(cross, step=2.5)
+#' s1<-scanone(cross, method="hk", pheno.col=c("pheno1", "pheno2"))
+#' perm<-scanone(cross, n.perm=100, method="hk",pheno.col=c("pheno1", "pheno2"), verbose=F)
+#' pullSigQTL(cross, s1.output=s1, perm.output=perm)
+#' pullSigQTL(cross, s1.output=s1, perm.output=perm, returnQTLModel=F)
 #'
 #' @export
 pullSigQTL<-function(cross, s1.output, perm.output, pheno.col=NULL, chr=NULL, alpha = 0.05, returnQTLModel = TRUE,
@@ -49,8 +57,8 @@ pullSigQTL<-function(cross, s1.output, perm.output, pheno.col=NULL, chr=NULL, al
 
   if(is.null(chr)) chr <- chrnames(cross)
   if(is.null(pheno.col)) pheno.col<- names(s1)[-c(1:2)]
-  maxs<-convert_scan1(s1, phenoname=phes, chr = chr)
-  sperms<-summary(perms, alpha = alpha, ...)
+  maxs<-convert_scan1(s1, phenoname=pheno.col, chr = chr)
+  sperms<-summary(perm.output, alpha = alpha, ...)
   perm.names<-attr(sperms,"dimnames")[[2]]
   sperms<-as.numeric(sperms)
   for(i in pheno.col){
