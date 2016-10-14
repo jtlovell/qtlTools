@@ -53,7 +53,7 @@
 segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL,
                         legendPosition = "bottom", legendCex = 0.8, col = NULL,
                         palette = highContrastColors, lwd = "byLod", max.lwd = 5, min.lwd = 1,
-                        leg.inset = 0.01, orderByLOD = TRUE, ...){
+                        leg.inset = 0.01, orderByLOD = TRUE, chrBuffer =.15, ...){
 
   ############
   # 1. Combine the results into a dataframe
@@ -132,7 +132,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
   ## 5. Figure out how tightly to pack the segments
   max.nq<-max(table(dat.ci$chr))
   min.st<-scl
-  max.st<-1-sepdist-scl
+  max.st<-1-chrBuffer-scl
   compress<-max.nq/(max.st-min.st)
 
   ### Add confidence interval segments
