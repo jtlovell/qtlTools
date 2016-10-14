@@ -68,7 +68,6 @@ calcCis<-function(mod = NULL, s1.output = NULL, perm.output = NULL, qtlnames = N
     qtl.peaks <- pullSigQTL(cross, pheno.col=phes,
                             s1.output = s1.output,
                             perm.output = perm.output, returnQTLModel = FALSE, ...)
-    print(qtl.peaks)
     out<-lapply(1:nrow(qtl.peaks), function(j){
       dat<-qtl.peaks[j,]
       phe<-dat$pheno

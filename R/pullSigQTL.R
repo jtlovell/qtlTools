@@ -16,11 +16,39 @@
 #' @return Either QTL models or simplified and converted scanone summary.
 #'
 #' @examples
-#' library(qtlpvl)
+#'
 #' @export
-pullSigQTL<-function(cross, s1.output, perm.output, pheno.col, chr=NULL, alpha = 0.05, returnQTLModel = TRUE,
+pullSigQTL<-function(cross, s1.output, perm.output, pheno.col=NULL, chr=NULL, alpha = 0.05, returnQTLModel = TRUE,
                      ...){
+
+  ########
+  ########
+  # convert_scan1, from qtlpvl...
+  convert_scan1<- function(out, phenoname, chr = NULL)  {
+    CHR <- out[, "chr"]
+    POS <- out[, "pos"]
+    out <- out[, phenoname]
+    maxLOD <- matrix(NA, length(phenoname), length(chr))
+    colnames(maxLOD) <- chr
+    rownames(maxLOD) <- phenoname
+    maxPOS <- maxLOD
+    for (i in 1:length(chr)) {
+      index <- CHR == chr[i]
+      LOD <- out[index, ]
+      maxLOD[, i] <- apply(LOD, 2, max)
+      maxPOS[, i] <- POS[index][apply(LOD, 2, which.max)]
+    }
+    out1 <- data.frame(pheno = rep(phenoname, ncol(maxLOD)),
+                       chr = rep(colnames(maxLOD), each = nrow(maxLOD)), lod1 = c(maxLOD),
+                       stringsAsFactors = FALSE)
+    out1$pos <- c(maxPOS)
+    return(out1)
+  }
+  ########
+  ########
+
   if(is.null(chr)) chr <- chrnames(cross)
+  if(is.null(pheno.col)) pheno.col<- names(s1)[-c(1:2)]
   maxs<-convert_scan1(s1, phenoname=phes, chr = chr)
   sperms<-summary(perms, alpha = alpha, ...)
   perm.names<-attr(sperms,"dimnames")[[2]]

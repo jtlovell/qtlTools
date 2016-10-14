@@ -39,6 +39,11 @@
 #'    h = highposition, legendCex = .5))
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, orderByLOD = FALSE)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, col = terrain.colors(length(unique(cis$phe))))
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, max.lwd=6, min.lwd=.5)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, max.lwd=4, min.lwd=2)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, lwd = 2)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, palette = rainbow)
 #'
 #' @return The plot
 #'
@@ -68,7 +73,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
   if(!is.null(col)){
     if(!any(length(col) == max(dat$phenonum), length(col) == 1))
       stop("provide a color vector of length 1 or with the same length as unique phenotypes\n")
-    if(length(col) == 1) col<-rep(col, length(unique(dat$phenonum)))
+    if(length(col) == 1) col<-rep(col, nrow(dat))
     for(i in 1:max(dat$phenonum)){
       dat$col[dat$phenonum == i]<-col[i]
     }
@@ -85,16 +90,16 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
     stop("lwd, if specified, must be a numeric vector of length 1\n or with the same length as the numbe of unique phenotypes\n")
   if(lwd == "byLod"){
     dat$lwd<-log2(dat$lod)
+    dat$lwd[dat$lwd>5]<-5
+    dat$lwd<-dat$lwd-min(dat$lwd)
+    dat$lwd<-dat$lwd/(max(dat$lwd))
+    dat$lwd<-dat$lwd*(max.lwd-min.lwd)
+    dat$lwd<-dat$lwd+min.lwd
   }else{
     if(length(lwd) == 1){
-      dat$lwd<-rep(lwd, max(dat$phenonum))
+      dat$lwd<-rep(lwd, nrow(dat))
     }
   }
-  dat$lwd[dat$lwd>5]<-5
-  dat$lwd<-dat$lwd-min(dat$lwd)
-  dat$lwd<-dat$lwd/(max(dat$lwd))
-  dat$lwd<-dat$lwd*(max.lwd-min.lwd)
-  dat$lwd<-dat$lwd+min.lwd
   dat.ci<-dat
 
   ############
@@ -181,13 +186,9 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
                                      lwd = c(min(lwd),
                                              mean(lwd),
                                              max(lwd)))))
-    }else{
-
     }
-
     with(leg.dat,
          legend(legendPosition, legend=phe, col=col, lty = 1,lwd =lwd, cex = legendCex, bty="n",
                 inset = leg.inset))
   }
-
 }
