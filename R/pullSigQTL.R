@@ -26,7 +26,9 @@
 #' pullSigQTL(cross, s1.output=s1, perm.output=perm, returnQTLModel=F)
 #'
 #' @export
-pullSigQTL<-function(cross, s1.output, perm.output, pheno.col=NULL, chr=NULL, alpha = 0.05, returnQTLModel = TRUE,
+pullSigQTL<-function(cross, s1.output, perm.output,
+                     pheno.col=NULL, chr=NULL,
+                     alpha = 0.05, returnQTLModel = TRUE,
                      ...){
 
   ########

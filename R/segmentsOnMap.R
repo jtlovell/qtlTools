@@ -10,16 +10,26 @@
 #' @param chr Vector of chromosome ids - will be coerced to numeric
 #' @param l The lower confidence interval bound for each qtl
 #' @param h The upper confidence interval bound for each qtl
-#' @param seqSpread How far apart (x axis) the semgents are
+#' @param peaklod Optional - if provided, permits segments width to be weighted by significance.
+#' @param calcCisResults A shortcut that allows results from calcCis to be piped directly into
+#' the plotting function. If provided, l, h, chr, phe and peaklod are ignored
 #' @param legendPosition Where to place the legend. This is passed to the first argument of
 #' the legend function. See legend documentation
 #' @param legendCex The character expansion for the legend. This is passed to the cex argument
 #' of legend.
-#' @param chr.adj How far should the first segment be from the map drawing? Defaults to scale with the
-#' number of chromosomes
-#' @param jColors A dataframe with two columns, "phe" and "color". The phe column contains a all unique
-#' phenotypes and the color is the associated color. The default sets the colors to the rainbow color
-#' palette.
+#' @param col Optional. A vector of colors for segments
+#' @param palette Optional. A color palette with which to draw segment colors
+#' @param lwd Either the specification "byLod", where segment weights are calculated from LOD
+#' score data, or a numeric vector of length 1 that is passed to segments lwd
+#' @param leg.lwd The lineweights of the legend.
+#' @param max.lwd If scaling by LOD, what should the maximum lwd be?
+#' @param min.lwd If scaling by LOD, what should the minimum lwd be?
+#' @param orderByLOD Logical, Should the x position of the segments be ordered
+#' by their LOD score? If false, the segments are ordered by the position of the
+#' lower confidence interval bound.
+#' @param leg.inset How far should the legend be away from the plot border?
+#' @param chrBuffer How much space should be provided between the adjacent chromosome
+#' and the last segment of the stack with the most QTL.
 #' @param ... Other arguments passed to segments
 #'
 #' @details Pass output from bayesint, lodint, or another confidence
