@@ -65,7 +65,8 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
                         legendPosition = "bottom", legendCex = 0.8, col = NULL,
                         palette = highContrastColors, lwd = "byLod", leg.lwd=2, max.lwd = 5, min.lwd = 1,
                         leg.inset = 0.01, orderByLOD = TRUE, chrBuffer =.15, ...){
-
+  if(lwd == "byLod" & is.na(peaklod)) lwd = 2
+  if(orderByLOD & is.na(peaklod)) orderByLOD = FALSE
   ############
   # 1. Combine the results into a dataframe
   if(!is.null(calcCisResults)){
