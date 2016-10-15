@@ -10,17 +10,20 @@
 #' @param chr Vector of chromosome ids - will be coerced to numeric
 #' @param l The lower confidence interval bound for each qtl
 #' @param h The upper confidence interval bound for each qtl
-#' @param peaklod Optional - if provided, permits segments width to be weighted by significance.
-#' @param calcCisResults A shortcut that allows results from calcCis to be piped directly into
-#' the plotting function. If provided, l, h, chr, phe and peaklod are ignored
-#' @param legendPosition Where to place the legend. This is passed to the first argument of
-#' the legend function. See legend documentation
-#' @param legendCex The character expansion for the legend. This is passed to the cex argument
-#' of legend.
+#' @param peaklod Optional - if provided, permits segments width
+#' to be weighted by significance.
+#' @param calcCisResults A shortcut that allows results from calcCis
+#' to be piped directly into the plotting function. If provided,
+#' l, h, chr, phe and peaklod are ignored
+#' @param legendPosition Where to place the legend. This is passed
+#' to the first argument of the legend function. See legend documentation
+#' @param legendCex The character expansion for the legend. This is
+#' passed to the cex argument of legend.
 #' @param col Optional. A vector of colors for segments
 #' @param palette Optional. A color palette with which to draw segment colors
-#' @param lwd Either the specification "byLod", where segment weights are calculated from LOD
-#' score data, or a numeric vector of length 1 that is passed to segments lwd
+#' @param lwd Either the specification "byLod", where segment weights
+#' are calculated from LOD score data, or a numeric vector of length
+#' 1 that is passed to segments lwd
 #' @param leg.lwd The lineweights of the legend.
 #' @param max.lwd If scaling by LOD, what should the maximum lwd be?
 #' @param min.lwd If scaling by LOD, what should the minimum lwd be?
@@ -39,22 +42,34 @@
 #' library(qtlTools)
 #' data(multitrait)
 #'
+#' # use multitrait data
 #' cross <- multitrait
 #' cross <- calc.genoprob(cross)
 #' phes <- phenames(cross)
+#' # Conduct scanone and permutations to get confidence intervals
 #' s1 <- scanone(cross, pheno.col = phes, method = "hk")
 #' perms <- scanone(cross, pheno.col = phes, method = "hk",
 #'    n.perm = 100, verbose=F)
 #' cis<-calcCis(s1.output = s1, perm.output = perms)
-#' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr, l = lowposition,
-#'    h = highposition, legendCex = .5))
+#'
+#' # manual construction of the confidence intervals
+#' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
+#'    l = lowposition, h = highposition, legendCex = .5))
+#'
+#' # feed calcCis directly into the plot
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, orderByLOD = FALSE)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, col = terrain.colors(length(unique(cis$phe))))
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, max.lwd=6, min.lwd=.5)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, max.lwd=4, min.lwd=2)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, lwd = 2)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, palette = rainbow)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    orderByLOD = FALSE)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    col = terrain.colors(length(unique(cis$phe))))
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    max.lwd=6, min.lwd=.5)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    max.lwd=4, min.lwd=2)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    lwd = 2)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    palette = rainbow)
 #'
 #' @return The plot
 #'
@@ -63,7 +78,8 @@
 
 segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL,
                         legendPosition = "bottom", legendCex = 0.8, col = NULL,
-                        palette = highContrastColors, lwd = "byLod", leg.lwd=2, max.lwd = 5, min.lwd = 1,
+                        palette = highContrastColors, lwd = "byLod",
+                        leg.lwd=2, max.lwd = 5, min.lwd = 1,
                         leg.inset = 0.01, orderByLOD = TRUE, chrBuffer =.15, ...){
   if(lwd == "byLod" & is.na(peaklod) & is.null(calcCisResults)) lwd = 2
   if(orderByLOD & is.na(peaklod)) orderByLOD = FALSE
@@ -73,7 +89,8 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
     dat<-calcCisResults[,c("pheno","chr","maxLod","lowposition","highposition")]
     colnames(dat)<-c("phe","chr","lod","l","h")
   }else{
-    dat<-data.frame(phe = phe, chr = chr, lod = peaklod, l = l, h = h, stringsAsFactors=F)
+    dat<-data.frame(phe = phe, chr = chr, lod = peaklod,
+                    l = l, h = h, stringsAsFactors=F)
   }
   dat$phenonum<-as.numeric(as.factor(dat$phe))
   dat$col<-NA
@@ -99,7 +116,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
   ############
   # 3. Get the line weights in order
   if(!any(length(lwd) == 1 & is.numeric(lwd) | lwd == "byLod"))
-    stop("lwd, if specified, must be a numeric vector of length 1\n or with the same length as the numbe of unique phenotypes\n")
+    stop("lwd, if specified, must be a numeric vector of length 1\n or with the same length as the number of unique phenotypes\n")
   if(lwd == "byLod"){
     dat$lwd<-log2(dat$lod)
     dat$lwd[dat$lwd>5]<-5
@@ -200,7 +217,8 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
                                              max(lwd)))))
     }
     with(leg.dat,
-         legend(legendPosition, legend=phe, col=col, lty = 1,lwd =lwd, cex = legendCex, bty="n",
+         legend(legendPosition, legend=phe, col=col, lty = 1,
+                lwd = lwd, cex = legendCex, bty="n",
                 inset = leg.inset))
   }
 }
