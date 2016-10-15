@@ -81,7 +81,6 @@ print(head(stats))
 ## ------------------------------------------------------------------------
 segmentsOnMap(cross=cross, phe=stats$phenotype, 
               chr=stats$chr, 
-              l = stats$lowposition, 
-              h =stats$highposition, segSpread = .05,legendCex=.5,
-              lwd = 2, legendPosition = "bottomright", leg.inset=.01)
+              l = stats$lowposition, lwd=2,
+              h =stats$highposition,legendCex=.35, leg.inset=.01)
 
