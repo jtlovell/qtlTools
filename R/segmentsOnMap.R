@@ -2,8 +2,7 @@
 #'
 #' @description
 #' \code{segmentsOnMap} A basic function to plot QTL confidence intervals.
-#' Useful for <10 traits. All inputs (excluding cross) must have the same length,
-#' since each element represents a single segment on the map.
+#' Useful for <20 traits.
 #'
 #' @param cross The qtl cross object with marker names that need to be changed.
 #' @param phe Character or numeric vector indicating the phenotype to be tested
@@ -38,6 +37,8 @@
 #' @details Pass output from bayesint, lodint, or another confidence
 #' interval estimation program to visualize this.
 #'
+#' @return The plot
+#'
 #' @examples
 #' library(qtlTools)
 #' data(multitrait)
@@ -71,7 +72,24 @@
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
 #'    palette = rainbow)
 #'
-#' @return The plot
+#' # manual construction of the confidence intervals
+#' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
+#'    l = lowposition, h = highposition, legendCex = .5))
+#'
+#' # feed calcCis directly into the plot
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    orderByLOD = FALSE)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    col = terrain.colors(length(unique(cis$phe))))
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    max.lwd=6, min.lwd=.5)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    max.lwd=4, min.lwd=2)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    lwd = 2)
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'    palette = rainbow)
 #'
 #' @import qtl
 #' @export
@@ -89,14 +107,19 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
     dat<-calcCisResults[,c("pheno","chr","maxLod","lowposition","highposition")]
     colnames(dat)<-c("phe","chr","lod","l","h")
   }else{
+    if(length(phe) != length(chr) |
+       length(phe) != length(l) |
+       length(phe) != length(h) |
+       !is.na(peaklod[1]) & length(phe) != length(peaklod))
+      stop("phe, chr, l, h, peaklod must all be the same length")
     dat<-data.frame(phe = phe, chr = chr, lod = peaklod,
                     l = l, h = h, stringsAsFactors=F)
   }
   dat$phenonum<-as.numeric(as.factor(dat$phe))
   dat$col<-NA
-
+  
   for(i in c("chr","l","lod","h")) dat[,i]<-as.numeric(as.character(dat[,i]))
-
+  
   ############
   # 2. Get the colors in order
   if(!is.null(col)){
@@ -112,7 +135,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
       dat$col[dat$phenonum == i]<-cols[i]
     }
   }
-
+  
   ############
   # 3. Get the line weights in order
   if(!any(length(lwd) == 1 & is.numeric(lwd) | lwd == "byLod"))
@@ -130,7 +153,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
     }
   }
   dat.ci<-dat
-
+  
   ############
   # 4. Plot the map
   if(class(cross)[1]=="4way"){
@@ -144,7 +167,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
   map<-as.data.frame(map, stringsAsFactors=F)
   map$chr <- as.numeric(map$chr)
   chrns<-unique(map$chr)
-
+  
   plot(chrns, rep(0, nchr(cross)), bty="n",type="n",
        ylim=c(max(chrlens),0),
        xlab="chromosome", ylab = "mapping position (cM)",
@@ -157,13 +180,13 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
     dat<-map[map$chr == i,]
     segments(x0 = i-scl, x1= i+scl, y0= dat$pos, y1=dat$pos)
   }
-
+  
   ## 5. Figure out how tightly to pack the segments
   max.nq<-max(table(dat.ci$chr))
   min.st<-scl
   max.st<-1-chrBuffer-scl
   compress<-max.nq/(max.st-min.st)
-
+  
   ### Add confidence interval segments
   for(i in chrns){
     if(i %in% dat.ci$chr){
@@ -195,10 +218,10 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
         tem$x[wh2]<-tem$x[wh2]-length(wh)
       }
       tem$x<-(tem$x/compress)+i+min.st
-      with(tem, segments(x0 = x, x1=x, y0 = l, y1=h, col = col, lwd=lwd))
+      with(tem, segments(x0 = x, x1=x, y0 = l, y1=h, col = col, lwd=lwd, ...))
     }
   }
-
+  
   ### Add legend
   if(!is.null(legendPosition)){
     leg.dat<-dat.ci[!duplicated(dat.ci$phe),]
@@ -222,3 +245,4 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
                 inset = leg.inset))
   }
 }
+
