@@ -26,9 +26,6 @@
 #' @param leg.lwd The lineweights of the legend.
 #' @param max.lwd If scaling by LOD, what should the maximum lwd be?
 #' @param min.lwd If scaling by LOD, what should the minimum lwd be?
-#' @param orderByLOD Logical, Should the x position of the segments be ordered
-#' by their LOD score? If false, the segments are ordered by the position of the
-#' lower confidence interval bound.
 #' @param leg.inset How far should the legend be away from the plot border?
 #' @param chrBuffer How much space should be provided between the adjacent chromosome
 #' and the last segment of the stack with the most QTL.
@@ -46,7 +43,7 @@
 #' # use multitrait data
 #' cross <- multitrait
 #' cross <- calc.genoprob(cross)
-#' phes <- phenames(cross)
+#' phes <- phenames(cross)[1:20]
 #' # Conduct scanone and permutations to get confidence intervals
 #' s1 <- scanone(cross, pheno.col = phes, method = "hk")
 #' perms <- scanone(cross, pheno.col = phes, method = "hk",
@@ -60,8 +57,6 @@
 #' # feed calcCis directly into the plot
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
-#'    orderByLOD = FALSE)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
 #'    col = terrain.colors(length(unique(cis$phe))))
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
 #'    max.lwd=6, min.lwd=.5)
@@ -71,24 +66,7 @@
 #'    lwd = 2)
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
 #'    palette = rainbow)
-#'
-#' # manual construction of the confidence intervals
-#' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
-#'    l = lowposition, h = highposition, legendCex = .5))
-#'
-#' # feed calcCis directly into the plot
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
-#'    orderByLOD = FALSE)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
-#'    col = terrain.colors(length(unique(cis$phe))))
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
-#'    max.lwd=6, min.lwd=.5)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
-#'    max.lwd=4, min.lwd=2)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
-#'    lwd = 2)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#'segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
 #'    palette = rainbow)
 #'
 #' @import qtl
@@ -98,9 +76,8 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
                         legendPosition = "bottom", legendCex = 0.8, col = NULL,
                         palette = highContrastColors, lwd = "byLod",
                         leg.lwd=2, max.lwd = 5, min.lwd = 1,
-                        leg.inset = 0.01, orderByLOD = TRUE, chrBuffer =.15, ...){
+                        leg.inset = 0.01, chrBuffer =.15, ...){
   if(lwd == "byLod" & is.na(peaklod) & is.null(calcCisResults)) lwd = 2
-  if(orderByLOD & is.na(peaklod)) orderByLOD = FALSE
   ############
   # 1. Combine the results into a dataframe
   if(!is.null(calcCisResults)){
@@ -117,9 +94,9 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
   }
   dat$phenonum<-as.numeric(as.factor(dat$phe))
   dat$col<-NA
-  
+
   for(i in c("chr","l","lod","h")) dat[,i]<-as.numeric(as.character(dat[,i]))
-  
+
   ############
   # 2. Get the colors in order
   if(!is.null(col)){
@@ -135,14 +112,13 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
       dat$col[dat$phenonum == i]<-cols[i]
     }
   }
-  
+
   ############
   # 3. Get the line weights in order
   if(!any(length(lwd) == 1 & is.numeric(lwd) | lwd == "byLod"))
     stop("lwd, if specified, must be a numeric vector of length 1\n or with the same length as the number of unique phenotypes\n")
   if(lwd == "byLod"){
     dat$lwd<-log2(dat$lod)
-    dat$lwd[dat$lwd>5]<-5
     dat$lwd<-dat$lwd-min(dat$lwd)
     dat$lwd<-dat$lwd/(max(dat$lwd))
     dat$lwd<-dat$lwd*(max.lwd-min.lwd)
@@ -153,7 +129,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
     }
   }
   dat.ci<-dat
-  
+
   ############
   # 4. Plot the map
   if(class(cross)[1]=="4way"){
@@ -167,7 +143,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
   map<-as.data.frame(map, stringsAsFactors=F)
   map$chr <- as.numeric(map$chr)
   chrns<-unique(map$chr)
-  
+
   plot(chrns, rep(0, nchr(cross)), bty="n",type="n",
        ylim=c(max(chrlens),0),
        xlab="chromosome", ylab = "mapping position (cM)",
@@ -180,13 +156,13 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
     dat<-map[map$chr == i,]
     segments(x0 = i-scl, x1= i+scl, y0= dat$pos, y1=dat$pos)
   }
-  
+
   ## 5. Figure out how tightly to pack the segments
   max.nq<-max(table(dat.ci$chr))
   min.st<-scl
   max.st<-1-chrBuffer-scl
   compress<-max.nq/(max.st-min.st)
-  
+
   ### Add confidence interval segments
   for(i in chrns){
     if(i %in% dat.ci$chr){
@@ -194,11 +170,8 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
       if(nrow(tem)==1){
         tem$x=0
       }else{
-        if(orderByLOD){
-          tem<-tem[order(-tem$lod),]
-        }else{
-          tem<-tem[order(tem$l),]
-        }
+        w<-with(tem, abs(l-h))
+        tem<-tem[order(w),]
         tem$x<-c(0,sapply(2:nrow(tem),function(x){
           a<-tem[x,]
           o<-tem[1:(x-1),]
@@ -218,10 +191,10 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
         tem$x[wh2]<-tem$x[wh2]-length(wh)
       }
       tem$x<-(tem$x/compress)+i+min.st
-      with(tem, segments(x0 = x, x1=x, y0 = l, y1=h, col = col, lwd=lwd, ...))
+      with(tem, segments(x0 = x, x1=x, y0 = l, y1=h, col = col, lwd=lwd))
     }
   }
-  
+
   ### Add legend
   if(!is.null(legendPosition)){
     leg.dat<-dat.ci[!duplicated(dat.ci$phe),]
