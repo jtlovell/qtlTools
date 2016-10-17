@@ -1,4 +1,4 @@
-#' @title Find the location of a cis eQTL
+#' @title Find the cM location of genes.
 #'
 #' @description
 #' \code{findGenecM} Using the physical position of genetic markers,
@@ -44,11 +44,11 @@
 #' 4. bp: the base-pair position of the marker
 #'
 #'
-#' @return A dataframe with the following columns:
-#' 1. geneID: the first field from the "attribute" column of the gff
-#' 2. chr: the chromosome/linkage group
-#' 3. pos: the mapping position of the gene
-#' 4. bp: the physical position of the gene in bp
+#' @return The gff file, with three added columns:
+#' geneID = the parsed name of the attribute
+#' bp = the average base pair position
+#' pos = the inferred cM position
+#'
 #'
 #' @examples
 #' library(qtl)
