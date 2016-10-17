@@ -7,8 +7,7 @@
 segmentsOnMap(cross, phe, chr, l, h, peaklod = NA, calcCisResults = NULL,
   legendPosition = "bottom", legendCex = 0.8, col = NULL,
   palette = highContrastColors, lwd = "byLod", leg.lwd = 2, max.lwd = 5,
-  min.lwd = 1, leg.inset = 0.01, orderByLOD = TRUE, chrBuffer = 0.15,
-  ...)
+  min.lwd = 1, leg.inset = 0.01, chrBuffer = 0.15, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
@@ -21,23 +20,26 @@ segmentsOnMap(cross, phe, chr, l, h, peaklod = NA, calcCisResults = NULL,
 
 \item{h}{The upper confidence interval bound for each qtl}
 
-\item{peaklod}{Optional - if provided, permits segments width to be weighted by significance.}
+\item{peaklod}{Optional - if provided, permits segments width
+to be weighted by significance.}
 
-\item{calcCisResults}{A shortcut that allows results from calcCis to be piped directly into
-the plotting function. If provided, l, h, chr, phe and peaklod are ignored}
+\item{calcCisResults}{A shortcut that allows results from calcCis
+to be piped directly into the plotting function. If provided,
+l, h, chr, phe and peaklod are ignored}
 
-\item{legendPosition}{Where to place the legend. This is passed to the first argument of
-the legend function. See legend documentation}
+\item{legendPosition}{Where to place the legend. This is passed
+to the first argument of the legend function. See legend documentation}
 
-\item{legendCex}{The character expansion for the legend. This is passed to the cex argument
-of legend.}
+\item{legendCex}{The character expansion for the legend. This is
+passed to the cex argument of legend.}
 
 \item{col}{Optional. A vector of colors for segments}
 
 \item{palette}{Optional. A color palette with which to draw segment colors}
 
-\item{lwd}{Either the specification "byLod", where segment weights are calculated from LOD
-score data, or a numeric vector of length 1 that is passed to segments lwd}
+\item{lwd}{Either the specification "byLod", where segment weights
+are calculated from LOD score data, or a numeric vector of length
+1 that is passed to segments lwd}
 
 \item{leg.lwd}{The lineweights of the legend.}
 
@@ -46,10 +48,6 @@ score data, or a numeric vector of length 1 that is passed to segments lwd}
 \item{min.lwd}{If scaling by LOD, what should the minimum lwd be?}
 
 \item{leg.inset}{How far should the legend be away from the plot border?}
-
-\item{orderByLOD}{Logical, Should the x position of the segments be ordered
-by their LOD score? If false, the segments are ordered by the position of the
-lower confidence interval bound.}
 
 \item{chrBuffer}{How much space should be provided between the adjacent chromosome
 and the last segment of the stack with the most QTL.}
@@ -61,8 +59,7 @@ The plot
 }
 \description{
 \code{segmentsOnMap} A basic function to plot QTL confidence intervals.
-Useful for <10 traits. All inputs (excluding cross) must have the same length,
-since each element represents a single segment on the map.
+Useful for <20 traits.
 }
 \details{
 Pass output from bayesint, lodint, or another confidence
@@ -72,22 +69,34 @@ interval estimation program to visualize this.
 library(qtlTools)
 data(multitrait)
 
+# use multitrait data
 cross <- multitrait
 cross <- calc.genoprob(cross)
-phes <- phenames(cross)
+phes <- phenames(cross)[1:20]
+# Conduct scanone and permutations to get confidence intervals
 s1 <- scanone(cross, pheno.col = phes, method = "hk")
 perms <- scanone(cross, pheno.col = phes, method = "hk",
    n.perm = 100, verbose=F)
 cis<-calcCis(s1.output = s1, perm.output = perms)
-with(cis, segmentsOnMap(cross, phe = pheno, chr = chr, l = lowposition,
-   h = highposition, legendCex = .5))
+
+# manual construction of the confidence intervals
+with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
+   l = lowposition, h = highposition, legendCex = .5))
+
+# feed calcCis directly into the plot
 segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
-segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, orderByLOD = FALSE)
-segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, col = terrain.colors(length(unique(cis$phe))))
-segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, max.lwd=6, min.lwd=.5)
-segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, max.lwd=4, min.lwd=2)
-segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, lwd = 2)
-segmentsOnMap(cross, calcCisResults = cis, legendCex = .5, palette = rainbow)
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+   col = terrain.colors(length(unique(cis$phe))))
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+   max.lwd=6, min.lwd=.5)
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+   max.lwd=4, min.lwd=2)
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+   lwd = 2)
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+   palette = rainbow)
+segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+   palette = rainbow)
 
 }
 

@@ -23,7 +23,8 @@ pullSigQTL(cross, s1.output, perm.output, pheno.col = NULL, chr = NULL,
 \item{returnQTLModel}{Logical, should a QTL model be returned (TRUE), or
 should a culled output from qtlpvl::convert_scan1 be returned (FALSE)?}
 
-\item{...}{additional arguments passed on to summary.scanone, such as controlAcrossCol.}
+\item{...}{additional arguments passed on to summary.scanone,
+such as controlAcrossCol.}
 }
 \value{
 Either QTL models or simplified and converted scanone summary.
@@ -38,7 +39,8 @@ data(fake.bc)
 cross<-fake.bc
 cross <- calc.genoprob(cross, step=2.5)
 s1<-scanone(cross, method="hk", pheno.col=c("pheno1", "pheno2"))
-perm<-scanone(cross, n.perm=100, method="hk",pheno.col=c("pheno1", "pheno2"), verbose=F)
+perm<-scanone(cross, n.perm=100, method="hk",
+   pheno.col=c("pheno1", "pheno2"), verbose=F)
 pullSigQTL(cross, s1.output=s1, perm.output=perm)
 pullSigQTL(cross, s1.output=s1, perm.output=perm, returnQTLModel=F)
 
