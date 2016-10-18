@@ -50,6 +50,8 @@
 #' segmentsOnPeaks(cross, mod = mod, showallchr=F, add = T, drop = 3, col = "purple", int.y=.5)
 #'
 #' s1<-scanone(cross, method="hk", pheno.col="pheno1")
+#' perm<-scanone(cross, n.perm=100, method="hk",pheno.col="pheno1", verbose=F)
+#' cis<-calcCis(s1.output=s1, perm.output=perm)
 #' plot(s1)
 #' segmentsOnPeaks(cross, s1.output=s1, calcCisOutput = cis)
 #' plot(s1, chr = c(2,5))
