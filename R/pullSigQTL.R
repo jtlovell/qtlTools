@@ -71,8 +71,8 @@ pullSigQTL<-function(cross, s1.output, perm.output,
   if(is.null(chr)) chr <- chrnames(cross)
   if(is.null(pheno.col)) pheno.col<- names(s1.output)[-c(1:2)]
   maxs<-convert_scan1(s1.output, phenoname=pheno.col, chr = chr)
-  sperms<-summary(perm.output, alpha = alpha, ...)
-  perm.names<-attr(sperms,"dimnames")[[2]]
+  sperms<-summary(perm.output,...)[1,]
+  perm.names<-attr(perm.output,"dimnames")[[2]]
   sperms<-as.numeric(sperms)
   for(i in pheno.col){
     thresh<-sperms[perm.names==i]

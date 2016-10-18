@@ -45,7 +45,7 @@
 #' @export
 
 calcCis<-function(mod = NULL, s1.output = NULL, perm.output = NULL, qtlnames = NULL,
-                  lodint = TRUE, drop=1.5, prob=0.95, expandtomarkers = FALSE,alpha=alpha,
+                  lodint = TRUE, drop=1.5, prob=0.95, expandtomarkers = FALSE,
                   ...){
   if(is.null(mod) & is.null(s1.output))
     stop("either scanone peaks, or qtl models must be supplied\n")
@@ -77,7 +77,7 @@ calcCis<-function(mod = NULL, s1.output = NULL, perm.output = NULL, qtlnames = N
     })
   }else{
     phes<-colnames(s1.output)[-c(1:2)]
-    qtl.peaks <- pullSigQTL(cross, pheno.col=phes,alpha=alpha,
+    qtl.peaks <- pullSigQTL(cross, pheno.col=phes,
                             s1.output = s1.output,
                             perm.output = perm.output, returnQTLModel = FALSE, ...)
     out<-lapply(1:nrow(qtl.peaks), function(j){
