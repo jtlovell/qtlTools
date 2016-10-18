@@ -52,7 +52,8 @@
 #'
 #' # manual construction of the confidence intervals
 #' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
-#'    l = lowposition, h = highposition, legendCex = .5))
+#'    l = lowposition, h = highposition, legendCex = .5,
+#'    chrBuffer = c(.1,.4)))
 #'
 #' # feed calcCis directly into the plot
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
@@ -75,8 +76,8 @@
 segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL,
                         legendPosition = "bottom", legendCex = 0.8, col = NULL,
                         palette = highContrastColors, lwd = "byLod",
-                        leg.lwd=2, max.lwd = 5, min.lwd = 1,
-                        leg.inset = 0.01, chrBuffer =.15, ...){
+                        leg.lwd=2, max.lwd = 5, min.lwd = 1, tick.width = NULL,
+                        leg.inset = 0.01, chrBuffer = c(.05,.15), ...){
   if(lwd == "byLod" & is.na(peaklod) & is.null(calcCisResults)) lwd = 2
   ############
   # 1. Combine the results into a dataframe
@@ -151,12 +152,19 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
        xaxt = "n")
   axis(1, at = chrns)
   segments(x0=chrns, x1=chrns, y0=rep(0, nchr(cross)), y1=chrlens)
-  scl<-length(chrns)/100
+  if(is.null(tick.width)){
+    scl<-length(chrns)/100
+  }else{
+    scl<-tick.width
+  }
+
   for(i in chrns){
     dat<-map[map$chr == i,]
     segments(x0 = i-scl, x1= i+scl, y0= dat$pos, y1=dat$pos)
   }
 
+  scl<-chrBuffer[1]
+  chrBuffer<-chrBuffer[2]
   ## 5. Figure out how tightly to pack the segments
   max.nq<-max(table(dat.ci$chr))
   min.st<-scl
