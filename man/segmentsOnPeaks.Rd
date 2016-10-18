@@ -4,25 +4,37 @@
 \alias{segmentsOnPeaks}
 \title{Single QTL confidence intervals on LOD curves}
 \usage{
-segmentsOnPeaks(cross, s1.output, perm.output, chr = NULL, mod = NULL,
-  showallchr = TRUE, qtlnames = NULL, lodint = TRUE, drop = 1.5,
-  prob = 0.95, expandtomarkers = FALSE, pt.pch = 8, pt.cex = 0.8,
-  pt.col = "red", int.y = 0, add = FALSE, ...)
+segmentsOnPeaks(cross, calcCisOutput = NULL, ci.chr = NULL, peak = NULL,
+  l = NULL, h = NULL, s1.output = NULL, qtlModel = NULL,
+  showallchr = FALSE, chr = NULL, pt.pch = 8, pt.cex = 0.8,
+  pt.col = "red", int.y = 0, ...)
 }
 \arguments{
 \item{cross}{R/qtl cross object}
 
 \item{s1.output}{Scanone output to be passed to calcCis}
 
+\item{showallchr}{If passing a model, should all chromosomes be plotted,
+even if they do not contain a QTL?}
+
 \item{chr}{If passing a scanone analysis, what chromosomes should plot be subset to?
 Defaults to all chromosomes}
+
+\item{pt.pch}{pch parameter to points}
+
+\item{pt.cex}{cex parameter to points}
+
+\item{pt.col}{color parameter to points}
+
+\item{int.y}{the y intercept of the segments}
+
+\item{...}{additional parameters passed to segments, e.g. col, lty, etc.}
+
+\item{perms.output}{Permutation output to be passed to calcCis}
 
 \item{mod}{If plotting qtl intervals from a QTL model, pass model here.
 Ensure that refineqtl, or stepwise w/ keep.lodprofile = T has been run
 so that plotLodProfile can be called successfully.}
-
-\item{showallchr}{If passing a model, should all chromosomes be plotted,
-even if they do not contain a QTL?}
 
 \item{qtlnames}{passed to calcCis}
 
@@ -35,19 +47,7 @@ even if they do not contain a QTL?}
 \item{expandtomarkers}{passed to calcCis, should interval be expanded to nearest
 marker?}
 
-\item{pt.pch}{pch parameter to points}
-
-\item{pt.cex}{cex parameter to points}
-
-\item{pt.col}{color parameter to points}
-
-\item{int.y}{the y intercept of the segments}
-
 \item{add}{should segements be added to an existing plot?}
-
-\item{...}{additional parameters passed to segments, e.g. col, lty, etc.}
-
-\item{perms.output}{Permutation output to be passed to calcCis}
 }
 \description{
 \code{segmentsOnPeaks} Overlay confidence intervals onto a LOD plot,
@@ -66,15 +66,23 @@ nform <- "y ~ Q1 + Q2 + Q1*sex + sex"
 #Calculate lodprofiles for confidence interval estimation
 mod <- refineqtl(cross, mod, pheno.col = "pheno1",
                  qtl = mod, formula = nform, covar = sex, method="hk")
+
+cis<-calcCis(mod)
 segmentsOnPeaks(cross, mod = mod)
-segmentsOnPeaks(cross, mod = mod, showallchr=F)
+plotLodProfile(mod, showallchr=F)
+segmentsOnPeaks(cross, qtlModel = mod, calcCisOutput = cis,  showallchr=F)
+
+plotLodProfile(mod, showallchr=T)
+segmentsOnPeaks(cross, qtlModel = mod, calcCisOutput = cis,  showallchr=T)
 segmentsOnPeaks(cross, mod = mod, showallchr=F, add = T, drop = 3, col = "purple", int.y=.5)
 
 s1<-scanone(cross, method="hk", pheno.col="pheno1")
 perm<-scanone(cross, n.perm=100, method="hk",pheno.col="pheno1", verbose=F)
-
-segmentsOnPeaks(cross, s1.output=s1, perm.output=perm)
-segmentsOnPeaks(cross, s1.output=s1, perm.output=perm, chr = c(2,5))
+cis<-calcCis(s1.output=s1, perm.output=perm)
+plot(s1)
+segmentsOnPeaks(cross, s1.output=s1, calcCisOutput = cis)
+plot(s1, chr = c(2,5))
+segmentsOnPeaks(cross, s1.output=s1, calcCisOutput = cis, chr = c(2,5))
 
 }
 

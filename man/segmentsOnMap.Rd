@@ -7,7 +7,8 @@
 segmentsOnMap(cross, phe, chr, l, h, peaklod = NA, calcCisResults = NULL,
   legendPosition = "bottom", legendCex = 0.8, col = NULL,
   palette = highContrastColors, lwd = "byLod", leg.lwd = 2, max.lwd = 5,
-  min.lwd = 1, leg.inset = 0.01, chrBuffer = 0.15, ...)
+  min.lwd = 1, tick.width = NULL, leg.inset = 0.01, chrBuffer = c(0.05,
+  0.15), ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
@@ -81,7 +82,8 @@ cis<-calcCis(s1.output = s1, perm.output = perms)
 
 # manual construction of the confidence intervals
 with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
-   l = lowposition, h = highposition, legendCex = .5))
+   l = lowposition, h = highposition, legendCex = .5,
+   chrBuffer = c(.1,.4)))
 
 # feed calcCis directly into the plot
 segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)

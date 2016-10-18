@@ -6,7 +6,7 @@
 \usage{
 findGenecM(cross, marker.info, gff, gffCols = NULL,
   attributeParse = c("ID="), seqnameParse = c("Chr", "scaffold_"),
-  dropNonColinearMarkers = FALSE, verbose = TRUE, ...)
+  dropNonColinearMarkers = TRUE, verbose = TRUE, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object.}
