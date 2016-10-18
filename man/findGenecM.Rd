@@ -75,7 +75,7 @@ map<-pullMap(multitrait)
 map$bp<-0
 for(i in unique(map$chr)){
   n<-sum(map$chr==i)
-  p<-1-sin((1:n/n)*pi)
+  p<-sin((1:n/n)*pi)
   map$bp[map$chr==i]<-cumsum(p*1000000)
 }
 

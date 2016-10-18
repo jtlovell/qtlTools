@@ -60,7 +60,7 @@
 #' map$bp<-0
 #' for(i in unique(map$chr)){
 #'   n<-sum(map$chr==i)
-#'   p<-1-sin((1:n/n)*pi)
+#'   p<-sin((1:n/n)*pi)
 #'   map$bp[map$chr==i]<-cumsum(p*1000000)
 #' }
 #'
@@ -86,13 +86,19 @@
 
 findGenecM<-function(cross, marker.info, gff, gffCols = NULL,
                      attributeParse = c("ID="),seqnameParse = c("Chr","scaffold_"),
-                     dropNonColinearMarkers=FALSE, verbose = TRUE,...){
+                     dropNonColinearMarkers=TRUE, verbose = TRUE,...){
 
-  findNonColinearMarkers<-function(bpsOrderdBycM){
+  findColinearMarkers<-function(bpsOrderdBycM){
     diffs<-sapply(2:(length(bpsOrderdBycM)-1), function(x){
       sum(abs(diff(bpsOrderdBycM[-x])))
     })
-    which(diffs<mean(diffs))+1
+    if(length(unique(diffs))>1){
+      bads<-which(diffs<mean(diffs))+1
+    }else{
+      bads<-NA
+    }
+    index<-1:length(bpsOrderdBycM)
+    return(index[!index %in% bads])
   }
 
   if(is.null(gffCols) & ncol(gff) != 9)
@@ -139,12 +145,10 @@ findGenecM<-function(cross, marker.info, gff, gffCols = NULL,
     tgff<-gff[gff$chr==i,]
     if(verbose) cat("chr ",i, " (n. features = ", nrow(tgff),")\n", sep="")
     tmap<-marker.info[marker.info$chr == i,]
-
     if(dropNonColinearMarkers){
-      bad<-findNonColinearMarkers(tmap$bp)
-      tmap<-tmap[-bad,]
+      good<-findColinearMarkers(tmap$bp)
+      tmap<-tmap[good,]
     }
-
     outint<-lapply(2:nrow(tmap), function(j) {
       bpcm<-tmap[(j-1):j,c("pos","bp")]
       gffbp<-tgff[tgff$bp >= min(bpcm$bp) &
