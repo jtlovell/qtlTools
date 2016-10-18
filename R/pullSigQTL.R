@@ -37,23 +37,32 @@ pullSigQTL<-function(cross, s1.output, perm.output,
   ########
   # convert_scan1, from qtlpvl...
   convert_scan1<- function(out, phenoname, chr = NULL)  {
-    CHR <- out[, "chr"]
-    POS <- out[, "pos"]
-    out <- out[, phenoname]
-    maxLOD <- matrix(NA, length(phenoname), length(chr))
-    colnames(maxLOD) <- chr
-    rownames(maxLOD) <- phenoname
-    maxPOS <- maxLOD
-    for (i in 1:length(chr)) {
-      index <- CHR == chr[i]
-      LOD <- out[index, ]
-      maxLOD[, i] <- apply(LOD, 2, max)
-      maxPOS[, i] <- POS[index][apply(LOD, 2, which.max)]
+    if(length(phenoname)>1){
+      CHR <- out[, "chr"]
+      POS <- out[, "pos"]
+      out <- out[, phenoname]
+      maxLOD <- matrix(NA, length(phenoname), length(chr))
+      colnames(maxLOD) <- chr
+      rownames(maxLOD) <- phenoname
+      maxPOS <- maxLOD
+      for (i in 1:length(chr)) {
+        index <- CHR == chr[i]
+        LOD <- out[index, ]
+        maxLOD[, i] <- apply(LOD, 2, max)
+        maxPOS[, i] <- POS[index][apply(LOD, 2, which.max)]
+      }
+      out1 <- data.frame(pheno = rep(phenoname, ncol(maxLOD)),
+                         chr = rep(colnames(maxLOD), each = nrow(maxLOD)), lod1 = c(maxLOD),
+                         stringsAsFactors = FALSE)
+      out1$pos <- c(maxPOS)
+    }else{
+      out<-data.frame(summary(out))
+      colnames(out)[3]<-"lod1"
+      out$pheno<-phenoname
+
+      out1 <- out[,c("pheno","chr","lod1","pos")]
     }
-    out1 <- data.frame(pheno = rep(phenoname, ncol(maxLOD)),
-                       chr = rep(colnames(maxLOD), each = nrow(maxLOD)), lod1 = c(maxLOD),
-                       stringsAsFactors = FALSE)
-    out1$pos <- c(maxPOS)
+
     return(out1)
   }
   ########
