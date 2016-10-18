@@ -4,21 +4,20 @@
 #' \code{segmentsOnPeaks} Overlay confidence intervals onto a LOD plot,
 #' from as either plotLodProfile or plot.scanone.
 #' @param cross R/qtl cross object
-#' @param s1.output Scanone output to be passed to calcCis
-#' @param perms.output Permutation output to be passed to calcCis
-#' @param chr If passing a scanone analysis, what chromosomes should plot be subset to?
-#' Defaults to all chromosomes
-#' @param mod If plotting qtl intervals from a QTL model, pass model here.
-#' Ensure that refineqtl, or stepwise w/ keep.lodprofile = T has been run
-#' so that plotLodProfile can be called successfully.
-#' @param showallchr If passing a model, should all chromosomes be plotted,
-#' even if they do not contain a QTL?
-#' @param qtlnames passed to calcCis
-#' @param lodint passed to calcCis, should droplod intervals be calculated?
-#' @param drop passed to calcCis, if lodint=TRUE, what drop level?
-#' @param prob passed to calcCis, if lodint=FALSE, what baye probability level?
-#' @param expandtomarkers passed to calcCis, should interval be expanded to nearest
-#' marker?
+#' @param calcCisOutput The output from qtlTools::calcCis. If this is not
+#' supplied, ci.chr, peak, l, h must be. If calcCisOutput, these arguments are
+#' ignored
+#' @param ci.chr vector of chromosomes for segments
+#' @param peak vector of QTL peak positions (cM) for segments
+#' @param l vector of QTL lower confidence interval bounds (cM) for segments
+#' @param h vector of QTL upper confidence interval bounds (cM) for segments
+#' @param s1.output If plotting on a scanone LOD plot, provide the scanone object
+#' used previously.
+#' @param chr If plotting on a specified set of chromosomes via scanone, replicate
+#' the chr call here.
+#' @param qtl If plotting on lodProfile, pass the qtl model object that was input into
+#' plotLodProfile
+#' @param showallchr Must match call to plotLodProfile if qtl is specified
 #' @param pt.pch pch parameter to points
 #' @param pt.cex cex parameter to points
 #' @param pt.col color parameter to points
@@ -41,13 +40,13 @@
 #'                  qtl = mod, formula = nform, covar = sex, method="hk")
 #'
 #' cis<-calcCis(mod)
-#' segmentsOnPeaks(cross, mod = mod)
 #' plotLodProfile(mod, showallchr=F)
-#' segmentsOnPeaks(cross, qtlModel = mod, calcCisOutput = cis,  showallchr=F)
+#' segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis,  showallchr=F)
 #'
 #' plotLodProfile(mod, showallchr=T)
-#' segmentsOnPeaks(cross, qtlModel = mod, calcCisOutput = cis,  showallchr=T)
-#' segmentsOnPeaks(cross, mod = mod, showallchr=F, add = T, drop = 3, col = "purple", int.y=.5)
+#' segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis, showallchr=T)
+#' cis<-calcCis(mod, drop = 3)
+#' segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis, showallchr=T, col = "purple", int.y=.5)
 #'
 #' s1<-scanone(cross, method="hk", pheno.col="pheno1")
 #' perm<-scanone(cross, n.perm=100, method="hk",pheno.col="pheno1", verbose=F)
@@ -63,15 +62,15 @@
 
 segmentsOnPeaks<-function(cross, calcCisOutput = NULL,
                           ci.chr = NULL, peak = NULL, l = NULL, h = NULL,
-                          s1.output = NULL, qtlModel = NULL,
+                          s1.output = NULL, qtl = NULL,
                           showallchr = FALSE, chr = NULL,
                           pt.pch = 8, pt.cex = .8, pt.col = "red", int.y = 0, ...){
 
-  if(is.null(s1.output) & is.null(qtlModel) |
-     !is.null(s1.output) & !is.null(qtlModel))
-    stop("either s1.output or qtlModel must be provided")
+  if(is.null(s1.output) & is.null(qtl) |
+     !is.null(s1.output) & !is.null(qtl))
+    stop("either s1.output or qtl must be provided")
 
-  if(!is.null(qtlModel)){
+  if(!is.null(qtl)){
     if(showallchr){
       chrs<-chrnames(cross)
     }else{

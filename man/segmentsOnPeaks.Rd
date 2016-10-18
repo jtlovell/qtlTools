@@ -5,20 +5,35 @@
 \title{Single QTL confidence intervals on LOD curves}
 \usage{
 segmentsOnPeaks(cross, calcCisOutput = NULL, ci.chr = NULL, peak = NULL,
-  l = NULL, h = NULL, s1.output = NULL, qtlModel = NULL,
+  l = NULL, h = NULL, s1.output = NULL, qtl = NULL,
   showallchr = FALSE, chr = NULL, pt.pch = 8, pt.cex = 0.8,
   pt.col = "red", int.y = 0, ...)
 }
 \arguments{
 \item{cross}{R/qtl cross object}
 
-\item{s1.output}{Scanone output to be passed to calcCis}
+\item{calcCisOutput}{The output from qtlTools::calcCis. If this is not
+supplied, ci.chr, peak, l, h must be. If calcCisOutput, these arguments are
+ignored}
 
-\item{showallchr}{If passing a model, should all chromosomes be plotted,
-even if they do not contain a QTL?}
+\item{ci.chr}{vector of chromosomes for segments}
 
-\item{chr}{If passing a scanone analysis, what chromosomes should plot be subset to?
-Defaults to all chromosomes}
+\item{peak}{vector of QTL peak positions (cM) for segments}
+
+\item{l}{vector of QTL lower confidence interval bounds (cM) for segments}
+
+\item{h}{vector of QTL upper confidence interval bounds (cM) for segments}
+
+\item{s1.output}{If plotting on a scanone LOD plot, provide the scanone object
+used previously.}
+
+\item{qtl}{If plotting on lodProfile, pass the qtl model object that was input into
+plotLodProfile}
+
+\item{showallchr}{Must match call to plotLodProfile if qtl is specified}
+
+\item{chr}{If plotting on a specified set of chromosomes via scanone, replicate
+the chr call here.}
 
 \item{pt.pch}{pch parameter to points}
 
@@ -29,23 +44,6 @@ Defaults to all chromosomes}
 \item{int.y}{the y intercept of the segments}
 
 \item{...}{additional parameters passed to segments, e.g. col, lty, etc.}
-
-\item{perms.output}{Permutation output to be passed to calcCis}
-
-\item{mod}{If plotting qtl intervals from a QTL model, pass model here.
-Ensure that refineqtl, or stepwise w/ keep.lodprofile = T has been run
-so that plotLodProfile can be called successfully.}
-
-\item{qtlnames}{passed to calcCis}
-
-\item{lodint}{passed to calcCis, should droplod intervals be calculated?}
-
-\item{drop}{passed to calcCis, if lodint=TRUE, what drop level?}
-
-\item{prob}{passed to calcCis, if lodint=FALSE, what baye probability level?}
-
-\item{expandtomarkers}{passed to calcCis, should interval be expanded to nearest
-marker?}
 
 \item{add}{should segements be added to an existing plot?}
 }
@@ -68,13 +66,13 @@ mod <- refineqtl(cross, mod, pheno.col = "pheno1",
                  qtl = mod, formula = nform, covar = sex, method="hk")
 
 cis<-calcCis(mod)
-segmentsOnPeaks(cross, mod = mod)
 plotLodProfile(mod, showallchr=F)
-segmentsOnPeaks(cross, qtlModel = mod, calcCisOutput = cis,  showallchr=F)
+segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis,  showallchr=F)
 
 plotLodProfile(mod, showallchr=T)
-segmentsOnPeaks(cross, qtlModel = mod, calcCisOutput = cis,  showallchr=T)
-segmentsOnPeaks(cross, mod = mod, showallchr=F, add = T, drop = 3, col = "purple", int.y=.5)
+segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis, showallchr=T)
+cis<-calcCis(mod, drop = 3)
+segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis, showallchr=T, col = "purple", int.y=.5)
 
 s1<-scanone(cross, method="hk", pheno.col="pheno1")
 perm<-scanone(cross, n.perm=100, method="hk",pheno.col="pheno1", verbose=F)
