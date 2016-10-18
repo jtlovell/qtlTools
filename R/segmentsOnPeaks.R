@@ -39,40 +39,43 @@
 #' #Calculate lodprofiles for confidence interval estimation
 #' mod <- refineqtl(cross, mod, pheno.col = "pheno1",
 #'                  qtl = mod, formula = nform, covar = sex, method="hk")
+#'
+#' cis<-calcCis(mod)
 #' segmentsOnPeaks(cross, mod = mod)
-#' segmentsOnPeaks(cross, mod = mod, showallchr=F)
+#' plotLodProfile(mod, showallchr=F)
+#' segmentsOnPeaks(cross, qtlModel = mod, calcCisOutput = cis,  showallchr=F)
+#'
+#' plotLodProfile(mod, showallchr=T)
+#' segmentsOnPeaks(cross, qtlModel = mod, calcCisOutput = cis,  showallchr=T)
 #' segmentsOnPeaks(cross, mod = mod, showallchr=F, add = T, drop = 3, col = "purple", int.y=.5)
 #'
 #' s1<-scanone(cross, method="hk", pheno.col="pheno1")
-#' perm<-scanone(cross, n.perm=100, method="hk",pheno.col="pheno1", verbose=F)
-#'
-#' segmentsOnPeaks(cross, s1.output=s1, perm.output=perm)
-#' segmentsOnPeaks(cross, s1.output=s1, perm.output=perm, chr = c(2,5))
+#' plot(s1)
+#' segmentsOnPeaks(cross, s1.output=s1, calcCisOutput = cis)
+#' plot(s1, chr = c(2,5))
+#' segmentsOnPeaks(cross, s1.output=s1, calcCisOutput = cis, chr = c(2,5))
 #'
 #' @import qtl
 #' @export
 #'
 
-segmentsOnPeaks<-function(cross, s1.output, perm.output, chr = NULL,
-                          mod = NULL, showallchr=TRUE,
-                          qtlnames = NULL, lodint = TRUE, drop = 1.5,
-                          prob = 0.95, expandtomarkers = FALSE,
-                          pt.pch = 8, pt.cex = .8, pt.col = "red", int.y = 0, add=FALSE, ...){
-  if(!is.null(mod)){
-    if(!add){
-      plotLodProfile(mod, showallchr=showallchr)
-    }
+segmentsOnPeaks<-function(cross, calcCisOutput = NULL,
+                          ci.chr = NULL, peak = NULL, l = NULL, h = NULL,
+                          s1.output = NULL, qtlModel = NULL,
+                          showallchr = FALSE, chr = NULL,
+                          pt.pch = 8, pt.cex = .8, pt.col = "red", int.y = 0, ...){
+
+  if(is.null(s1.output) & is.null(qtlModel) |
+     !is.null(s1.output) & !is.null(qtlModel))
+    stop("either s1.output or qtlModel must be provided")
+
+  if(!is.null(qtlModel)){
     if(showallchr){
       chrs<-chrnames(cross)
     }else{
       chrs<-mod$chr
     }
-
-    cis<-calcCis(mod=mod, qtlnames=qtlname, lodint=lodint,
-                 drop=drop, prob=prob, expandtomarkers=expandtomarkers)
   }else{
-    if(ncol(s1.output)>3)
-      stop("only one phenotype can be tested at a time")
     if(is.null(chr)){
       chrs<-chrnames(cross)
     }else{
@@ -80,18 +83,24 @@ segmentsOnPeaks<-function(cross, s1.output, perm.output, chr = NULL,
       s1.output<-s1.output[s1.output$chr %in% chrs, ]
       cis<-cis[cis$chr %in% chrs, ]
     }
-    cis<-calcCis(s1.output=s1.output, perm.output=perm.output,
-                 lodint=lodint, drop=drop, prob=prob,
-                 expandtomarkers=expandtomarkers)
-
-    if(!add){
-      plot(s1.output)
-    }
   }
 
   m<-pull.map(cross, chr=chrs, as.table=T)
   class(m)<-c("scanone", "data.frame")
-
+  if(is.null(calcCisOutput) & is.null(ci.chr)
+     & is.null(peak) & is.null(l) & is.null(h))
+    stop("if calcCisOutput is not provided, ci.chr, peak, l and h must be specified")
+  if(!is.null(calcCisOutput)){
+    cis<-calcCisOutput
+  }else{
+    if(length(unique(c(length(ci.chr),
+                       length(peak),
+                       length(l),
+                       length(h)))) != 1)
+      stop("ci.chr, peak, l and h must be the same length")
+    cis<-data.frame(chr = ci.chr, pos = peak,
+                    lowposition = l, highposition = h)
+  }
   for(i in 1:nrow(cis)){
     points(xaxisloc.scanone(m, cis$chr[i], cis$pos[i]), int.y,
            pch = pt.pch, cex=pt.cex, col=pt.col)
