@@ -30,14 +30,15 @@ model, convert it to a factor by as.factor.}
 \item{...}{additional arguments passed on to lsmeans.}
 }
 \value{
-A dataframe of least square means and standard mean statistics.
+A dataframe of (least square) means.
 }
 \description{
-\code{lsmeans4qtl} Takes a QTL model, formula and returns SAS - style LSMeans.
-*** Note: to use this function, the "lsmeans" package must be installed and loaded.
+\code{lsmeans4qtl} Takes a QTL model, formula and returns standard
+and SAS - style LSMeans. If the "lsmeans" package is not installed
+means and sem are reported without least square means.
 }
 \details{
-This function iterates through the terms in the formula, pulling out lsmeans.
+This function iterates through the terms in the formula, pulling out (ls)means.
 It calls the function lsmeans from the lsmeans package, which calculates SAS-style
 least square means. Regular means are calculated by aggregate.
 }

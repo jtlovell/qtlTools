@@ -1,8 +1,9 @@
 #' @title Using a QTL model, calcuate conditional QTL genotype effects
 #'
 #' @description
-#' \code{lsmeans4qtl} Takes a QTL model, formula and returns SAS - style LSMeans.
-#' *** Note: to use this function, the "lsmeans" package must be installed and loaded.
+#' \code{lsmeans4qtl} Takes a QTL model, formula and returns standard
+#' and SAS - style LSMeans. If the "lsmeans" package is not installed
+#' means and sem are reported without least square means.
 #'
 #' @param cross The qtl cross object used to generate the model. Must contain genotype
 #' probabilities, calculated via calc.genoprob.
@@ -18,10 +19,10 @@
 #' .5 (default) all individuals are assigned genotype calls, otherwise, those with a probability
 #' < prob.threshold are called as NA. Values closer to 1 are more stringent.
 #' @param ... additional arguments passed on to lsmeans.
-#' @details This function iterates through the terms in the formula, pulling out lsmeans.
+#' @details This function iterates through the terms in the formula, pulling out (ls)means.
 #' It calls the function lsmeans from the lsmeans package, which calculates SAS-style
 #' least square means. Regular means are calculated by aggregate.
-#' @return A dataframe of least square means and standard mean statistics.
+#' @return A dataframe of (least square) means.
 #'
 #' @examples
 #' library(qtlTools)
@@ -89,6 +90,12 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   if(length(pheno.col) != 1)
     stop("pheno.col (pheno.col) must be a numeric or character vector of length 1")
 
+  if(!require("lsmeans")){
+    warning("install the lsmeans package to calculate least square means\n")
+  }else{
+    library(lsmeans)
+  }
+
   # 1. parse the formula and subset the cross
   form<-as.formula(form)
   terms<-attr(terms(form), "term.labels")
@@ -121,22 +128,25 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
 
 
   # 4. calculate lsmeans for each term in model
-  lm.out<-lm(form,gp)
-  out<-lapply(terms, function(x){
-    lsmeans(lm.out, as.formula(paste("~",x,sep = "")), ...)
-  })
+  if(require("lsmeans")){
+    lm.out<-lm(form,gp)
+    out<-lapply(terms, function(x){
+      lsmeans(lm.out, as.formula(paste("~",x,sep = "")), ...)
+    })
 
-  # 5. reformat output so that it can be combined into a dataframe
-  addterms<-terms[!grepl(":",terms, fixed=T)]
-  out<-lapply(out, function(x){
-    x<-data.frame(summary(x))
-    naterms<-addterms[!addterms %in% colnames(x)]
-    for(i in naterms) x[,i]<-NA
-    x<-x[,c(addterms,"lsmean", "SE", "df", "lower.CL","upper.CL")]
-  })
+    # 5. reformat output so that it can be combined into a dataframe
+    addterms<-terms[!grepl(":",terms, fixed=T)]
+    out<-lapply(out, function(x){
+      x<-data.frame(summary(x))
+      naterms<-addterms[!addterms %in% colnames(x)]
+      for(i in naterms) x[,i]<-NA
+      x<-x[,c(addterms,"lsmean", "SE", "df", "lower.CL","upper.CL")]
+    })
 
-  # 6. combine into data.frame
-  out<-do.call(rbind, out)
+    # 6. combine into data.frame
+    out<-do.call(rbind, out)
+  }
+
 
   # 7. Get generic means and ses
 
@@ -156,5 +166,9 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   })
   out.mean<-do.call(rbind, out.mean)
 
-  return(merge(out, out.mean, by = addterms))
+  if(require("lsmeans")){
+    return(merge(out, out.mean, by = addterms))
+  }else{
+    return(out.mean)
+  }
 }
