@@ -34,7 +34,7 @@
 #'
 #' # Some simple customization
 #' meanScan(cross, covar = NULL, cols = c("black","orange"), ltys = c(1,2),
-#'    leg.pos = "top", leg.inset = 0.02, ylab = "mean phenotype")
+#'    leg.pos = "top", leg.inset = 0.02)
 #'
 #' sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
 #' meanScan(cross, covar = sex, chr = c(2,7))

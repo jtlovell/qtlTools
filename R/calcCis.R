@@ -36,11 +36,11 @@
 #' mod <- refineqtl(cross, mod, pheno.col = "pheno1",
 #'   qtl = mod, formula = nform, covar = sex, method="hk")
 #' calcCis(mod=mod)
-#'
+#' \dontrun{
 #' s1<-scanone(cross, method="hk", pheno.col=c("pheno1", "pheno2"))
-#' perm<-scanone(cross, n.perm=100, method="hk",pheno.col=c("pheno1", "pheno2"), verbose=F)
+#' perm<-scanone(cross, n.perm=100, method="hk",pheno.col=c("pheno1", "pheno2"), verbose=FALSE)
 #' calcCis(s1.output=s1, perm.output=perm)
-#'
+#' }
 #' @import qtl
 #' @export
 
