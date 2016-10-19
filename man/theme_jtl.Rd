@@ -2,11 +2,13 @@
 % Please edit documentation in R/theme_jtl.R
 \name{theme_jtl}
 \alias{theme_jtl}
-\title{simple custom theme}
+\alias{theme_jtlbar}
+\title{simple custom themes}
 \usage{
 theme_jtl()
 }
 \description{
-\code{theme_jtl}  a theme for ggplot similar to theme bw, but better (i think)
+\code{theme_jtl}  two themes for ggplot similar to theme bw, but better (i think). One is
+appropriate for most types of plots (theme_jtl). The other is better for barplots (theme_jtlbar)
 }
 
