@@ -17,7 +17,7 @@ library(qtlTools)
 library(plyr)
 ```
 
-```{r env.set.up, eval = FALSE}
+```{r env.set.up}
 library(devtools)
 install_github("jtlovell/qtlTools")
 ```
