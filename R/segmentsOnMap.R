@@ -38,6 +38,7 @@
 #' @return The plot
 #'
 #' @examples
+#' \dontrun{
 #' library(qtlTools)
 #' data(multitrait)
 #'
@@ -68,9 +69,9 @@
 #'    lwd = 2)
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
 #'    palette = rainbow)
-#'segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
+#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
 #'    palette = rainbow)
-#'
+#' }
 #' @import qtl
 #' @export
 
