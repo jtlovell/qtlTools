@@ -53,7 +53,7 @@
 #' # manual construction of the confidence intervals
 #' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
 #'    l = lowposition, h = highposition, legendCex = .5,
-#'    chrBuffer = c(.1,.4)))
+#'    tick.width = .1,  chrBuffer = c(.15,.5)))
 #'
 #' # feed calcCis directly into the plot
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
@@ -157,7 +157,6 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
   }else{
     scl<-tick.width
   }
-
   for(i in chrns){
     dat<-map[map$chr == i,]
     segments(x0 = i-scl, x1= i+scl, y0= dat$pos, y1=dat$pos)
