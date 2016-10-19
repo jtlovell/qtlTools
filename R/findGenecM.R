@@ -52,6 +52,7 @@
 #'
 #'
 #' @examples
+#' \dontrun{
 #' library(qtl)
 #' library(qtlTools)
 #' data(multitrait)
@@ -81,7 +82,7 @@
 #' with(test[test$chr==i,], plot(pos,bp, col="grey"))
 #' with(map[map$chr==i,], points(pos,bp, col=i, pch = 19, cex=.8))
 #' }
-#'
+#' }
 #' @import qtl
 #' @export
 
