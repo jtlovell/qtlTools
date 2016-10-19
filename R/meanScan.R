@@ -25,6 +25,7 @@
 #' @return The plot
 #'
 #' @examples
+#' \dontrun{
 #' library(qtlTools)
 #' library(qtl)
 #' data(fake.bc)
@@ -52,7 +53,8 @@
 #' meanScan(cross, covar = NULL)
 #' sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
 #' meanScan(cross, covar = sex, chr = c(2,7))
-
+#' }
+#'
 #' @import qtl
 #' @export
 meanScan<-function(cross, pheno.col = 1,  covar = NULL,
