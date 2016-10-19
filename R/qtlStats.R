@@ -27,7 +27,8 @@
 #' mod <- makeqtl(cross, chr = c(2,5), pos = c(40,25), what = "prob")
 #' nform <- "y ~ Q1 + Q2 + Q1*sex + sex"
 #' sex <- data.frame(sex = cross$phe$sex)
-#' mod <- refineqtl(cross, mod, pheno.col = "pheno1", qtl = mod, formula = nform, covar = sex, method="hk")
+#' mod <- refineqtl(cross, mod, pheno.col = "pheno1", qtl = mod,
+#'    formula = nform, covar = sex, method="hk")
 #' qtlStats(cross, pheno.col = "pheno1",form = nform, mod = mod, covar=sex)
 #'
 #' @return A dataframe of statistics.
@@ -36,7 +37,7 @@
 #' @export
 
 qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
-                   calcConfint=TRUE, calcMeans=TRUE, estEffects = TRUE,
+                   calcConfint=TRUE, estEffects = TRUE,
                    model="normal",
                    ...){
 

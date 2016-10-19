@@ -17,6 +17,7 @@
 #' markers. See details. The base-pair positions of the markers must be known.
 #' @param dropNonColinearMarkers logical, should markers that are not in the right bp order
 #' be dropped?
+#' @param verbose Logical, should updates be reported?
 #' @param ... Not currently in use.
 #'
 #' @details

@@ -48,7 +48,8 @@ cross <- calc.genoprob(cross, step=2.5)
 mod <- makeqtl(cross, chr = c(2,5), pos = c(40,25), what = "prob")
 nform <- "y ~ Q1 + Q2 + Q1*sex + sex"
 sex <- data.frame(sex = cross$phe$sex)
-mod <- refineqtl(cross, mod, pheno.col = "pheno1", qtl = mod, formula = nform, covar = sex, method="hk")
+mod <- refineqtl(cross, mod, pheno.col = "pheno1", qtl = mod,
+   formula = nform, covar = sex, method="hk")
 qtlStats(cross, pheno.col = "pheno1",form = nform, mod = mod, covar=sex)
 
 }

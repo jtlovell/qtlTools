@@ -19,6 +19,7 @@
 #' @param leg.bty The border setting for the legend
 #' @param cols The vector of colors for the lines in the plot (by genotype)
 #' @param ltys The vector of linetypes
+#' @param set.mfrow Logical, Should the plotting window be set to the number of covariates?
 #' @param ... additional arguments passed on to plot.scanone
 #' @details Calculates genotypic means at each marker/psuedomarker, plots them.
 #' @return The plot
@@ -55,7 +56,7 @@
 #' @import qtl
 #' @export
 meanScan<-function(cross, pheno.col = 1,  covar = NULL,
-                   prob.thresh = 0, set.mfrow=TRUE,
+                   prob.thresh = 0, set.mfrow=FALSE,
                    leg.pos = "topright", leg.inset = 0.001, leg.bty = "n",
                    cols = NULL, ltys = NULL, ...){
 

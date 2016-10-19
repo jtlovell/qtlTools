@@ -92,7 +92,7 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   if(length(pheno.col) != 1)
     stop("pheno.col (pheno.col) must be a numeric or character vector of length 1")
 
-  if(!suppressWarnings(library("lsmeans", logical.return=T))){
+  if(!requireNamespace("lsmeans", quietly = TRUE)){
     warning("install the lsmeans package to calculate least square means\n")
   }else{
     library(lsmeans)
@@ -130,7 +130,7 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
 
   addterms<-terms[!grepl(":",terms, fixed=T)]
   # 4. calculate lsmeans for each term in model
-  if(suppressWarnings(library("lsmeans", logical.return=T))){
+  if(requireNamespace("lsmeans", quietly = TRUE)){
     lm.out<-lm(form,gp)
     out<-lapply(terms, function(x){
       lsmeans(lm.out, as.formula(paste("~",x,sep = "")), ...)
@@ -168,7 +168,7 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   })
   out.mean<-do.call(rbind, out.mean)
 
-  if(suppressWarnings(library("lsmeans", logical.return=T))){
+  if(requireNamespace("lsmeans", quietly = TRUE)){
     return(merge(out, out.mean, by = addterms))
   }else{
     return(out.mean)
