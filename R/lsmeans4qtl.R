@@ -25,6 +25,7 @@
 #' @return A dataframe of (least square) means.
 #'
 #' @examples
+#' \dontrun{
 #' library(qtlTools)
 #'
 #' data(fake.bc)
@@ -72,7 +73,8 @@
 #'    theme_jtl()+
 #'    geom_errorbar(aes(ymin = mean - se, ymax = mean+se), width = .1,position = pos)+
 #'    ggtitle("sas-style LSMeans")
-
+#' }
+#'
 #' @import qtl
 #' @export
 lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob.thresh = 0, ...){
