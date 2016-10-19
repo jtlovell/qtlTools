@@ -94,8 +94,6 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
 
   if(!requireNamespace("lsmeans", quietly = TRUE)){
     warning("install the lsmeans package to calculate least square means\n")
-  }else{
-    library(lsmeans)
   }
 
   # 1. parse the formula and subset the cross
@@ -133,7 +131,7 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   if(requireNamespace("lsmeans", quietly = TRUE)){
     lm.out<-lm(form,gp)
     out<-lapply(terms, function(x){
-      lsmeans(lm.out, as.formula(paste("~",x,sep = "")), ...)
+      lsmeans::lsmeans(lm.out, as.formula(paste("~",x,sep = "")), ...)
     })
 
     # 5. reformat output so that it can be combined into a dataframe

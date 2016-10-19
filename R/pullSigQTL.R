@@ -23,9 +23,9 @@
 #' cross <- calc.genoprob(cross, step=2.5)
 #' s1<-scanone(cross, method="hk", pheno.col=c("pheno1", "pheno2"))
 #' perm<-scanone(cross, n.perm=100, method="hk",
-#'    pheno.col=c("pheno1", "pheno2"), verbose=F)
+#'    pheno.col=c("pheno1", "pheno2"), verbose=FALSE)
 #' pullSigQTL(cross, s1.output=s1, perm.output=perm)
-#' pullSigQTL(cross, s1.output=s1, perm.output=perm, returnQTLModel=F)
+#' pullSigQTL(cross, s1.output=s1, perm.output=perm, returnQTLModel=FALSE)
 #'
 #' @export
 pullSigQTL<-function(cross, s1.output, perm.output,
