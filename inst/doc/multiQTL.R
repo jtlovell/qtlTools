@@ -5,9 +5,9 @@ library(qtl)
 library(qtlTools)
 library(plyr)
 
-## ----env.set.up, eval = FALSE--------------------------------------------
-#  library(devtools)
-#  install_github("jtlovell/qtlTools")
+## ----env.set.up----------------------------------------------------------
+library(devtools)
+install_github("jtlovell/qtlTools")
 
 ## ----env.set.up2---------------------------------------------------------
 library(qtlTools)
