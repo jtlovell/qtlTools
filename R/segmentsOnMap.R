@@ -179,19 +179,19 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
       if(nrow(tem)==1){
         tem$x=0
       }else{
-        w<-with(tem, abs(l-h))
-        tem<-tem[order(w),]
-        tem$x<-c(0,sapply(2:nrow(tem),function(x){
+        tem<-tem[order(tem$l),]
+        tem$x<-0
+        for(x in 2:nrow(tem)){
           a<-tem[x,]
           o<-tem[1:(x-1),]
-          ho<-o$h>=a$l & o$h<=a$h
-          lo<-o$l>=a$l & o$l<=a$h
-          bo<-o$l<=a$l & o$h>=a$h
-          no<-o$l>=a$l & o$h<=a$h
-          sum(sapply(1:length(ho), function(y){
-            any(ho[y],lo[y],no[y],bo[y])
-          }))
-        }))
+          overlap<-a$l<=o$h
+          n.overlap<-sum(overlap)
+          if(any(!overlap)){
+            tem$x[x]<-tem$x[which(!overlap)[1]]
+          }else{
+            tem$x[x]<-n.overlap
+          }
+        }
       }
       xs<-0:max(tem$x)
       if(!all(xs %in% tem$x)){
