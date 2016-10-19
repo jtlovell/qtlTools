@@ -1,6 +1,0 @@
-# data(fake.bc)
-# fake.bc <- calc.genoprob(fake.bc, step=2.5)
-# covar = data.frame(covar = fake.bc$phe$sex)
-# outsw <- stepwiseqtl(fake.bc, max.qtl=5, method="hk", covar=covar)
-# outsw <- stepwiseqtl.int(fake.bc, max.qtl=5, method="hk", covar=covar)
-# summary(fitqtl(fake.bc, qtl=outsw, formula = formula(outsw), covar=covar))
