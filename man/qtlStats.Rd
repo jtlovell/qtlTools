@@ -42,6 +42,7 @@ bayesint, dropint, and qtlTools::calcCis. The method of QTL inference is extract
 }
 \examples{
 library(qtlTools)
+data(fake.bc)
 cross<-fake.bc
 cross <- calc.genoprob(cross, step=2.5)
 mod <- makeqtl(cross, chr = c(2,5), pos = c(40,25), what = "prob")
