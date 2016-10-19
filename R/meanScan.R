@@ -68,7 +68,9 @@ meanScan<-function(cross, pheno.col = 1,  covar = NULL,
 
   if(length(pheno.col) != 1)
     stop("pheno.col (pheno.col) must be a numeric or character vector of length 1.")
-
+  if(is.numeric(pheno.col)){
+    pheno.col<-phenames(cross)[pheno.col]
+  }
   # 1. get the covariate data in order
   if(is.null(covar)){
     covar<-factor(rep(1, nind(cross)))
@@ -131,7 +133,9 @@ meanScan<-function(cross, pheno.col = 1,  covar = NULL,
     for(j in mnames)  s1[,j]<-out[,j]
 
 
-    plot(s1, type = "n", ylim = c(min(as.matrix(out[,cnames])), max(as.matrix(out[,cnames]))), main = covar.title,...)
+    plot(s1, type = "n", ylim = c(min(as.matrix(out[,cnames])),
+                                  max(as.matrix(out[,cnames]))),
+         main = covar.title, ylab = pheno.col, ...)
     s1$lod<-NULL
 
     if(is.null(cols)){
