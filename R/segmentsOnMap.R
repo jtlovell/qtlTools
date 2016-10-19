@@ -26,9 +26,10 @@
 #' @param leg.lwd The lineweights of the legend.
 #' @param max.lwd If scaling by LOD, what should the maximum lwd be?
 #' @param min.lwd If scaling by LOD, what should the minimum lwd be?
+#' @param tick.width How wide should the ticks be? Defaults to 1/n chromosomes.
 #' @param leg.inset How far should the legend be away from the plot border?
-#' @param chrBuffer How much space should be provided between the adjacent chromosome
-#' and the last segment of the stack with the most QTL.
+#' @param chrBuffer Numeric vector of length 2, specifying the buffer space
+#' between confidence interval segments on the left and right adjacent chromosomes.
 #' @param ... Other arguments passed to segments
 #'
 #' @details Pass output from bayesint, lodint, or another confidence
@@ -53,7 +54,7 @@
 #' # manual construction of the confidence intervals
 #' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
 #'    l = lowposition, h = highposition, legendCex = .5,
-#'    tick.width = .1,  chrBuffer = c(.15,.5)))
+#'    tick.width = .1,  chrBuffer = c(.15,.2)))
 #'
 #' # feed calcCis directly into the plot
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
