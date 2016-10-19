@@ -26,7 +26,7 @@
 #'
 #' @examples
 #' library(qtlTools)
-#' library(lsmeans)
+#'
 #' data(fake.bc)
 #' cross<-fake.bc
 #' cross <- calc.genoprob(cross, step=2.5)
@@ -45,8 +45,10 @@
 #'
 #' # Calculate lsmeans and regular means
 #' sex2<-ifelse(sex1 == 0, "F","M")
-#' lsms<-lsmeans4qtl(cross, pheno.col = "pheno1",form = nform, mod = mod, covar=data.frame(sex = sex2))
+#' ms<-lsmeans4qtl(cross, pheno.col = "pheno1",form = nform, mod = mod, covar=data.frame(sex = sex2))
 #'
+#' library(lsmeans)
+#' lsms<-lsmeans4qtl(cross, pheno.col = "pheno1",form = nform, mod = mod, covar=data.frame(sex = sex2))
 #' # Cull to lsmeans and regular means
 #' lsms<-lsms[!is.na(lsms$Q1) & !is.na(lsms$sex),c("Q1","sex","lsmean","SE","mean","sem")]
 #' library(ggplot2)
@@ -90,7 +92,7 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   if(length(pheno.col) != 1)
     stop("pheno.col (pheno.col) must be a numeric or character vector of length 1")
 
-  if(!require("lsmeans")){
+  if(!suppressWarnings(library("lsmeans", logical.return=T))){
     warning("install the lsmeans package to calculate least square means\n")
   }else{
     library(lsmeans)
@@ -126,16 +128,16 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
     gp<-data.frame(gp, covar)
   }
 
-
+  addterms<-terms[!grepl(":",terms, fixed=T)]
   # 4. calculate lsmeans for each term in model
-  if(require("lsmeans")){
+  if(suppressWarnings(library("lsmeans", logical.return=T))){
     lm.out<-lm(form,gp)
     out<-lapply(terms, function(x){
       lsmeans(lm.out, as.formula(paste("~",x,sep = "")), ...)
     })
 
     # 5. reformat output so that it can be combined into a dataframe
-    addterms<-terms[!grepl(":",terms, fixed=T)]
+
     out<-lapply(out, function(x){
       x<-data.frame(summary(x))
       naterms<-addterms[!addterms %in% colnames(x)]
@@ -166,7 +168,7 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   })
   out.mean<-do.call(rbind, out.mean)
 
-  if(require("lsmeans")){
+  if(suppressWarnings(library("lsmeans", logical.return=T))){
     return(merge(out, out.mean, by = addterms))
   }else{
     return(out.mean)

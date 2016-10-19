@@ -44,7 +44,7 @@ least square means. Regular means are calculated by aggregate.
 }
 \examples{
 library(qtlTools)
-library(lsmeans)
+
 data(fake.bc)
 cross<-fake.bc
 cross <- calc.genoprob(cross, step=2.5)
@@ -63,8 +63,10 @@ effectplot(cross, pheno.col = "pheno1", mname2 = "2@40",
 
 # Calculate lsmeans and regular means
 sex2<-ifelse(sex1 == 0, "F","M")
-lsms<-lsmeans4qtl(cross, pheno.col = "pheno1",form = nform, mod = mod, covar=data.frame(sex = sex2))
+ms<-lsmeans4qtl(cross, pheno.col = "pheno1",form = nform, mod = mod, covar=data.frame(sex = sex2))
 
+library(lsmeans)
+lsms<-lsmeans4qtl(cross, pheno.col = "pheno1",form = nform, mod = mod, covar=data.frame(sex = sex2))
 # Cull to lsmeans and regular means
 lsms<-lsms[!is.na(lsms$Q1) & !is.na(lsms$sex),c("Q1","sex","lsmean","SE","mean","sem")]
 library(ggplot2)
