@@ -27,6 +27,8 @@ repRipple(cross, chr = NULL, window = 6, repeatloop = TRUE,
 
 \item{error.prob}{If re.est.map = TRUE, what error probability should be used?}
 
+\item{verbose}{logical, should updates be reported?}
+
 \item{...}{Additional arguments passed to qtl::ripple}
 }
 \value{
@@ -37,8 +39,9 @@ A new cross object with the optimal rippled marker order
 returning a cross object with the best order.
 }
 \examples{
+\dontrun{
 set.seed(42)
-map<-sim.map(len = c(50,20), n.mar = c(20,40), include.x=F)
+map<-sim.map(len = c(50,20), n.mar = c(20,40), include.x=FALSE)
 cross0<-sim.cross(map, n.ind=50, type="f2", map.function="kosambi")
 ## Mess up the order on chr1
 mars<-1:nmar(cross0)[1]
@@ -52,6 +55,6 @@ cross0<-est.rf(cross0)
 cross1<-repRipple(cross0, chr = 1, error.prob=0.001, map.function="kosambi",window = 6)
 plot.rf(cross0, chr = 1, main = "recombination fractions before ripple")
 plot.rf(cross1, chr = 1, main = "recombination fractions after ripple")
-
+}
 }
 

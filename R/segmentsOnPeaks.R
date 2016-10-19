@@ -15,7 +15,7 @@
 #' used previously.
 #' @param chr If plotting on a specified set of chromosomes via scanone, replicate
 #' the chr call here.
-#' @param qtl If plotting on lodProfile, pass the qtl model object that was input into
+#' @param mod If plotting on lodProfile, pass the qtl model object that was input into
 #' plotLodProfile
 #' @param showallchr Must match call to plotLodProfile if qtl is specified
 #' @param pt.pch pch parameter to points
@@ -64,15 +64,15 @@
 
 segmentsOnPeaks<-function(cross, calcCisOutput = NULL,
                           ci.chr = NULL, peak = NULL, l = NULL, h = NULL,
-                          s1.output = NULL, qtl = NULL,
+                          s1.output = NULL, mod = NULL,
                           showallchr = FALSE, chr = NULL,
                           pt.pch = 8, pt.cex = .8, pt.col = "red", int.y = 0, ...){
 
-  if(is.null(s1.output) & is.null(qtl) |
-     !is.null(s1.output) & !is.null(qtl))
-    stop("either s1.output or qtl must be provided")
+  if(is.null(s1.output) & is.null(mod) |
+     !is.null(s1.output) & !is.null(mod))
+    stop("either s1.output or qtl model (mod) must be provided")
 
-  if(!is.null(qtl)){
+  if(!is.null(mod)){
     if(showallchr){
       chrs<-chrnames(cross)
     }else{

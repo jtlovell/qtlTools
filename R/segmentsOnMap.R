@@ -69,8 +69,6 @@
 #'    lwd = 2)
 #' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
 #'    palette = rainbow)
-#' segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
-#'    palette = rainbow)
 #' }
 #' @import qtl
 #' @export
@@ -79,7 +77,8 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
                         legendPosition = "bottom", legendCex = 0.8, col = NULL,
                         palette = highContrastColors, lwd = "byLod",
                         leg.lwd=2, max.lwd = 5, min.lwd = 1, tick.width = NULL,
-                        leg.inset = 0.01, chrBuffer = c(.05,.15), ...){
+                        leg.inset = 0.01, chrBuffer = c(.05,.15),
+                        orderBy = "lod",...){
   if(lwd == "byLod" & is.na(peaklod) & is.null(calcCisResults)) lwd = 2
   ############
   # 1. Combine the results into a dataframe
@@ -93,7 +92,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
        !is.na(peaklod[1]) & length(phe) != length(peaklod))
       stop("phe, chr, l, h, peaklod must all be the same length")
     dat<-data.frame(phe = phe, chr = chr, lod = peaklod,
-                    l = l, h = h, stringsAsFactors=F)
+                    l = l, h = h, stringsAsFactors=FALSE)
   }
   dat$phenonum<-as.numeric(as.factor(dat$phe))
   dat$col<-NA
@@ -172,27 +171,42 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
   max.st<-1-chrBuffer-scl
   compress<-max.nq/(max.st-min.st)
 
+  mpos<-with(dat.ci, data.frame(chr = rep(chr,2), pos=c(l, h)))
+  mpos<-mpos[order(mpos$chr, mpos$pos),]
+  mpos<-mpos[!duplicated(mpos),]
+
   ### Add confidence interval segments
   for(i in chrns){
     if(i %in% dat.ci$chr){
       tem<-dat.ci[dat.ci$chr == i,]
+      tem<-tem[order(tem$l),]
       if(nrow(tem)==1){
-        tem$x=0
-      }else{
-        tem<-tem[order(tem$l),]
         tem$x<-0
-        for(x in 2:nrow(tem)){
-          a<-tem[x,]
-          o<-tem[1:(x-1),]
-          overlap<-a$l<=o$h
-          n.overlap<-sum(overlap)
-          if(any(!overlap)){
-            tem$x[x]<-tem$x[which(!overlap)[1]]
+      }else{
+        m<-data.frame(pos = mpos$pos[mpos$chr == i])
+        for(j in tem$phe) m[,j]<-ifelse(m$pos>=tem$l[tem$phe==j] &
+                                          m$pos<=tem$h[tem$phe==j],TRUE,FALSE)
+
+        m<-m[,-1]
+        z<-vector()
+        for(j in tem$phe){
+          if(which(colnames(m)==j)==1){
+            z[j]<-0
           }else{
-            tem$x[x]<-n.overlap
+            n<-m[m[,j],1:which(colnames(m)==j)]
+            wh.allf<-apply(n,2,function(k) all(!k))
+            if(any(wh.allf)){
+              z[j]<-min(which(wh.allf))
+              m[m[,j],z[j]]<-TRUE
+              z[j]<-z[j]-1
+            }else{
+              z[j]<-sum(apply(n,2,any)[-ncol(n)])
+            }
           }
         }
+        tem$x<-z
       }
+
       xs<-0:max(tem$x)
       if(!all(xs %in% tem$x)){
         wh<-xs[-which(xs %in% tem$x)]
