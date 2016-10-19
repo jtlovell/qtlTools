@@ -17,6 +17,7 @@
 #' @return Either QTL models or simplified and converted scanone summary.
 #'
 #' @examples
+#' \dontrun{
 #' library(qtlTools)
 #' data(fake.bc)
 #' cross<-fake.bc
@@ -26,6 +27,7 @@
 #'    pheno.col=c("pheno1", "pheno2"), verbose=FALSE)
 #' pullSigQTL(cross, s1.output=s1, perm.output=perm)
 #' pullSigQTL(cross, s1.output=s1, perm.output=perm, returnQTLModel=FALSE)
+#' }
 #'
 #' @export
 pullSigQTL<-function(cross, s1.output, perm.output,

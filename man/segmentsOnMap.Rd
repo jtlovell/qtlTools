@@ -69,6 +69,7 @@ Pass output from bayesint, lodint, or another confidence
 interval estimation program to visualize this.
 }
 \examples{
+\dontrun{
 library(qtlTools)
 data(multitrait)
 
@@ -101,6 +102,6 @@ segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
    palette = rainbow)
 segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
    palette = rainbow)
-
+}
 }
 

@@ -5,7 +5,7 @@
 \title{Make a scanone plot of genotype means.}
 \usage{
 meanScan(cross, pheno.col = 1, covar = NULL, prob.thresh = 0,
-  set.mfrow = TRUE, leg.pos = "topright", leg.inset = 0.001,
+  set.mfrow = FALSE, leg.pos = "topright", leg.inset = 0.001,
   leg.bty = "n", cols = NULL, ltys = NULL, ...)
 }
 \arguments{
@@ -22,6 +22,8 @@ model, convert it to a factor by as.factor.}
 \item{prob.thresh}{The genotype probability threshold required to call a genotype. If set at
 .5 (default) all individuals are assigned genotype calls, otherwise, those with a probability
 < prob.threshold are called as NA. Values closer to 1 are more stringent.}
+
+\item{set.mfrow}{Logical, Should the plotting window be set to the number of covariates?}
 
 \item{leg.pos}{The character of numeric (length 2) position of the legend. Default is "topright".}
 
@@ -46,6 +48,7 @@ marker / pseudomarker grid.
 Calculates genotypic means at each marker/psuedomarker, plots them.
 }
 \examples{
+\dontrun{
 library(qtlTools)
 library(qtl)
 data(fake.bc)
@@ -55,7 +58,7 @@ meanScan(cross, covar = NULL)
 
 # Some simple customization
 meanScan(cross, covar = NULL, cols = c("black","orange"), ltys = c(1,2),
-   leg.pos = "top", leg.inset = 0.02, ylab = "mean phenotype")
+   leg.pos = "top", leg.inset = 0.02)
 
 sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
 meanScan(cross, covar = sex, chr = c(2,7))
@@ -73,5 +76,7 @@ cross<-calc.genoprob(cross)
 meanScan(cross, covar = NULL)
 sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
 meanScan(cross, covar = sex, chr = c(2,7))
+}
+
 }
 

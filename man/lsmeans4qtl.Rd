@@ -43,6 +43,7 @@ It calls the function lsmeans from the lsmeans package, which calculates SAS-sty
 least square means. Regular means are calculated by aggregate.
 }
 \examples{
+\dontrun{
 library(qtlTools)
 
 data(fake.bc)
@@ -90,5 +91,7 @@ ggplot(tp, aes(x = Q1, y = mean, shape = sex,
    theme_jtl()+
    geom_errorbar(aes(ymin = mean - se, ymax = mean+se), width = .1,position = pos)+
    ggtitle("sas-style LSMeans")
+}
+
 }
 

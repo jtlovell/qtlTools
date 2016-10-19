@@ -5,8 +5,7 @@
 \title{Extract statistics from a QTL model}
 \usage{
 qtlStats(cross, mod, pheno.col, form = NULL, covar = NULL,
-  calcConfint = TRUE, calcMeans = TRUE, estEffects = TRUE,
-  model = "normal", ...)
+  calcConfint = TRUE, estEffects = TRUE, model = "normal", ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}

@@ -29,6 +29,8 @@ to make the cross chromosome names match the gff seqname. Defaults to c("Chr","s
 \item{dropNonColinearMarkers}{logical, should markers that are not in the right bp order
 be dropped?}
 
+\item{verbose}{Logical, should updates be reported?}
+
 \item{...}{Not currently in use.}
 }
 \value{
@@ -66,6 +68,7 @@ generated using qtlTools::pullMap(cross)
 4. bp: the base-pair position of the marker
 }
 \examples{
+\dontrun{
 library(qtl)
 library(qtlTools)
 data(multitrait)
@@ -95,6 +98,6 @@ for(i in unique(map$chr)){
 with(test[test$chr==i,], plot(pos,bp, col="grey"))
 with(map[map$chr==i,], points(pos,bp, col=i, pch = 19, cex=.8))
 }
-
+}
 }
 
