@@ -26,6 +26,7 @@
 #' @param ... additional parameters passed to segments, e.g. col, lty, etc.
 #'
 #' @examples
+#' \dontrun{
 #' library(qtlTools)
 #' data(fake.bc)
 #' cross<-fake.bc
@@ -40,22 +41,23 @@
 #'                  qtl = mod, formula = nform, covar = sex, method="hk")
 #'
 #' cis<-calcCis(mod)
-#' plotLodProfile(mod, showallchr=F)
-#' segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis,  showallchr=F)
+#' plotLodProfile(mod, showallchr=FALSE)
+#' segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis,  showallchr=FALSE)
 #'
-#' plotLodProfile(mod, showallchr=T)
-#' segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis, showallchr=T)
+#' plotLodProfile(mod, showallchr=TRUE)
+#' segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis, showallchr=TRUE)
 #' cis<-calcCis(mod, drop = 3)
-#' segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis, showallchr=T, col = "purple", int.y=.5)
+#' segmentsOnPeaks(cross, qtl = mod, calcCisOutput = cis, showallchr=TRUE,
+#'    col = "purple", int.y=.5)
 #'
 #' s1<-scanone(cross, method="hk", pheno.col="pheno1")
-#' perm<-scanone(cross, n.perm=100, method="hk",pheno.col="pheno1", verbose=F)
+#' perm<-scanone(cross, n.perm=100, method="hk",pheno.col="pheno1", verbose=FALSE)
 #' cis<-calcCis(s1.output=s1, perm.output=perm)
 #' plot(s1)
 #' segmentsOnPeaks(cross, s1.output=s1, calcCisOutput = cis)
 #' plot(s1, chr = c(2,5))
 #' segmentsOnPeaks(cross, s1.output=s1, calcCisOutput = cis, chr = c(2,5))
-#'
+#' }
 #' @import qtl
 #' @export
 #'
