@@ -52,3 +52,11 @@ cis<-lapply(models.out, function(x) {
 cis.df<-ldply(cis, data.frame)
 colnames(cis.df)[1]<-"phe"
 
+## ------------------------------------------------------------------------
+segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
+              lwd = 5, segSpread=.1)
+
+## ------------------------------------------------------------------------
+segmentsOnMap(cross=cross, phe=cis.df$phe, chr=cis.df$chr, l = cis.df$lowposition, h =cis.df$highposition, 
+              lwd = 5, segSpread=.05,  legendCex=.8)
+
