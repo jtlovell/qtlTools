@@ -48,10 +48,12 @@ are calculated from LOD score data, or a numeric vector of length
 
 \item{min.lwd}{If scaling by LOD, what should the minimum lwd be?}
 
+\item{tick.width}{How wide should the ticks be? Defaults to 1/n chromosomes.}
+
 \item{leg.inset}{How far should the legend be away from the plot border?}
 
-\item{chrBuffer}{How much space should be provided between the adjacent chromosome
-and the last segment of the stack with the most QTL.}
+\item{chrBuffer}{Numeric vector of length 2, specifying the buffer space
+between confidence interval segments on the left and right adjacent chromosomes.}
 
 \item{...}{Other arguments passed to segments}
 }
@@ -83,7 +85,7 @@ cis<-calcCis(s1.output = s1, perm.output = perms)
 # manual construction of the confidence intervals
 with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
    l = lowposition, h = highposition, legendCex = .5,
-   chrBuffer = c(.1,.4)))
+   tick.width = .1,  chrBuffer = c(.15,.2)))
 
 # feed calcCis directly into the plot
 segmentsOnMap(cross, calcCisResults = cis, legendCex = .5)
