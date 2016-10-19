@@ -188,9 +188,17 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
           lo<-o$l>=a$l & o$l<=a$h
           bo<-o$l<=a$l & o$h>=a$h
           no<-o$l>=a$l & o$h<=a$h
-          sum(sapply(1:length(ho), function(y){
+          toy<-sum(sapply(1:length(ho), function(y){
             any(ho[y],lo[y],no[y],bo[y])
           }))
+          nover<-sapply(1:length(ho), function(y){
+            c(ho[y],lo[y],no[y],bo[y])
+          })
+          toz<-any(apply(nover,2,function(y) all(!y)))
+          if(toy>0 & toz){
+             toy<-which(apply(nover,2,function(y) all(!y)))-1
+           }
+          return(toy)
         }))
       }
       xs<-0:max(tem$x)
