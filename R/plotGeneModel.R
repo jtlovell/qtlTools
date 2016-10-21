@@ -64,8 +64,8 @@ plotGeneModel<-function(gff, snpEffVCF, geneID, upstreamBuffer = 1000, downstrea
 
   #5. make basic plot
   if(makePlot){
-    par(mar=c(5, 6, 4, 2) + 0.1)
-    plot(1,type = "n", xlim=xrange, ylim=c(0,1.2), axes=F, bty="n", xlab = NA, ylab=NA)
+    par(mar=c(4, 6, 0, 2) + 0.1)
+    plot(1,type = "n", xlim=xrange, ylim=c(0,1.3), axes=F, bty="n", xlab = NA, ylab=NA)
     arrows(x0=xrange[1], x1=xrange[2],y0=1,y1=1, length = .1, code = dir)
     features2plot<-features2plot[features2plot %in% gff$feature]
     for(j in 1:length(features2plot)){
@@ -170,13 +170,18 @@ plotGeneModel<-function(gff, snpEffVCF, geneID, upstreamBuffer = 1000, downstrea
       segments(x0=end,x1=end, y0 = 1.1, y1=1.12)
       text(x = beg, y = 1.11, label = paste(seg,"bp"), adj = c(0,-.5))
     }
+    text(x = max(xrange),
+         y = 1.11,   adj = c(1,-.5),
+         labels = paste(geneID, "  ",
+                       paste0(gff$seqname[1], ":",
+                              min(gff$start)
+                              ,"..",
+                              max(gff$end))))
+
 
     #16. add annotation track labels
     axis(2, at = c(1,.7,.4), labels = c("gene model","mut. density", "mut. annot."), las=2,
          line=-1, lwd=0)
-
-
-    title(main = paste(geneID, ": ", paste(gff$seqname[1], "...", min(gff$start)," - ",max(gff$end)), sep =""))
   }
   if(returnData){
     colnames(tp)[colnames(tp) == "rel.pos"]<-"variant.type"

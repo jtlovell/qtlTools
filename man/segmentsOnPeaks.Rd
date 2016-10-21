@@ -5,7 +5,7 @@
 \title{Single QTL confidence intervals on LOD curves}
 \usage{
 segmentsOnPeaks(cross, calcCisOutput = NULL, ci.chr = NULL, peak = NULL,
-  l = NULL, h = NULL, s1.output = NULL, qtl = NULL,
+  l = NULL, h = NULL, s1.output = NULL, mod = NULL,
   showallchr = FALSE, chr = NULL, pt.pch = 8, pt.cex = 0.8,
   pt.col = "red", int.y = 0, ...)
 }
@@ -27,7 +27,7 @@ ignored}
 \item{s1.output}{If plotting on a scanone LOD plot, provide the scanone object
 used previously.}
 
-\item{qtl}{If plotting on lodProfile, pass the qtl model object that was input into
+\item{mod}{If plotting on lodProfile, pass the qtl model object that was input into
 plotLodProfile}
 
 \item{showallchr}{Must match call to plotLodProfile if qtl is specified}

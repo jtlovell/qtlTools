@@ -8,7 +8,7 @@ segmentsOnMap(cross, phe, chr, l, h, peaklod = NA, calcCisResults = NULL,
   legendPosition = "bottom", legendCex = 0.8, col = NULL,
   palette = highContrastColors, lwd = "byLod", leg.lwd = 2, max.lwd = 5,
   min.lwd = 1, tick.width = NULL, leg.inset = 0.01, chrBuffer = c(0.05,
-  0.15), ...)
+  0.15), orderBy = "lod", ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
@@ -69,10 +69,16 @@ Pass output from bayesint, lodint, or another confidence
 interval estimation program to visualize this.
 }
 \examples{
-\dontrun{
+
 library(qtlTools)
 data(multitrait)
-
+segmentsOnMap(cross = multitrait, phe = paste0("phe",1:15),
+ chr = rep(1,15), l =seq(from = 1, to = 100, length.out = 15),
+ h =seq(from = 20, to = 120, length.out = 15)
+segmentsOnMap(cross = multitrait, phe = paste0("phe",1:25),
+ chr = rep(1,25), l =seq(from = 1, to = 100, length.out = 25),
+ h =seq(from = 20, to = 120, length.out = 25))
+\dontrun{
 # use multitrait data
 cross <- multitrait
 cross <- calc.genoprob(cross)
@@ -98,8 +104,6 @@ segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
    max.lwd=4, min.lwd=2)
 segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
    lwd = 2)
-segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
-   palette = rainbow)
 segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
    palette = rainbow)
 }
