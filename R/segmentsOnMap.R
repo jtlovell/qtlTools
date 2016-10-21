@@ -38,10 +38,16 @@
 #' @return The plot
 #'
 #' @examples
-#' \dontrun{
+#'
 #' library(qtlTools)
 #' data(multitrait)
-#'
+#' segmentsOnMap(cross = multitrait, phe = paste0("phe",1:15),
+#'  chr = rep(1,15), l =seq(from = 1, to = 100, length.out = 15),
+#'  h =seq(from = 20, to = 120, length.out = 15)
+#' segmentsOnMap(cross = multitrait, phe = paste0("phe",1:25),
+#'  chr = rep(1,25), l =seq(from = 1, to = 100, length.out = 25),
+#'  h =seq(from = 20, to = 120, length.out = 25))
+#' \dontrun{
 #' # use multitrait data
 #' cross <- multitrait
 #' cross <- calc.genoprob(cross)
