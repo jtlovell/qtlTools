@@ -4,11 +4,11 @@
 \alias{segmentsOnMap}
 \title{Visualize the positions of QTL on a genetic map.}
 \usage{
-segmentsOnMap(cross, phe, chr, l, h, peaklod = NA, calcCisResults = NULL,
-  legendPosition = "bottom", legendCex = 0.8, col = NULL,
-  palette = highContrastColors, lwd = "byLod", leg.lwd = 2, max.lwd = 5,
-  min.lwd = 1, tick.width = NULL, leg.inset = 0.01, chrBuffer = c(0.05,
-  0.15), orderBy = "lod", ...)
+segmentsOnMap(cross, phe, chr, l, h, peaklod = NA, peakcM = NA,
+  calcCisResults = NULL, legendPosition = "bottom", legendCex = 0.8,
+  col = NULL, palette = highContrastColors, lwd = "byLod", leg.lwd = 2,
+  max.lwd = 5, min.lwd = 1, tick.width = NULL, leg.inset = 0.01,
+  chrBuffer = c(0.05, 0.15), orderBy = "lod", showPeaks = TRUE, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
@@ -23,6 +23,8 @@ segmentsOnMap(cross, phe, chr, l, h, peaklod = NA, calcCisResults = NULL,
 
 \item{peaklod}{Optional - if provided, permits segments width
 to be weighted by significance.}
+
+\item{peakcM}{Optional - the position of the peak}
 
 \item{calcCisResults}{A shortcut that allows results from calcCis
 to be piped directly into the plotting function. If provided,
@@ -74,7 +76,7 @@ library(qtlTools)
 data(multitrait)
 segmentsOnMap(cross = multitrait, phe = paste0("phe",1:15),
  chr = rep(1,15), l =seq(from = 1, to = 100, length.out = 15),
- h =seq(from = 20, to = 120, length.out = 15)
+ h =seq(from = 20, to = 120, length.out = 15))
 segmentsOnMap(cross = multitrait, phe = paste0("phe",1:25),
  chr = rep(1,25), l =seq(from = 1, to = 100, length.out = 25),
  h =seq(from = 20, to = 120, length.out = 25))
@@ -92,6 +94,7 @@ cis<-calcCis(s1.output = s1, perm.output = perms)
 # manual construction of the confidence intervals
 with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
    l = lowposition, h = highposition, legendCex = .5,
+   peakcM = pos,
    tick.width = .1,  chrBuffer = c(.15,.2)))
 
 # feed calcCis directly into the plot

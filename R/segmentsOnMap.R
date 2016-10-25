@@ -9,6 +9,7 @@
 #' @param chr Vector of chromosome ids - will be coerced to numeric
 #' @param l The lower confidence interval bound for each qtl
 #' @param h The upper confidence interval bound for each qtl
+#' @param peakcM Optional - the position of the peak
 #' @param peaklod Optional - if provided, permits segments width
 #' to be weighted by significance.
 #' @param calcCisResults A shortcut that allows results from calcCis
@@ -43,7 +44,7 @@
 #' data(multitrait)
 #' segmentsOnMap(cross = multitrait, phe = paste0("phe",1:15),
 #'  chr = rep(1,15), l =seq(from = 1, to = 100, length.out = 15),
-#'  h =seq(from = 20, to = 120, length.out = 15)
+#'  h =seq(from = 20, to = 120, length.out = 15))
 #' segmentsOnMap(cross = multitrait, phe = paste0("phe",1:25),
 #'  chr = rep(1,25), l =seq(from = 1, to = 100, length.out = 25),
 #'  h =seq(from = 20, to = 120, length.out = 25))
@@ -61,6 +62,7 @@
 #' # manual construction of the confidence intervals
 #' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
 #'    l = lowposition, h = highposition, legendCex = .5,
+#'    peakcM = pos,
 #'    tick.width = .1,  chrBuffer = c(.15,.2)))
 #'
 #' # feed calcCis directly into the plot
@@ -79,31 +81,32 @@
 #' @import qtl
 #' @export
 
-segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL,
+segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCisResults=NULL,
                         legendPosition = "bottom", legendCex = 0.8, col = NULL,
                         palette = highContrastColors, lwd = "byLod",
                         leg.lwd=2, max.lwd = 5, min.lwd = 1, tick.width = NULL,
                         leg.inset = 0.01, chrBuffer = c(.05,.15),
-                        orderBy = "lod",...){
+                        orderBy = "lod", showPeaks = TRUE, ...){
   if(lwd == "byLod" & is.na(peaklod) & is.null(calcCisResults)) lwd = 2
   ############
   # 1. Combine the results into a dataframe
   if(!is.null(calcCisResults)){
-    dat<-calcCisResults[,c("pheno","chr","maxLod","lowposition","highposition")]
-    colnames(dat)<-c("phe","chr","lod","l","h")
+    dat<-calcCisResults[,c("pheno","chr","maxLod","pos","lowposition","highposition")]
+    colnames(dat)<-c("phe","chr","lod","cm","l","h")
   }else{
     if(length(phe) != length(chr) |
        length(phe) != length(l) |
        length(phe) != length(h) |
-       !is.na(peaklod[1]) & length(phe) != length(peaklod))
-      stop("phe, chr, l, h, peaklod must all be the same length")
-    dat<-data.frame(phe = phe, chr = chr, lod = peaklod,
+       !is.na(peaklod[1]) & length(phe) != length(peaklod) |
+       !is.na(peakcM[1]) & length(phe) != length(peakcM))
+      stop("phe, chr, l, h, peaklod, peakcM must all be the same length")
+    dat<-data.frame(phe = phe, chr = chr, lod = peaklod, cm = peakcM,
                     l = l, h = h, stringsAsFactors=FALSE)
   }
   dat$phenonum<-as.numeric(as.factor(dat$phe))
   dat$col<-NA
 
-  for(i in c("chr","l","lod","h")) dat[,i]<-as.numeric(as.character(dat[,i]))
+  for(i in c("chr","l","lod","h","cm")) dat[,i]<-as.numeric(as.character(dat[,i]))
 
   ############
   # 2. Get the colors in order
@@ -221,6 +224,10 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, calcCisResults=NULL
       }
       tem$x<-(tem$x/compress)+i+min.st
       with(tem, segments(x0 = x, x1=x, y0 = l, y1=h, col = col, lwd=lwd))
+      if(showPeaks){
+        with(tem, points(x = x, y = cm, col = "white", pch=19, cex = lwd/8))
+        with(tem, points(x = x, y = cm, col = "black", pch=20, cex = lwd/10))
+      }
     }
   }
 
