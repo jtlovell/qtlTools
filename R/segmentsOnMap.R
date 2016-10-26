@@ -31,6 +31,7 @@
 #' @param leg.inset How far should the legend be away from the plot border?
 #' @param chrBuffer Numeric vector of length 2, specifying the buffer space
 #' between confidence interval segments on the left and right adjacent chromosomes.
+#' @param showPeaks Logical, should the QTL peaks be plotted as points?
 #' @param ... Other arguments passed to segments
 #'
 #' @details Pass output from bayesint, lodint, or another confidence
@@ -63,6 +64,9 @@
 #' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
 #'    l = lowposition, h = highposition, legendCex = .5,
 #'    peakcM = pos,
+#'    tick.width = .1,  chrBuffer = c(.15,.2)))
+#'with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
+#'    l = lowposition, h = highposition, legendCex = .5,
 #'    tick.width = .1,  chrBuffer = c(.15,.2)))
 #'
 #' # feed calcCis directly into the plot
