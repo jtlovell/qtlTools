@@ -1,13 +1,11 @@
 #' @title Method to improve an estimated genetic map.
 #'
 #' @description
-#' \code{rep.pickMarkerSubset} finds the best marker within a cM window.
+#' \code{repPickMarkerSubset} finds the best marker within a cM window.
 #'
 #' @param cross The qtl cross object to search
 #' @param chr The chromosome to scan. Can be a vector of chromosome names or a single name.
 #' If NULL, run on all chromosomes.
-#' @param rf.threshold The recombination fraction threshold to drop a marker. If est.rf has
-#' not been run on cross, it will be done so automatically. See qtl::est.rf for details
 #' @param sd.weight The weighting of segregation distortion rank in dropping a marker.
 #' Higher values relative to na.weight increase the weight of the sd rank. Setting a value
 #' of 0 removes sd as a factor in choosing the best marker. Only used if cross is not a 4way.
@@ -20,6 +18,7 @@
 #'
 #' @examples
 #' set.seed(42)
+#' library(qtlTools)
 #' map<-sim.map(len = c(50,20), n.mar = c(20,30), include.x=FALSE)
 #' cross0<-sim.cross(map, n.ind=50, type="f2", map.function="kosambi",
 #'    error.prob=.01, missing.prob = .05)
@@ -30,7 +29,7 @@
 #'
 #' @import qtl
 #' @export
-rep.pickMarkerSubset<-function(cross, chr = NULL,
+repPickMarkerSubset<-function(cross, chr = NULL,
                                na.weight = 2, sd.weight=1,
                                min.distance = 1, verbose=TRUE){
   if(is.null(chr)) chr<-chrnames(cross)
@@ -41,12 +40,14 @@ rep.pickMarkerSubset<-function(cross, chr = NULL,
         rABCD<-apply(gt[,3:6], 1, function(x) sum(x>0))
         rNA<-1-(gt$missing/max(gt$missing))
         wts<-rNA+rABCD
+        pickMarkerSubset(pull.map(cross)[[i]][1,], min.distance = min.distance, wts)
       }else{
         rNA<-rank(-gt$missing)*na.weight
         rP<-rank(log10(gt$P.value))*sd.weight
         wts<-log(rNA*rP)
+        pickMarkerSubset(pull.map(cross)[[i]], min.distance = min.distance, wts)
       }
-      pickMarkerSubset(pull.map(cross)[[i]][1,], min.distance = min.distance, wts)
+
     }))
   dupmar<-markernames(cross)[!markernames(cross) %in% smallmarkers]
   cross2<-drop.markers(cross, dupmar)
