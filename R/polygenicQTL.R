@@ -40,35 +40,58 @@ polygenicQTL<-function(cross, qtl = NULL, pheno.col = 1,
                        rrBLUP.method = "REML",
                        verbose = TRUE,
                        ...){
-  while(substr(formula,1,1) == " ")
-    formula <- substr(formula,2,nchar(formula))
-  if(substr(formula,1,1) == "y")
-    formula <- substr(formula,2,nchar(formula))
-  while(substr(formula,1,1) == " ")
-    formula <- substr(formula,2,nchar(formula))
 
-  if(verbose) cat("calculating allele probabilities on a grid \n")
-  gp<-genoprob2marker(cross, prob.thresh)
-
-  if(verbose) cat("calculating kinship matrix \n")
-  kinship.matrix<-A.mat(gp)
-  y = pull.pheno(cross, pheno.col=pheno.col)
-
-  if(verbose) cat("running polygenic selection \n")
   if(is.null(qtl) & is.null(covar)){
+
+    y = pull.pheno(cross, pheno.col=pheno.col)
+    cross = subset(cross, ind = !is.na(y))
+    covar<-covar[!is.na(y),]
+    y<-pull.pheno(cross, pheno.col=pheno.col)
+
+    if(verbose) cat("calculating allele probabilities on a grid \n")
+    gp<-genoprob2marker(cross, prob.thresh)
+
+    if(verbose) cat("calculating kinship matrix \n")
+    kinship.matrix<-A.mat(gp)
+
+    if(verbose) cat("running polygenic selection \n")
     test<-mixed.solve(y=y,
                       K = kinship.matrix,
                       method = rrBLUP.method, ...)
   }else{
-    if(is.null(covar)) covar = NA
-    if(is.null(qtl)) Q1 = NA
+
+    while(substr(formula,1,1) == " ")
+      formula <- substr(formula,2,nchar(formula))
+    if(substr(formula,1,1) == "y")
+      formula <- substr(formula,2,nchar(formula))
+    while(substr(formula,1,1) == " ")
+      formula <- substr(formula,2,nchar(formula))
+
+    if(is.null(covar)) covar = "1"
+    if(is.null(qtl)) Q1 = "1"
+
     dat<-data.frame(covar,
                     genoprob2marker(cross,
                                     qtl = qtl,
                                     returnNumeric=FALSE,
                                     prob.thresh))
+
+    y = pull.pheno(cross, pheno.col=pheno.col)
+    is.good<-complete.cases(data.frame(dat,y))
+    cross = subset(cross, ind = is.good)
+    dat<-dat[is.good,]
+    y<-pull.pheno(cross, pheno.col=pheno.col)
+
     formula = as.formula(formula)
     fixed.matrix<-model.matrix(formula, data = dat)
+
+    if(verbose) cat("calculating allele probabilities on a grid \n")
+    gp<-genoprob2marker(cross, prob.thresh)
+
+    if(verbose) cat("calculating kinship matrix \n")
+    kinship.matrix<-A.mat(gp)
+
+    if(verbose) cat("running polygenic selection \n")
     test<-mixed.solve(y=y,
                       K = kinship.matrix,
                       X = fixed.matrix,
