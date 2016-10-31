@@ -36,9 +36,10 @@ A dataframe with 3 columns: Vg, Ve and polyH2
 genomic selection pipe. Outputs polygenic inheritance stats.
 }
 \details{
-See rrBLUP::mixed.solve and ::kin.blup
+See rrBLUP::mixed.solve and rrBLUP::kin.blup
 }
 \examples{
+\dontrun{
 library(qtlTools)
 library(rrBLUP)
 data(fake.bc)
@@ -51,6 +52,6 @@ polygenicQTL(cross = cross, pheno.col = 1)
 polygenicQTL(cross = cross, covar = covar, formula = "~ sex", pheno.col = 1)
 polygenicQTL(cross = cross, qtl = qtl, formula = "~ Q1", pheno.col = 1)
 polygenicQTL(cross = cross, qtl = qtl,covar = covar, formula = "~ Q1 + Q1*sex + sex", pheno.col = 1)
-
+}
 }
 

@@ -15,9 +15,10 @@
 #' @param verbose Should a normal or binary model be fit?
 #' @param ... additional arguments passed on to rrBLUP::mixed.solve
 #'
-#' @details See rrBLUP::mixed.solve and ::kin.blup
+#' @details See rrBLUP::mixed.solve and rrBLUP::kin.blup
 #'
 #' @examples
+#' \dontrun{
 #' library(qtlTools)
 #' library(rrBLUP)
 #' data(fake.bc)
@@ -30,7 +31,7 @@
 #' polygenicQTL(cross = cross, covar = covar, formula = "~ sex", pheno.col = 1)
 #' polygenicQTL(cross = cross, qtl = qtl, formula = "~ Q1", pheno.col = 1)
 #' polygenicQTL(cross = cross, qtl = qtl,covar = covar, formula = "~ Q1 + Q1*sex + sex", pheno.col = 1)
-#'
+#' }
 #' @return A dataframe with 3 columns: Vg, Ve and polyH2
 #'
 #' @import qtl
@@ -41,6 +42,10 @@ polygenicQTL<-function(cross, qtl = NULL, pheno.col = 1,
                        rrBLUP.method = "REML",
                        verbose = TRUE,
                        ...){
+
+  if(!requireNamespace("rrBLUP", quietly = TRUE)){
+    stop("install the rrBLUP package to run polygenicQTL\n")
+  }
 
   if(is.null(qtl) & is.null(covar)){
 
@@ -53,12 +58,12 @@ polygenicQTL<-function(cross, qtl = NULL, pheno.col = 1,
     gp<-genoprob2marker(cross, prob.thresh)
 
     if(verbose) cat("calculating kinship matrix \n")
-    kinship.matrix<-A.mat(gp)
+    kinship.matrix<-rrBLUP::A.mat(gp)
 
     if(verbose) cat("running polygenic selection \n")
-    test<-mixed.solve(y=y,
-                      K = kinship.matrix,
-                      method = rrBLUP.method, ...)
+    test<-rrBLUP::mixed.solve(y=y,
+                              K = kinship.matrix,
+                              method = rrBLUP.method, ...)
   }else{
 
     while(substr(formula,1,1) == " ")
@@ -90,13 +95,13 @@ polygenicQTL<-function(cross, qtl = NULL, pheno.col = 1,
     gp<-genoprob2marker(cross, prob.thresh)
 
     if(verbose) cat("calculating kinship matrix \n")
-    kinship.matrix<-A.mat(gp)
+    kinship.matrix<-rrBLUP::A.mat(gp)
 
     if(verbose) cat("running polygenic selection \n")
-    test<-mixed.solve(y=y,
-                      K = kinship.matrix,
-                      X = fixed.matrix,
-                      method = rrBLUP.method, ...)
+    test<-rrBLUP::mixed.solve(y=y,
+                              K = kinship.matrix,
+                              X = fixed.matrix,
+                              method = rrBLUP.method, ...)
   }
   return(data.frame(Vg = test$Vu,
                     Ve = test$Ve,
