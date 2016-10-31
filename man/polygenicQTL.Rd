@@ -40,6 +40,7 @@ See rrBLUP::mixed.solve and ::kin.blup
 }
 \examples{
 library(qtlTools)
+library(rrBLUP)
 data(fake.bc)
 cross<-fake.f2
 cross<-calc.genoprob(cross, step = 12, stepwidth = "fixed")
