@@ -65,5 +65,6 @@ polygenicQTL(cross = cross, covar = covar, formula = "~ sex", pheno.col = 1)
 polygenicQTL(cross = cross, qtl = qtl, formula = "~ Q1", pheno.col = 1)
 polygenicQTL(cross = cross, qtl = qtl,covar = covar, formula = "~ Q1 + Q1*sex + sex", pheno.col = 1)
 }
+
 }
 

@@ -21,6 +21,14 @@
 #'
 #' @details See rrBLUP::mixed.solve and rrBLUP::kin.blup
 #'
+#' @return A dataframe with 3 columns:
+#' \itemize{
+#'  \item{"Vg"}{The genetic variance attributable to the kinship (polygenic)}
+#'  \item{"Ve"}{The amount of environmental (residual) varaince}
+#'  \item{"polyH2"}{the proportion of Vtotal in Vg. Equivalent to the amount of
+#'  heritability attributable to kinship (polygenic) variance following incoporpation of
+#'  any fixed effects}
+#' }
 #' @examples
 #' \dontrun{
 #' library(qtlTools)
@@ -35,14 +43,6 @@
 #' polygenicQTL(cross = cross, covar = covar, formula = "~ sex", pheno.col = 1)
 #' polygenicQTL(cross = cross, qtl = qtl, formula = "~ Q1", pheno.col = 1)
 #' polygenicQTL(cross = cross, qtl = qtl,covar = covar, formula = "~ Q1 + Q1*sex + sex", pheno.col = 1)
-#' }
-#' @return A dataframe with 3 columns:
-#' \itemize{
-#'  \item{"Vg"}{The genetic variance attributable to the kinship (polygenic)}
-#'  \item{"Ve"}{The amount of environmental (residual) varaince}
-#'  \item{"polyH2"}{the proportion of Vtotal in Vg. Equivalent to the amount of
-#'  heritability attributable to kinship (polygenic) variance following incoporpation of
-#'  any fixed effects}
 #' }
 #'
 #' @import qtl
