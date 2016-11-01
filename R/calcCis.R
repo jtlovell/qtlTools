@@ -35,16 +35,16 @@
 #' #Calculate lodprofiles for confidence interval estimation
 #' mod <- refineqtl(cross, mod, pheno.col = "pheno1",
 #'   qtl = mod, formula = nform, covar = sex, method="hk")
-#' calcCis(mod=mod)
+#' calcCis(cross = cross, mod=mod)
 #' \dontrun{
 #' s1<-scanone(cross, method="hk", pheno.col=c("pheno1", "pheno2"))
 #' perm<-scanone(cross, n.perm=100, method="hk",pheno.col=c("pheno1", "pheno2"), verbose=FALSE)
-#' calcCis(s1.output=s1, perm.output=perm)
+#' calcCis(cross,s1.output=s1, perm.output=perm)
 #' }
 #' @import qtl
 #' @export
 
-calcCis<-function(cross, mod = NULL, s1.output = NULL, perm.output = NULL, qtlnames = NULL,
+calcCis<-function(cross, mod = NULL, s1.output = NULL, pheno.col = NA, perm.output = NULL, qtlnames = NULL,
                   lodint = TRUE, drop=1.5, prob=0.95, expandtomarkers = FALSE,
                   ...){
   if(is.null(mod) & is.null(s1.output))
@@ -70,13 +70,18 @@ calcCis<-function(cross, mod = NULL, s1.output = NULL, perm.output = NULL, qtlna
 
       chr=mod$chr[j]
       pos=mod$pos[j]
-      return(data.frame(qtlname = qtlnames[j],
+      return(data.frame(pheno = pheno.col[j],
+                        qtlname = qtlnames[j],
                         chr, pos, maxLod,
                         lowmarker,highmarker,
                         lowposition,highposition))
     })
   }else{
-    phes<-colnames(s1.output)[-c(1:2)]
+    if(ncol(s1.output)==3){
+      phes<-pheno.col
+    }else{
+      phes<-colnames(s1.output)[-c(1:2)]
+    }
     qtl.peaks <- pullSigQTL(cross, pheno.col=phes,
                             s1.output = s1.output,
                             perm.output = perm.output, returnQTLModel = FALSE, ...)
@@ -98,6 +103,7 @@ calcCis<-function(cross, mod = NULL, s1.output = NULL, perm.output = NULL, qtlna
       maxLod<-dat$lod1
 
       return(data.frame(pheno = phe,
+                        qtlname = NA,
                         chr, pos, maxLod,
                         lowmarker,highmarker,
                         lowposition,highposition))
