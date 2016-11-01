@@ -56,11 +56,11 @@ nform <- "y ~ Q1 + Q2 + Q1*sex + sex"
 #Calculate lodprofiles for confidence interval estimation
 mod <- refineqtl(cross, mod, pheno.col = "pheno1",
   qtl = mod, formula = nform, covar = sex, method="hk")
-calcCis(mod=mod)
+calcCis(cross = cross, mod=mod)
 \dontrun{
 s1<-scanone(cross, method="hk", pheno.col=c("pheno1", "pheno2"))
 perm<-scanone(cross, n.perm=100, method="hk",pheno.col=c("pheno1", "pheno2"), verbose=FALSE)
-calcCis(s1.output=s1, perm.output=perm)
+calcCis(cross,s1.output=s1, perm.output=perm)
 }
 }
 

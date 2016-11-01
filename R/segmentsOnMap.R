@@ -58,7 +58,7 @@
 #' s1 <- scanone(cross, pheno.col = phes, method = "hk")
 #' perms <- scanone(cross, pheno.col = phes, method = "hk",
 #'    n.perm = 100, verbose=F)
-#' cis<-calcCis(s1.output = s1, perm.output = perms)
+#' cis<-calcCis(cross, s1.output = s1, perm.output = perms)
 #'
 #' # manual construction of the confidence intervals
 #' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
@@ -107,9 +107,15 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
     dat<-data.frame(phe = phe, chr = chr, lod = peaklod, cm = peakcM,
                     l = l, h = h, stringsAsFactors=FALSE)
   }
-  if(length(unique(dat$phe))==1) {
-    dat$phe<-with(dat, paste(chr, round(cm,0),sep="@"))
+  if(length(unique(dat$phe))==1 | all(is.na(dat$phe))) {
+    if(all(is.na(dat$cm))){
+      dat$phe<-with(dat, paste(chr, round(l,0),sep="@"))
+    }else{
+      dat$phe<-with(dat, paste(chr, round(cm,0),sep="@"))
+    }
+
   }
+  print(dat)
   dat$phenonum<-as.numeric(as.factor(dat$phe))
   dat$col<-NA
 

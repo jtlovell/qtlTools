@@ -70,7 +70,7 @@ calcCis<-function(cross, mod = NULL, s1.output = NULL, pheno.col = NA, perm.outp
 
       chr=mod$chr[j]
       pos=mod$pos[j]
-      return(data.frame(pheno = pheno.col[j],
+      return(data.frame(pheno = pheno.col,
                         qtlname = qtlnames[j],
                         chr, pos, maxLod,
                         lowmarker,highmarker,

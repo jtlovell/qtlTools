@@ -16,7 +16,7 @@ library(qtl)
 library(qtlTools)
 ```
 
-```{r get qtlTools, eval = FALSE}
+```{r get qtlTools}
 library(qtl)
 library(devtools)
 install_github("jtlovell/qtlTools")
@@ -223,9 +223,8 @@ print(cis<-calcCis(cross, mod = step.model, lodint = TRUE, drop = 1.5))
 For publication, reviewers often want to see the position of QTL intervals on a genetic map.
 `qtlTools::segmentsOnMap` provides one method to do this.
 ```{r}
-cis$phenotype<-"fake"
 segmentsOnMap(cross=cross, 
-              phe=cis$phenotype, 
+              phe=cis$pheno, 
               chr=cis$chr, 
               l = cis$lowposition, 
               h = cis$highposition, 
