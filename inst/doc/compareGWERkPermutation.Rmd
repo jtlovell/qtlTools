@@ -26,13 +26,6 @@ library(qtlTools)
 library(qtl)
 ```
 
-### Get the basic scripts from Karl Broman's github
-```{r get source}
-source("https://raw.githubusercontent.com/kbroman/qtl/master/R/util.R")
-source("https://raw.githubusercontent.com/kbroman/qtl/master/R/calc.pairprob.R")
-source("https://raw.githubusercontent.com/kbroman/qtl/master/R/xchr.R")
-```
-
 
 ### Load the simulated F2 data 
 ```{r load data}

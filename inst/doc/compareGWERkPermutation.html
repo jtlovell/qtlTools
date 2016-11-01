@@ -12,7 +12,7 @@
 
 <meta name="author" content="JT Lovell" />
 
-<meta name="date" content="2016-10-19" />
+<meta name="date" content="2016-11-01" />
 
 <title>Comparison of permutation methods</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Comparison of permutation methods</h1>
 <h4 class="author"><em>JT Lovell</em></h4>
-<h4 class="date"><em>2016-10-19</em></h4>
+<h4 class="date"><em>2016-11-01</em></h4>
 
 
 
@@ -81,7 +81,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <pre><code>## Installing qtlTools</code></pre>
 <pre><code>## '/Library/Frameworks/R.framework/Resources/bin/R' --no-site-file  \
 ##   --no-environ --no-save --no-restore --quiet CMD INSTALL  \
-##   '/private/var/folders/b6/w7rk82fx273ct14rskd_csk40000gp/T/RtmpG0d3Kl/devtoolsd67853bf55ac/jtlovell-qtlTools-1dce9b2'  \
+##   '/private/var/folders/b6/w7rk82fx273ct14rskd_csk40000gp/T/RtmpNKLAn6/devtools2a2e6bbfd6ca/jtlovell-qtlTools-f73cf56'  \
 ##   --library='/Library/Frameworks/R.framework/Versions/3.3/Resources/library'  \
 ##   --install-tests</code></pre>
 <pre><code>## </code></pre>
@@ -90,15 +90,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 ## Attaching package: 'qtlTools'</code></pre>
 <pre><code>## The following object is masked _by_ '.GlobalEnv':
 ## 
-##     lsmeans4qtl</code></pre>
+##     calcCis</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(qtlTools)
 <span class="kw">library</span>(qtl)</code></pre></div>
-<div id="get-the-basic-scripts-from-karl-bromans-github" class="section level3">
-<h3>Get the basic scripts from Karl Broman’s github</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;https://raw.githubusercontent.com/kbroman/qtl/master/R/util.R&quot;</span>)
-<span class="kw">source</span>(<span class="st">&quot;https://raw.githubusercontent.com/kbroman/qtl/master/R/calc.pairprob.R&quot;</span>)
-<span class="kw">source</span>(<span class="st">&quot;https://raw.githubusercontent.com/kbroman/qtl/master/R/xchr.R&quot;</span>)</code></pre></div>
-</div>
 <div id="load-the-simulated-f2-data" class="section level3">
 <h3>Load the simulated F2 data</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(fake.f2)
