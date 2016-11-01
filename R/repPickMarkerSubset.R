@@ -23,7 +23,7 @@
 #' cross0<-sim.cross(map, n.ind=50, type="f2", map.function="kosambi",
 #'    error.prob=.01, missing.prob = .05)
 #' cross0<-est.rf(cross0)
-#' cross1<-rep.pickMarkerSubset(cross0)
+#' cross1<-repPickMarkerSubset(cross0)
 #' par(mfrow=c(2,1))
 #' plot.map(cross0, cross1, main = "comparison of full and culled maps")
 #'

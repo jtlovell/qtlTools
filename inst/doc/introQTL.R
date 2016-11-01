@@ -4,11 +4,11 @@ library(knitr)
 library(qtl)
 library(qtlTools)
 
-## ----get qtlTools, eval = FALSE------------------------------------------
-#  library(qtl)
-#  library(devtools)
-#  install_github("jtlovell/qtlTools")
-#  library(qtlTools)
+## ----get qtlTools--------------------------------------------------------
+library(qtl)
+library(devtools)
+install_github("jtlovell/qtlTools")
+library(qtlTools)
 
 ## ----sim map-------------------------------------------------------------
 # Set the seed so that all our maps are identical
@@ -109,15 +109,22 @@ bayesint(step.model, qtl.index = 1, prob = .80)
 bayesint(step.model, qtl.index = 1, prob = .99)
 
 ## ------------------------------------------------------------------------
-print(cis<-calcCis(step.model, lodint = TRUE, drop = 1.5))
+print(cis<-calcCis(cross, mod = step.model, lodint = TRUE, drop = 1.5))
 
 ## ------------------------------------------------------------------------
-cis$phenotype<-"fake"
-segmentsOnMap(cross=cross, phe=cis$phenotype, 
+segmentsOnMap(cross=cross, 
+              phe=cis$pheno, 
               chr=cis$chr, 
               l = cis$lowposition, 
-              h =cis$highposition, 
-              lwd = 5, legendPosition = "right", leg.inset=.1)
+              h = cis$highposition, 
+              lwd = 5, legendPosition = "right", leg.inset=.1,
+              palette = rainbow)
+
+## ------------------------------------------------------------------------
+segmentsOnMap(cross=cross,
+              calcCisResults=cis, 
+              legendPosition = "right", leg.inset=.1, 
+              palette = rainbow)
 
 ## ------------------------------------------------------------------------
 qtlStats(cross,  pheno.col = "phenotype",

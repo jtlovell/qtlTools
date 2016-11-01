@@ -46,7 +46,7 @@ mods<-pullSigQTL(cross, pheno.col=phes,
 print(mods[1:5])
 
 ## ------------------------------------------------------------------------
-cis<-calcCis(s1.output=s1, perm.output=perms)
+cis<-calcCis(cross,s1.output=s1, perm.output=perms)
 head(cis)
 
 ## ------------------------------------------------------------------------

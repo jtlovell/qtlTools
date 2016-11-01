@@ -12,11 +12,6 @@ install_github("jtlovell/qtlTools")
 library(qtlTools)
 library(qtl)
 
-## ----get source----------------------------------------------------------
-source("https://raw.githubusercontent.com/kbroman/qtl/master/R/util.R")
-source("https://raw.githubusercontent.com/kbroman/qtl/master/R/calc.pairprob.R")
-source("https://raw.githubusercontent.com/kbroman/qtl/master/R/xchr.R")
-
 ## ----load data-----------------------------------------------------------
 data(fake.f2)
 covar<-data.frame(covar = fake.f2$phe$sex)
