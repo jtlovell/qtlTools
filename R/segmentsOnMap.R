@@ -115,7 +115,6 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
     }
 
   }
-  print(dat)
   dat$phenonum<-as.numeric(as.factor(dat$phe))
   dat$col<-NA
 

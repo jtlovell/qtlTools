@@ -76,7 +76,7 @@ print(mods[1:5])
 
 We can also plot confidence intervals directly from scanone data, however, it is important to note that multiple peaks on a single chromosome can violate assumptions of such intervals. 
 ```{r}
-cis<-calcCis(s1.output=s1, perm.output=perms)
+cis<-calcCis(cross,s1.output=s1, perm.output=perms)
 head(cis)
 ```
 
