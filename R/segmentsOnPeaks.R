@@ -22,7 +22,6 @@
 #' @param pt.cex cex parameter to points
 #' @param pt.col color parameter to points
 #' @param int.y the y intercept of the segments
-#' @param add should segements be added to an existing plot?
 #' @param ... additional parameters passed to segments, e.g. col, lty, etc.
 #'
 #' @examples

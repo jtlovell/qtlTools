@@ -44,8 +44,6 @@ the chr call here.}
 \item{int.y}{the y intercept of the segments}
 
 \item{...}{additional parameters passed to segments, e.g. col, lty, etc.}
-
-\item{add}{should segements be added to an existing plot?}
 }
 \description{
 \code{segmentsOnPeaks} Overlay confidence intervals onto a LOD plot,

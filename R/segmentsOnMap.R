@@ -32,6 +32,7 @@
 #' @param chrBuffer Numeric vector of length 2, specifying the buffer space
 #' between confidence interval segments on the left and right adjacent chromosomes.
 #' @param showPeaks Logical, should the QTL peaks be plotted as points?
+#' @param orderBy What data should the segments be stacked by?
 #' @param ... Other arguments passed to segments
 #'
 #' @details Pass output from bayesint, lodint, or another confidence

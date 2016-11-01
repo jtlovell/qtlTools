@@ -57,6 +57,8 @@ are calculated from LOD score data, or a numeric vector of length
 \item{chrBuffer}{Numeric vector of length 2, specifying the buffer space
 between confidence interval segments on the left and right adjacent chromosomes.}
 
+\item{orderBy}{What data should the segments be stacked by?}
+
 \item{showPeaks}{Logical, should the QTL peaks be plotted as points?}
 
 \item{...}{Other arguments passed to segments}
