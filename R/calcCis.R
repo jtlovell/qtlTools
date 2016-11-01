@@ -44,7 +44,7 @@
 #' @import qtl
 #' @export
 
-calcCis<-function(mod = NULL, s1.output = NULL, perm.output = NULL, qtlnames = NULL,
+calcCis<-function(cross, mod = NULL, s1.output = NULL, perm.output = NULL, qtlnames = NULL,
                   lodint = TRUE, drop=1.5, prob=0.95, expandtomarkers = FALSE,
                   ...){
   if(is.null(mod) & is.null(s1.output))

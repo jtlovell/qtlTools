@@ -4,7 +4,7 @@
 \alias{calcCis}
 \title{Calculate all confidence intervals from a QTL model}
 \usage{
-calcCis(mod = NULL, s1.output = NULL, perm.output = NULL,
+calcCis(cross, mod = NULL, s1.output = NULL, perm.output = NULL,
   qtlnames = NULL, lodint = TRUE, drop = 1.5, prob = 0.95,
   expandtomarkers = FALSE, ...)
 }
