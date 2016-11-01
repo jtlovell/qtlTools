@@ -77,11 +77,7 @@ calcCis<-function(cross, mod = NULL, s1.output = NULL, pheno.col = NA, perm.outp
                         lowposition,highposition))
     })
   }else{
-    if(ncol(s1.output)==3){
-      phes<-pheno.col
-    }else{
-      phes<-colnames(s1.output)[-c(1:2)]
-    }
+    phes<-colnames(s1.output)[-c(1:2)]
     qtl.peaks <- pullSigQTL(cross, pheno.col=phes,
                             s1.output = s1.output,
                             perm.output = perm.output, returnQTLModel = FALSE, ...)
