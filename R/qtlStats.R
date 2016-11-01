@@ -106,7 +106,7 @@ qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
 
   # 4. Get Cis and merge
   if(calcConfint){
-    cis<-calcCis(mod, qtlnames = NULL)
+    cis<-calcCis(cross, mod, qtlnames = NULL)
     colnames(cis)[1]<-"terms"
     out<-merge(out, cis, by = "terms", all=T)
   }
