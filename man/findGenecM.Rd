@@ -35,9 +35,11 @@ be dropped?}
 }
 \value{
 The gff file, with three added columns:
-geneID = the parsed name of the attribute
-bp = the average base pair position
-pos = the inferred cM position
+\itemize{
+  \item{"geneID"}{the parsed name of the attribute}
+  \item{"bp"}{the average base pair position}
+  \item{"pos"}{the inferred cM position}
+}
 }
 \description{
 \code{findGenecM} Using the physical position of genetic markers,
@@ -45,27 +47,33 @@ infer the mapping position of every gene.
 }
 \details{
 standard gff fields are as follows:
-1. seqname: name of the chromosome or scaffold
-2. source: name of the program that generated this feature,
-          or the data source (database or project name)
-3. feature: feature type name, e.g. Gene, Variation, Similarity
-         **Note** the term "Gene" must be present in this column
-4. start: Start position of the feature, with sequence numbering starting at 1.
-5. end: End position of the feature, with sequence numbering starting at 1.
-6. score: A floating point value.
-7. strand: defined as + (forward) or - (reverse).
-8. frame: One of '0', '1' or '2'.
+\itemize{
+   \item{1. seqname}{name of the chromosome or scaffold}
+   \item{2. source}{name of the program that generated this feature,
+          or the data source (database or project name)}
+   \item{3. feature}{feature type name, e.g. Gene, Variation, Similarity
+         **Note** the term "Gene" must be present in this column}
+   \item{4. start}{Start position of the feature,
+         with sequence numbering starting at 1.}
+   \item{5. end}{End position of the feature,
+         with sequence numbering starting at 1.}
+   \item{6. score}{A floating point value.}
+   \item{7. strand}{defined as + (forward) or - (reverse)}
+   \item{8. frame}{One of '0', '1' or '2'.
          '0' indicates that the first base of the feature is the first base of a codon,
-         '1' that the second base is the first base of a codon, and so on..
-9. attribute: A semicolon-separated list of tag-value pairs,
-         providing additional information about each feature.
-
+         '1' that the second base is the first base of a codon, and so on..}
+   \item{9. attribute}{A semicolon-separated list of tag-value pairs,
+         providing additional information about each feature.}
+   \item{}{}
+}
 marker.info fields - names must match exactly. The first three fields can be
 generated using qtlTools::pullMap(cross)
-1. marker.name: Marker names (rownames from pull.map with as.table=T)
-2. chr: the chromosome of the marker
-3. pos: the mapping position of the marker
-4. bp: the base-pair position of the marker
+\itemize{
+     \item{1. marker.name}{Marker names (rownames from pull.map with as.table=T)}
+     \item{2. chr}{the chromosome of the marker}
+     \item{3. pos}{the mapping position of the marker}
+     \item{4. bp}{the base-pair position of the marker}
+}
 }
 \examples{
 \dontrun{

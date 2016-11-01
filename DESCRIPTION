@@ -14,5 +14,6 @@ Suggests: knitr,
     rmarkdown,
     lsmeans,
     ggplot2,
-    qtlpvl
+    qtlpvl,
+    rrBLUP
 VignetteBuilder: knitr
