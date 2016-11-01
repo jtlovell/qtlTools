@@ -58,7 +58,7 @@
 #' s1 <- scanone(cross, pheno.col = phes, method = "hk")
 #' perms <- scanone(cross, pheno.col = phes, method = "hk",
 #'    n.perm = 100, verbose=F)
-#' cis<-calcCis(s1.output = s1, perm.output = perms)
+#' cis<-calcCis(cross, s1.output = s1, perm.output = perms)
 #'
 #' # manual construction of the confidence intervals
 #' with(cis, segmentsOnMap(cross, phe = pheno, chr = chr,
