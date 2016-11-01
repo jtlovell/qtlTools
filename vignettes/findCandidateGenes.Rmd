@@ -40,12 +40,6 @@ install_github("jtlovell/qtlTools")
 library(qtlTools)
 ```
 
-##### A few other packages are needed, install these if you don't have them
-```{r, warning = F, message=FALSE}
-library(qtlpvl)
-library(data.table)
-```
-
 ##### Load the multitrait data from R/qtl
 ```{r loadmultitrait}
 data(multitrait)
