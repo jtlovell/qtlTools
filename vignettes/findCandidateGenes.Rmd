@@ -41,7 +41,7 @@ library(qtlTools)
 ```
 
 ##### A few other packages are needed, install these if you don't have them
-```{r}
+```{r, warning = F, message=FALSE}
 library(qtlpvl)
 library(data.table)
 ```
@@ -51,7 +51,7 @@ library(data.table)
 data(multitrait)
 ```
 
-##### Infer the physical position of the markers allowing for low recombination in the middle of the chromosomes (as would be expected in the pericentromeric region)
+##### Create some fake physical positions of the markers allowing for low recombination in the middle of the chromosomes (as would be expected in the pericentromeric region)
 ```{r fakemap}
 map<-pullMap(multitrait)
 map$bp<-0
@@ -108,9 +108,9 @@ print(candGenes)
 ```
 
 ## Part 5: next steps
-There are a number of approaches to define how likely any gene is to be the candidate. 
-- Genes with non-synonymous SNPs
-- Genes with cis-eQTL (Lowry et al. 2013, Plant Cell)
-- Genes with annotations similar to the trait of interest
-- Covariance of expression and trait of interest in mapping population (Lovell et al. 2015, Plant Cell)
-- Causal Inference testing
+##### There are a number of approaches to define how likely any gene is to be the candidate. 
+1. Genes with non-synonymous SNPs
+2. Genes with cis-eQTL (Lowry et al. 2013, Plant Cell)
+3. Genes with annotations similar to the trait of interest
+4. Covariance of expression and trait of interest in mapping population (Lovell et al. 2015, Plant Cell)
+5. Causal Inference testing

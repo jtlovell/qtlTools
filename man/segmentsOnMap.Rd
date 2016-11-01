@@ -8,7 +8,7 @@ segmentsOnMap(cross, phe, chr, l, h, peaklod = NA, peakcM = NA,
   calcCisResults = NULL, legendPosition = "bottom", legendCex = 0.8,
   col = NULL, palette = highContrastColors, lwd = "byLod", leg.lwd = 2,
   max.lwd = 5, min.lwd = 1, tick.width = NULL, leg.inset = 0.01,
-  chrBuffer = c(0.05, 0.15), orderBy = "lod", showPeaks = TRUE, ...)
+  chrBuffer = c(0.05, 0.15), orderBy = "lod", showPeaks = FALSE, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}

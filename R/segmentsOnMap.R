@@ -90,7 +90,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
                         palette = highContrastColors, lwd = "byLod",
                         leg.lwd=2, max.lwd = 5, min.lwd = 1, tick.width = NULL,
                         leg.inset = 0.01, chrBuffer = c(.05,.15),
-                        orderBy = "lod", showPeaks = TRUE, ...){
+                        orderBy = "lod", showPeaks = FALSE, ...){
   if(lwd == "byLod" & is.na(peaklod) & is.null(calcCisResults)) lwd = 2
   ############
   # 1. Combine the results into a dataframe
@@ -106,6 +106,9 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
       stop("phe, chr, l, h, peaklod, peakcM must all be the same length")
     dat<-data.frame(phe = phe, chr = chr, lod = peaklod, cm = peakcM,
                     l = l, h = h, stringsAsFactors=FALSE)
+  }
+  if(length(unique(dat$phe))==1) {
+    dat$phe<-with(dat, paste(chr, round(cm,0),sep="@"))
   }
   dat$phenonum<-as.numeric(as.factor(dat$phe))
   dat$col<-NA
