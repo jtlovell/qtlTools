@@ -32,6 +32,16 @@
 #'    formula = nform, covar = sex, method="hk")
 #' qtlStats(cross, pheno.col = "pheno1",form = nform, mod = mod, covar=sex)
 #'
+#' data(fake.f2)
+#' cross<-fake.f2
+#' cross <- calc.genoprob(cross, step=2.5)
+#' mod <- makeqtl(cross, chr = c(1,13), pos = c(27.5,27.5), what = "prob")
+#' nform <- "y ~ Q1 + Q2 + Q1*sex + sex"
+#' sex <- data.frame(sex = cross$phe$sex)
+#' mod <- refineqtl(cross, mod, pheno.col = 1, qtl = mod,
+#'    formula = nform, covar = sex, method="hk")
+#' qtlStats(cross, pheno.col = 1,form = nform, mod = mod, covar=sex)
+#'
 #' @return A dataframe of statistics.
 #'
 #' @import qtl
@@ -101,13 +111,26 @@ qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
     out.est$terms = rownames(out.est)
     if(nrow(out.est) == nrow(out)){
       out<-merge(out, out.est, by = "terms")
+    }else{
+      if(nrow(out.est)+1 == nrow(out)*2){
+        qtype<-out.est$terms
+        for(i in mod$name) qtype<-gsub(i,"q",qtype, fixed=T)
+        oed<-out.est[qtype == "qd",]
+        for(i in mod$name) oed$terms[grepl(i,oed$terms)]<-i
+        names(oed)[1:3]<-paste(names(oed)[1:3],"dom",sep="_")
+        oea<-out.est[qtype == "qa" | out.est$terms %in% out$terms,]
+        for(i in mod$name) oea$terms[grepl(i,oea$terms)]<-i
+        out<-merge(out, oea, by = "terms", all.x=T)
+        out<-merge(out, oed, by = "terms", all.x=T)
+      }
     }
   }
 
   # 4. Get Cis and merge
   if(calcConfint){
     cis<-calcCis(cross=cross, mod=mod, qtlnames = NULL)
-    colnames(cis)[2]<-"terms"
+    cis<-cis[-which(colnames(cis)=="pheno")]
+    colnames(cis)[1]<-"terms"
     out<-merge(out, cis, by = "terms", all=T)
   }
 
