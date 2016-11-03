@@ -112,17 +112,15 @@ qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
     if(nrow(out.est) == nrow(out)){
       out<-merge(out, out.est, by = "terms")
     }else{
-      if(nrow(out.est)+1 == nrow(out)*2){
-        qtype<-out.est$terms
-        for(i in mod$name) qtype<-gsub(i,"q",qtype, fixed=T)
-        oed<-out.est[qtype == "qd",]
-        for(i in mod$name) oed$terms[grepl(i,oed$terms)]<-i
-        names(oed)[1:3]<-paste(names(oed)[1:3],"dom",sep="_")
-        oea<-out.est[qtype == "qa" | out.est$terms %in% out$terms,]
-        for(i in mod$name) oea$terms[grepl(i,oea$terms)]<-i
-        out<-merge(out, oea, by = "terms", all.x=T)
-        out<-merge(out, oed, by = "terms", all.x=T)
-      }
+      qtype<-out.est$terms
+      for(i in mod$name) qtype<-gsub(i,"q",qtype, fixed=T)
+      oed<-out.est[qtype == "qd",]
+      for(i in mod$name) oed$terms[grepl(i,oed$terms)]<-i
+      names(oed)[1:3]<-paste(names(oed)[1:3],"dom",sep="_")
+      oea<-out.est[qtype == "qa" | out.est$terms %in% out$terms,]
+      for(i in mod$name) oea$terms[grepl(i,oea$terms)]<-i
+      out<-merge(out, oea, by = "terms", all.x=T)
+      out<-merge(out, oed, by = "terms", all.x=T)
     }
   }
 
