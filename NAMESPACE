@@ -2,7 +2,9 @@
 
 export(calcCis)
 export(covScanQTL)
+export(dropCloseQTL)
 export(dropSimilarMarkers)
+export(dropSmallCovInt)
 export(findGenecM)
 export(findGenesInterval)
 export(genoprob2marker)
