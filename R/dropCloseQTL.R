@@ -15,7 +15,7 @@ dropCloseQTL<-function(cross, qtl, formula, covar, pheno.col, method = "hk",
   while(anyClose){
     fout<-data.frame(summary(fitqtl(cross, qtl = qtl, formula = formula(qtl),
                                     covar = covar, method = "hk",
-                                    pheno.col = phe))$result.drop)
+                                    pheno.col = pheno.col))$result.drop)
     fout$id = rownames(fout)
     for(i in 1:length(qtl$name)) fout$id = gsub(qtl$name[i],qtl$altname[i],fout$id, fixed = T)
     bads<-unlist(sapply(chrnames(cross), function(i){
@@ -44,7 +44,7 @@ dropCloseQTL<-function(cross, qtl, formula, covar, pheno.col, method = "hk",
 
       newform2 = paste("y ~ ", paste(fout$new.id, collapse = " + "))
       attr(new.qtl, "formula")<-newform2
-      qtl = refineqtl(cross, pheno.col = phe, qtl = new.qtl, formula = newform2, method = "hk", covar = covar,
+      qtl = refineqtl(cross, pheno.col = pheno.col, qtl = new.qtl, formula = newform2, method = "hk", covar = covar,
                       verbose = F)
     }
     anyClose<-any(unlist(sapply(chrnames(cross), function(i){

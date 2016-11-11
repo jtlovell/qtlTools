@@ -18,7 +18,7 @@ dropSmallCovInt<-function(cross, qtl, formula, covar, pheno.col, method = "hk",
   fout<-f[!checked | f[,"LOD"]>thresh.diff,]
   newform = paste("y ~ ", paste(fout$id, collapse = " + "))
   attr(qtl,"formula")<-newform
-  newqtl = refineqtl(cross, pheno.col = phe, qtl = qtl,
+  newqtl = refineqtl(cross, pheno.col = pheno.col, qtl = qtl,
                      formula = formula(qtl), method = "hk", covar = covar, verbose=F)
   return(newqtl)
 }
