@@ -60,7 +60,7 @@
 meanScan<-function(cross, pheno.col = 1,  covar = NULL,
                    prob.thresh = 0, set.mfrow=FALSE,
                    leg.pos = "topright", leg.inset = 0.001, leg.bty = "n",
-                   cols = NULL, ltys = NULL, ...){
+                   cols = NULL, ltys = NULL, ylim = NULL, ...){
 
   if("X" %in% chrnames(cross)){
     cat("dropping X chromosome")
@@ -135,9 +135,11 @@ meanScan<-function(cross, pheno.col = 1,  covar = NULL,
 
     for(j in mnames)  s1[,j]<-out[,j]
 
-
-    plot(s1, type = "n", ylim = c(min(as.matrix(out[,cnames])),
-                                  max(as.matrix(out[,cnames]))),
+    if(is.null(ylim)){
+      ylim = c(min(as.matrix(out[,cnames])),
+               max(as.matrix(out[,cnames])))
+    }
+    plot(s1, type = "n", ylim = ylim,
          main = covar.title, ylab = pheno.col, ...)
     s1$lod<-NULL
 
