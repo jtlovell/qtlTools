@@ -4,8 +4,8 @@
 \alias{stepwiseqtl.int}
 \title{stepwise qtl analysis forcing an interactive covariate}
 \usage{
-stepwiseqtl.int(cross, chr, pheno.col = 1, qtl, formula, max.qtl = 10,
-  covar = NULL, method = c("imp", "hk"), model = c("normal", "binary"),
+stepwiseqtl.int(cross, chr, pheno.col = 1, max.qtl = 10, covar = NULL,
+  method = c("imp", "hk"), model = c("normal", "binary"),
   incl.markers = TRUE, refine.locations = TRUE, additive.only = FALSE,
   scan.pairs = FALSE, penalties, keeplodprofile = TRUE, keeptrace = FALSE,
   verbose = TRUE, tol = 1e-04, maxit = 1000, require.fullrank = FALSE)

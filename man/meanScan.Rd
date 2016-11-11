@@ -6,7 +6,7 @@
 \usage{
 meanScan(cross, pheno.col = 1, covar = NULL, prob.thresh = 0,
   set.mfrow = FALSE, leg.pos = "topright", leg.inset = 0.001,
-  leg.bty = "n", cols = NULL, ltys = NULL, ...)
+  leg.bty = "n", cols = NULL, ltys = NULL, ylim = NULL, ...)
 }
 \arguments{
 \item{cross}{The qtl cross. Must contain genotype probabilities, calculated via calc.genoprob.
@@ -54,7 +54,7 @@ library(qtl)
 data(fake.bc)
 cross<-fake.bc
 cross<-calc.genoprob(cross)
-meanScan(cross, covar = NULL)
+meanScan(cross, covar = NULL, ylim = c(5,7))
 
 # Some simple customization
 meanScan(cross, covar = NULL, cols = c("black","orange"), ltys = c(1,2),
