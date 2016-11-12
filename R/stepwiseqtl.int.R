@@ -5,7 +5,7 @@
 #' @import qtl
 #' @export
 stepwiseqtl.int <-
-  function(cross, chr, pheno.col=1, max.qtl=10, covar=NULL,
+  function(cross, chr, pheno.col=1, qtl, formula, max.qtl=10, covar=NULL,
            method=c("imp", "hk"), model=c("normal", "binary"),
            incl.markers=TRUE, refine.locations=TRUE,
            additive.only=FALSE, scan.pairs=FALSE, penalties,
