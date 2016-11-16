@@ -4,25 +4,24 @@
 #' \code{meanScan} Like qtl:effectscan, but plots the genotypic means across the
 #' marker / pseudomarker grid.
 #'
-#' @param cross The qtl cross. Must contain genotype probabilities, calculated via calc.genoprob.
-#' If the cross has an X chromosome, this is dropped, as the genotypes are different.
+#' @param cross The qtl cross. Must contain genotype probabilities or imputed genotypes
 #' @param pheno.col Character or numeric vector indicating the phenotype to be tested.
 #' Only 1 phenotype can be tested at a time.
-#' @param covar dataframe of covariates with names that match terms in the formula.
-#' Each column must be either a character or factor. If a numeric vector was used to fit the
-#' model, convert it to a factor by as.factor.
-#' @param prob.thresh The genotype probability threshold required to call a genotype. If set at
-#' .5 (default) all individuals are assigned genotype calls, otherwise, those with a probability
-#' < prob.threshold are called as NA. Values closer to 1 are more stringent.
+#' @param covar dataframe of covariates like addcovar in qtl::scanone.
+#' @param chr The chromosomes to analyze. If not supplied, all are tested.
 #' @param leg.pos The character of numeric (length 2) position of the legend. Default is "topright".
 #' @param leg.inset The numeric inset of the legend from the plot border.
 #' @param leg.bty The border setting for the legend
-#' @param cols The vector of colors for the lines in the plot (by genotype)
-#' @param ltys The vector of linetypes
-#' @param set.mfrow Logical, Should the plotting window be set to the number of covariates?
+#' @param cols optional vector of line colors.
+#' @param ltys optional vector of linetypes
+#' @param ylim optional limits for the y axis
+#' @param ylab optional label for the y axis
+#' @param plotit Logical, should a plot be made?
+#' @param draw.legend Logical, should a legend be drawn?
 #' @param ... additional arguments passed on to plot.scanone
 #' @details Calculates genotypic means at each marker/psuedomarker, plots them.
-#' @return The plot
+#' @return The plot (if plotit) and an object of class scanone containing the means
+#' for each combination of genotype and covariate.
 #'
 #' @examples
 #' \dontrun{
@@ -31,131 +30,106 @@
 #' data(fake.bc)
 #' cross<-fake.bc
 #' cross<-calc.genoprob(cross)
-#' meanScan(cross, covar = NULL, ylim = c(5,7))
+#' ms<-meanScan(cross, covar = NULL, ylim = c(5,7), leg.inset = .05)
 #'
 #' # Some simple customization
-#' meanScan(cross, covar = NULL, cols = c("black","orange"), ltys = c(1,2),
+#' ms<-meanScan(cross, covar = NULL, cols = c("black","orange"), ltys = c(1,2),
 #'    leg.pos = "top", leg.inset = 0.02)
 #'
 #' sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
-#' meanScan(cross, covar = sex, chr = c(2,7))
+#' ms<-meanScan(cross, covar = sex, chr = c(2,7), leg.pos = "right", leg.inset = .1)
+#' ms<-meanScan(cross, covar = sex, chr = c(2,7), leg.pos = "right", leg.inset = .1,
+#'    cols = c("black","grey","darkblue","lightblue"))
+#'
+#' cross.fem<-subset(cross, ind = sex[,1] == "F")
+#' cross.male<-subset(cross, ind = sex[,1] == "M")
+#' par(mfrow = c(2,1))
+#' ms <-meanScan(cross.fem, leg.pos = "topright", leg.inset = .05, main = "females only")
+#' ms <-meanScan(cross.male, leg.pos = "topright", leg.inset = .05, main = "males only")
 #'
 #' data(fake.f2)
 #' cross<-fake.f2
 #' cross<-calc.genoprob(cross)
-#' meanScan(cross, covar = NULL)
+#' ms <- meanScan(cross, covar = NULL, leg.pos = "bottomright", leg.inset = .1)
 #' sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
-#' meanScan(cross, covar = sex, chr = c(1,13))
+#' ms<-meanScan(cross, covar = sex, chr = c(1,13))
 #'
 #' data(fake.4way)
 #' cross<-fake.4way
 #' cross<-calc.genoprob(cross)
-#' meanScan(cross, covar = NULL)
+#' ms<-meanScan(cross, covar = NULL)
 #' sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
-#' meanScan(cross, covar = sex, chr = c(2,7))
+#' ms<-meanScan(cross, covar = sex, chr = c(2,7))
 #' }
 #'
 #' @import qtl
 #' @export
-meanScan<-function(cross, pheno.col = 1,  covar = NULL,
-                   prob.thresh = 0, set.mfrow=FALSE,
+meanScan<-function(cross, pheno.col = 1,
+                   covar = NULL, chr = NULL,
                    leg.pos = "topright", leg.inset = 0.001, leg.bty = "n",
-                   cols = NULL, ltys = NULL, ylim = NULL, ...){
-
-  if("X" %in% chrnames(cross)){
-    cat("dropping X chromosome")
-    cross<-subset(cross, chr = chrnames(cross)[chrnames(cross)!="X"])
-  }
-  if (!("prob" %in% names(cross$geno[[1]])))
-    stop("You must first run calc.genoprob.")
-
-  if(length(pheno.col) != 1)
-    stop("pheno.col (pheno.col) must be a numeric or character vector of length 1.")
-  if(is.numeric(pheno.col)){
-    pheno.col<-phenames(cross)[pheno.col]
-  }
-  # 1. get the covariate data in order
+                   cols = NULL, ltys = NULL, ylim = NULL, ylab =NULL,
+                   plotit = TRUE, draw.legend = TRUE, ...){
+  if(!is.null(chr)) cross<-subset(cross, chr = chr)
+  if(!pheno.col %in% phenames(cross)) pheno.col<-phenames(cross)[pheno.col]
   if(is.null(covar)){
-    covar<-factor(rep(1, nind(cross)))
-    covar.name<-levels(covar)
-    covar.id<-NULL
+    formula = paste0(pheno.col, " ~ QTL")
   }else{
-    if(class(covar) == "data.frame"){
-      covar.id<-names(covar)
-      if(ncol(covar)!=1) stop("only single covariates permitted")
-      covar<-as.factor(covar[,1])
-    }else{
-      covar<-as.factor(covar)
-      covar.id<-"covar"
-    }
-    covar.name<-levels(covar)
+    formula = paste0(pheno.col, " ~ ", "QTL + ", paste(colnames(covar), collapse = " + "))
   }
 
-  # 2. Extract the genotype probabilities
-  s1<-scanone(cross, method = "hk")
-  m<-makeqtl(cross, chr = s1$chr,
-             pos = s1$pos,
-             what="prob")
-
-  # 3. infer the genotypes for each individuals * (pseudo)marker
-  gp<-lapply(m[[1]], function(x) apply(x,1, function(y) {
-    if(max(y) < prob.thresh){
-      return(NA)
+  if("prob" %in% names(cross$geno[[1]])){
+    atr<-attributes(cross$geno[[1]]$prob)
+  }else{
+    if("draws" %in% names(cross$geno[[1]])){
+      atr<-attributes(cross$geno[[1]]$draws)
     }else{
-      if(length(colnames(x)[which(y==max(y))])>1){
-        return(NA)
-      }else{
-        return(colnames(x)[which(y==max(y))])
-      }
+      stop("run either calc.genoprob or sim.geno first.\n")
     }
-  }))
-  gp<-data.frame(do.call(cbind,gp))
-  for(i in colnames(gp)) gp[,i]<-as.character(gp[,i])
-
-  # 4. add in phenotype and covariate data
-  y<-pull.pheno(cross, pheno.col=pheno.col)
-  if(set.mfrow) par(mfrow = c(length(unique(covar)),1))
-
-  # 5. Loop through the covariates, plotting the effects for each.
-  for(i in covar.name){
-    tmp<-gp[covar == i,]
-    tmp.y<-y[covar == i]
-    out<-data.frame(t(apply(tmp,2,function(x){
-      tapply(tmp.y, x, mean, na.rm=T)
-    })))
-    if(is.null(covar.id)){
-      covar.title = NULL
-    }else{
-      covar.title = paste0(covar.id,": ", i)
-    }
-
-    nnames<-ncol(out)
-    mnames<-colnames(out)
-    cnames<-1:(nnames)
-
-    for(j in mnames)  s1[,j]<-out[,j]
-
-    if(is.null(ylim)){
-      ylim = c(min(as.matrix(out[,cnames])),
-               max(as.matrix(out[,cnames])))
-    }
-    plot(s1, type = "n", ylim = ylim,
-         main = covar.title, ylab = pheno.col, ...)
-    s1$lod<-NULL
-
-    if(is.null(cols)){
-      cols<-rainbow(nnames)
-    }
-    if(length(cols)!=nnames) stop("vector of colors must match the number of genotypes\n")
-    if(is.null(ltys)){
-      ltys<-rep(1, nnames)
-    }
-    if(length(ltys)!=nnames) stop("vector of linetypes must match the number of genotypes\n")
-    for(i in mnames) s1[,i]<-out[,i]
-    for(i in 1:nnames){
-      plot(s1, lodcolumn = cnames[i] , col = cols[i], add=T, lty=ltys[i],...)
-    }
-
-    legend(leg.pos, mnames, col = cols, lty=ltys, inset = leg.inset, bty=leg.bty)
   }
+  ag<-argmax.geno(cross, step = atr$step, error.prob = atr$error.prob,
+                  off.end = atr$off.end, map.function = atr$map.function,
+                  stepwidth = atr$stepwidth)
+
+  gen<-pull.argmaxgeno(ag, include.pos.info=F)
+
+  s1<-scanone(cross,method = ifelse("prob" %in% names(cross$geno[[1]]),"hk","imp"))[,-3]
+  mars<-rownames(s1)
+  dat<-cbind(pull.pheno(cross, pheno.col), gen, covar)
+  colnames(dat)[1]<-pheno.col
+
+  genotypes<-attr(cross$geno[[1]]$prob,"dimnames")[[3]]
+
+  out<-lapply(mars, function(x){
+    form <- as.formula(gsub("QTL",x,formula))
+    a<-aggregate(form, data = dat, mean)
+    res<-all.vars(form)[1]
+    of<-all.vars(form)[-1]
+    of<-of[of!=x]
+    a$mar.id = paste("geno",genotypes[a[,x]], sep = ":")
+    if(length(of)>=1){
+      a$covar.id<-sapply(1:nrow(a), function(y) paste(paste(of, collapse = "."),
+                                                      paste(a[,of][y], collapse = "."),sep = ":"))
+      a$ids<-paste(a$mar.id, a$covar.id, sep = " ")
+    }else{
+      a$ids<-a$mar.id
+    }
+    num<-a[,res]
+    names(num)<-a$ids
+    return(num)
+  })
+  n <- max(sapply(out, length))
+  out1 <- do.call(rbind, lapply(out, `[`, seq_len(n)))
+  for(i in colnames(out1)) s1[,i]<-out1[,i]
+  if(is.null(ylim)) ylim = c(min(out1, na.rm=T),max(out1, na.rm=T))
+  if(is.null(cols)) cols = highContrastColors(ncol(s1))
+  if(is.null(ltys)) ltys = rep(1, ncol(s1))
+  if(is.null(ylab)) ylab = paste0(res," mean")
+  if(plotit){
+    plot(s1, type = "n", ylim = ylim, ylab = ylab, ...)
+    for(i in 1:(ncol(s1)-2)) plot(s1, lodcolumn = i, col = cols[i],lty=ltys[i], add = T)
+    if(draw.legend){
+      legend(leg.pos, inset = leg.inset, colnames(out1), col = cols, lty = ltys, bty = leg.bty)
+    }
+  }
+  return(s1)
 }

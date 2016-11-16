@@ -4,26 +4,20 @@
 \alias{meanScan}
 \title{Make a scanone plot of genotype means.}
 \usage{
-meanScan(cross, pheno.col = 1, covar = NULL, prob.thresh = 0,
-  set.mfrow = FALSE, leg.pos = "topright", leg.inset = 0.001,
-  leg.bty = "n", cols = NULL, ltys = NULL, ylim = NULL, ...)
+meanScan(cross, pheno.col = 1, covar = NULL, chr = NULL,
+  leg.pos = "topright", leg.inset = 0.001, leg.bty = "n", cols = NULL,
+  ltys = NULL, ylim = NULL, ylab = NULL, plotit = TRUE,
+  draw.legend = TRUE, ...)
 }
 \arguments{
-\item{cross}{The qtl cross. Must contain genotype probabilities, calculated via calc.genoprob.
-If the cross has an X chromosome, this is dropped, as the genotypes are different.}
+\item{cross}{The qtl cross. Must contain genotype probabilities or imputed genotypes}
 
 \item{pheno.col}{Character or numeric vector indicating the phenotype to be tested.
 Only 1 phenotype can be tested at a time.}
 
-\item{covar}{dataframe of covariates with names that match terms in the formula.
-Each column must be either a character or factor. If a numeric vector was used to fit the
-model, convert it to a factor by as.factor.}
+\item{covar}{dataframe of covariates like addcovar in qtl::scanone.}
 
-\item{prob.thresh}{The genotype probability threshold required to call a genotype. If set at
-.5 (default) all individuals are assigned genotype calls, otherwise, those with a probability
-< prob.threshold are called as NA. Values closer to 1 are more stringent.}
-
-\item{set.mfrow}{Logical, Should the plotting window be set to the number of covariates?}
+\item{chr}{The chromosomes to analyze. If not supplied, all are tested.}
 
 \item{leg.pos}{The character of numeric (length 2) position of the legend. Default is "topright".}
 
@@ -31,14 +25,23 @@ model, convert it to a factor by as.factor.}
 
 \item{leg.bty}{The border setting for the legend}
 
-\item{cols}{The vector of colors for the lines in the plot (by genotype)}
+\item{cols}{optional vector of line colors.}
 
-\item{ltys}{The vector of linetypes}
+\item{ltys}{optional vector of linetypes}
+
+\item{ylim}{optional limits for the y axis}
+
+\item{ylab}{optional label for the y axis}
+
+\item{plotit}{Logical, should a plot be made?}
+
+\item{draw.legend}{Logical, should a legend be drawn?}
 
 \item{...}{additional arguments passed on to plot.scanone}
 }
 \value{
-The plot
+The plot (if plotit) and an object of class scanone containing the means
+for each combination of genotype and covariate.
 }
 \description{
 \code{meanScan} Like qtl:effectscan, but plots the genotypic means across the
@@ -54,28 +57,36 @@ library(qtl)
 data(fake.bc)
 cross<-fake.bc
 cross<-calc.genoprob(cross)
-meanScan(cross, covar = NULL, ylim = c(5,7))
+ms<-meanScan(cross, covar = NULL, ylim = c(5,7), leg.inset = .05)
 
 # Some simple customization
-meanScan(cross, covar = NULL, cols = c("black","orange"), ltys = c(1,2),
+ms<-meanScan(cross, covar = NULL, cols = c("black","orange"), ltys = c(1,2),
    leg.pos = "top", leg.inset = 0.02)
 
 sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
-meanScan(cross, covar = sex, chr = c(2,7))
+ms<-meanScan(cross, covar = sex, chr = c(2,7), leg.pos = "right", leg.inset = .1)
+ms<-meanScan(cross, covar = sex, chr = c(2,7), leg.pos = "right", leg.inset = .1,
+   cols = c("black","grey","darkblue","lightblue"))
+
+cross.fem<-subset(cross, ind = sex[,1] == "F")
+cross.male<-subset(cross, ind = sex[,1] == "M")
+par(mfrow = c(2,1))
+ms <-meanScan(cross.fem, leg.pos = "topright", leg.inset = .05, main = "females only")
+ms <-meanScan(cross.male, leg.pos = "topright", leg.inset = .05, main = "males only")
 
 data(fake.f2)
 cross<-fake.f2
 cross<-calc.genoprob(cross)
-meanScan(cross, covar = NULL)
+ms <- meanScan(cross, covar = NULL, leg.pos = "bottomright", leg.inset = .1)
 sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
-meanScan(cross, covar = sex, chr = c(1,13))
+ms<-meanScan(cross, covar = sex, chr = c(1,13))
 
 data(fake.4way)
 cross<-fake.4way
 cross<-calc.genoprob(cross)
-meanScan(cross, covar = NULL)
+ms<-meanScan(cross, covar = NULL)
 sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
-meanScan(cross, covar = sex, chr = c(2,7))
+ms<-meanScan(cross, covar = sex, chr = c(2,7))
 }
 
 }
