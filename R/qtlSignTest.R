@@ -23,7 +23,7 @@ qtlSignTest<-function(effect = NULL, trans.effect = NULL, verbose=T, ...){
     effect<-effect[!is.na(effect) & is.finite(effect) & !is.nan(effect)]
     nup = sum(effect>0)
     ntot = sum(effect!=0)
-    out<-binom.test(nup,ntot, ...)
+    out<-binom.test(nup,ntot, p = 0.5, alternative = "two.sided", ...)
     if(verbose)
       cat("n. up regulated = ", nup, " out of ", ntot,
           " genes (",round(nup/ntot,3),"%)\npvalue = ",out$p.value, sep = "")
@@ -37,19 +37,20 @@ qtlSignTest<-function(effect = NULL, trans.effect = NULL, verbose=T, ...){
         cat("running sign test as independence of cis and trans effect directions\n")
       effect<-effect[!is.na(effect) & is.finite(effect) & !is.nan(effect)]
       trans.effect<-trans.effect[!is.na(trans.effect) & is.finite(trans.effect) & !is.nan(trans.effect)]
-      nup = sum(effect>0)
-      ndown = sum(effect<0)
-      nup.trans = sum(trans.effect>0)
-      ndown.trans = sum(trans.effect<0)
-      out<-fisher.test(rbind(c(nup,ndown), c(nup.trans,ndown.trans)), ...)
+      upup = sum(effect>0 & trans.effect>0)
+      updown = sum(effect>0 & trans.effect<0)
+      downup = sum(effect<0 & trans.effect>0)
+      downdown = sum(effect<0 & trans.effect<0)
+      ctsame = sum(upup, downdown)
+      ctdiff = sum(updown, downup)
+      out<-binom.test(ctsame,sum(ctdiff,ctsame), p = 0.5, alternative = "two.sided", ...)
       if(verbose)
-        cat("cis = ", round(nup/ndown,2),
-            "; trans = ", round(nup.trans/ndown.trans,2),
-            "; odds ratio = ", round(out$estimate,2),
+        cat("cis&trans same = ", ctsame,
+            "; cis&trans different = ", ctdiff,
+            "; ratio = ", round(out$estimate,2),
             "; p.value = ",out$p.value, sep = "")
-      ret<-with(out, data.frame(n.up_cis = nup, n.down_cis = ndown,
-                                n.up_trans = nup.trans, n.down_trans = ndown.trans,
-                                odds.ratio = estimate,
+      ret<-with(out, data.frame(ctsame = ctsame, ctdiff = ctdiff,
+                                prob.success = estimate,
                                 ci.low = conf.int[1], ci.high = conf.int[2],
                                 p.value = p.value))
     }else{

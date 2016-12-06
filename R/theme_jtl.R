@@ -15,7 +15,6 @@ theme_jtl <- function()
   theme_classic(base_size = base_size, base_family = base_family) +
     theme(
       legend.key = element_blank(),
-      strip.background = element_blank(),
 
       strip.text = txt.10,
       text = txt.8,
