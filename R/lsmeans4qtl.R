@@ -15,13 +15,11 @@
 #' @param covar dataframe of covariates with names that match terms in the formula.
 #' Each column must be either a character or factor. If a numeric vector was used to fit the
 #' model, convert it to a factor by as.factor.
-#' @param prob.thresh The genotype probability threshold required to call a genotype. If set at
-#' .5 (default) all individuals are assigned genotype calls, otherwise, those with a probability
-#' < prob.threshold are called as NA. Values closer to 1 are more stringent.
 #' @param ... additional arguments passed on to lsmeans.
 #' @details This function iterates through the terms in the formula, pulling out (ls)means.
 #' It calls the function lsmeans from the lsmeans package, which calculates SAS-style
-#' least square means. Regular means are calculated by aggregate.
+#' least square means. Regular means are calculated by aggregate. Genotypes for each individual
+#' are inferred using the Viterbi algorithm from qtl::argmax.geno.
 #' @return A dataframe of (least square) means.
 #'
 #' @examples
@@ -108,20 +106,26 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   }
 
   # 2. infer the genotype for each individual at each qtl
-  gp<-lapply(mod[[1]], function(x) apply(x,1, function(y) {
-    if(max(y) < prob.thresh){
-      return(NA)
+  if("prob" %in% names(cross$geno[[1]])){
+    atr<-attributes(cross$geno[[1]]$prob)
+  }else{
+    if("draws" %in% names(cross$geno[[1]])){
+      atr<-attributes(cross$geno[[1]]$draws)
     }else{
-      if(length(colnames(x)[which(y==max(y))])>1){
-        return(NA)
-      }else{
-        return(colnames(x)[which(y==max(y))])
-      }
+      stop("run either calc.genoprob or sim.geno first.\n")
     }
-  }))
-  names(gp)<-mod$altname
-  gp<-data.frame(do.call(cbind,gp))
+  }
+  ag<-argmax.geno(cross, step = atr$step, error.prob = atr$error.prob,
+                  off.end = atr$off.end, map.function = atr$map.function,
+                  stepwidth = atr$stepwidth)
+  gp<-pull.argmaxgeno(ag, include.pos.info=F)
 
+  marsInMod<-find.marker(cross, chr = mod$chr, pos = mod$pos)
+  gp<-gp[,marsInMod]
+  colnames(gp)<-mod$altname
+  genotypes<-attr(cross$geno[[1]]$prob,"dimnames")[[3]]
+  for(i in 1:nqtl(mod)) gp[gp==i]<-genotypes[i]
+  gp<-data.frame(gp)
   # 3. add in phenotype and covariate data
   gp$y<-pull.pheno(cross, pheno.col=pheno.col)
   if(!is.null(covar)){

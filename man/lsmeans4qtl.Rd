@@ -23,10 +23,6 @@ must be generated using what = "prob" (makeqtl) or method = "hk".}
 Each column must be either a character or factor. If a numeric vector was used to fit the
 model, convert it to a factor by as.factor.}
 
-\item{prob.thresh}{The genotype probability threshold required to call a genotype. If set at
-.5 (default) all individuals are assigned genotype calls, otherwise, those with a probability
-< prob.threshold are called as NA. Values closer to 1 are more stringent.}
-
 \item{...}{additional arguments passed on to lsmeans.}
 }
 \value{
@@ -40,7 +36,8 @@ means and sem are reported without least square means.
 \details{
 This function iterates through the terms in the formula, pulling out (ls)means.
 It calls the function lsmeans from the lsmeans package, which calculates SAS-style
-least square means. Regular means are calculated by aggregate.
+least square means. Regular means are calculated by aggregate. Genotypes for each individual
+are inferred using the Viterbi algorithm from qtl::argmax.geno.
 }
 \examples{
 \dontrun{
