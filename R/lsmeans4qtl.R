@@ -83,9 +83,6 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   if(is.null(form))
      form <- formula(mod)
 
-  if(!"prob" %in% names(mod))
-    stop("mod (QTL Model) must contain genotype probabilities\n")
-
   if(any(sapply(covar, class) == "numeric"))
     stop("covariates must be either character or factor\n")
 
