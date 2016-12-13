@@ -75,7 +75,7 @@
 #'
 #' @import qtl
 #' @export
-lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob.thresh = 0, ...){
+lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, ...){
 
   if(is.null(form) & is.null(attr(mod, "formula")))
       stop("formula must either be supplied, or included in mod (QTL model)\n")
@@ -105,9 +105,12 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   # 2. infer the genotype for each individual at each qtl
   if("prob" %in% names(cross$geno[[1]])){
     atr<-attributes(cross$geno[[1]]$prob)
+    genotypes<-attr(cross$geno[[1]]$prob,"dimnames")[[3]]
   }else{
     if("draws" %in% names(cross$geno[[1]])){
       atr<-attributes(cross$geno[[1]]$draws)
+      tmp<-calc.genoprob(cross)
+      genotypes<-attr(tmp$geno[[1]]$prob,"dimnames")[[3]]
     }else{
       stop("run either calc.genoprob or sim.geno first.\n")
     }
@@ -120,8 +123,7 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, prob
   marsInMod<-find.marker(cross, chr = mod$chr, pos = mod$pos)
   gp<-gp[,marsInMod]
   colnames(gp)<-mod$altname
-  genotypes<-attr(cross$geno[[1]]$prob,"dimnames")[[3]]
-  for(i in 1:nqtl(mod)) gp[gp==i]<-genotypes[i]
+  for(i in 1:length(genotypes)) gp[gp==i]<-genotypes[i]
   gp<-data.frame(gp)
   # 3. add in phenotype and covariate data
   gp$y<-pull.pheno(cross, pheno.col=pheno.col)

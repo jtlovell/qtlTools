@@ -79,9 +79,12 @@ meanScan<-function(cross, pheno.col = 1,
 
   if("prob" %in% names(cross$geno[[1]])){
     atr<-attributes(cross$geno[[1]]$prob)
+    genotypes<-attr(cross$geno[[1]]$prob,"dimnames")[[3]]
   }else{
     if("draws" %in% names(cross$geno[[1]])){
       atr<-attributes(cross$geno[[1]]$draws)
+      tmp<-calc.genoprob(cross)
+      genotypes<-attr(tmp$geno[[1]]$prob,"dimnames")[[3]]
     }else{
       stop("run either calc.genoprob or sim.geno first.\n")
     }
@@ -99,8 +102,6 @@ meanScan<-function(cross, pheno.col = 1,
 
   dat<-cbind(pull.pheno(cross, pheno.col), gen, covar)
   colnames(dat)[1]<-pheno.col
-
-  genotypes<-attr(cross$geno[[1]]$prob,"dimnames")[[3]]
 
   out<-lapply(mars, function(x){
     form <- as.formula(gsub("QTL",x,formula, fixed=T))
