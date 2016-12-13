@@ -93,14 +93,17 @@ meanScan<-function(cross, pheno.col = 1,
   gen<-pull.argmaxgeno(ag, include.pos.info=F)
 
   s1<-scanone(cross,method = ifelse("prob" %in% names(cross$geno[[1]]),"hk","imp"))[,-3]
-  mars<-rownames(s1)
+  mars<-gsub("[[:punct:]]", "", colnames(gen))
+  rownames(s1)<-mars
+  colnames(gen)<-mars
+
   dat<-cbind(pull.pheno(cross, pheno.col), gen, covar)
   colnames(dat)[1]<-pheno.col
 
   genotypes<-attr(cross$geno[[1]]$prob,"dimnames")[[3]]
 
   out<-lapply(mars, function(x){
-    form <- as.formula(gsub("QTL",x,formula))
+    form <- as.formula(gsub("QTL",x,formula, fixed=T))
     a<-aggregate(form, data = dat, mean)
     res<-all.vars(form)[1]
     of<-all.vars(form)[-1]
