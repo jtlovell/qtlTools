@@ -4,8 +4,7 @@
 \alias{lsmeans4qtl}
 \title{Using a QTL model, calcuate conditional QTL genotype effects}
 \usage{
-lsmeans4qtl(cross, pheno.col = 1, form = NULL, mod, covar = NULL,
-  prob.thresh = 0, ...)
+lsmeans4qtl(cross, pheno.col = 1, form = NULL, mod, covar = NULL, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object used to generate the model. Must contain genotype
