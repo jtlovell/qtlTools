@@ -167,12 +167,18 @@ findGenecM<-function(cross, marker.info, gff, gffCols = NULL,
       }
       return(gffbp)
     })
-    outchr<-do.call(rbind, outint)
-    outlow<-tgff[tgff$bp<min(tmap$bp),]
-    outlow$pos<-0
-    outhi<-tgff[tgff$bp>=max(tmap$bp),]
-    outhi$pos<-max(tmap$pos)
-    return(rbind(outlow,outchr,outhi))
+    outchr <- do.call(rbind, outint)
+    if(any(tgff$bp < min(tmap$bp))){
+      outlow <- tgff[tgff$bp < min(tmap$bp), ]
+      outlow$pos <- 0
+      outchr<-rbind(outlow, outchr)
+    }
+    if(any(tgff$bp > max(tmap$bp))){
+      outhi <- tgff[tgff$bp >= max(tmap$bp), ]
+      outhi$pos <- max(tmap$pos)
+      outchr<-rbind(outchr, outhi)
+    }
+    return(outchr)
     })
 
   return(do.call(rbind,out))
