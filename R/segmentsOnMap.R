@@ -92,6 +92,36 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
                         leg.lwd=2, max.lwd = 5, min.lwd = 1, tick.width = NULL,
                         leg.inset = 0.01, chrBuffer = c(.05,.15),
                         orderBy = "lod", showPeaks = FALSE, ...){
+
+  ### function that gives y positions of segments
+  gravSeg<-function(bx,ex){
+    u<-unique(c(bx,ex))
+    m<-data.frame(pos = u[order(u)])
+    out<-data.frame(l = bx, h = ex)
+    out$id<-paste0("qtl",1:nrow(out))
+    for(j in out$id) m[,j]<-ifelse(m$pos>=out$l[out$id==j] &
+                                      m$pos<=out$h[out$id==j],TRUE,FALSE)
+
+    m<-m[,-1]
+    z<-vector()
+    for(j in out$id){
+      if(which(colnames(m)==j)==1){
+        z[j]<-0
+      }else{
+        n<-m[m[,j],1:which(colnames(m)==j)]
+        wh.allf<-apply(n,2,function(k) all(!k))
+        if(any(wh.allf)){
+          z[j]<-min(which(wh.allf))
+          m[m[,j],z[j]]<-TRUE
+          z[j]<-z[j]-1
+        }else{
+          z[j]<-sum(apply(n,2,any)[-ncol(n)])
+        }
+      }
+    }
+    return(z)
+  }
+
   if(lwd == "byLod" & is.na(peaklod) & is.null(calcCisResults)) lwd = 2
   ############
   # 1. Combine the results into a dataframe
@@ -114,7 +144,6 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
     }else{
       dat$phe<-with(dat, paste(chr, round(cm,0),sep="@"))
     }
-
   }
   dat$phenonum<-as.numeric(as.factor(dat$phe))
   dat$col<-NA
@@ -202,32 +231,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
     if(i %in% dat.ci$chr){
       tem<-dat.ci[dat.ci$chr == i,]
       tem<-tem[order(tem$l),]
-      if(nrow(tem)==1){
-        tem$x<-0
-      }else{
-        m<-data.frame(pos = mpos$pos[mpos$chr == i])
-        for(j in tem$phe) m[,j]<-ifelse(m$pos>=tem$l[tem$phe==j] &
-                                          m$pos<=tem$h[tem$phe==j],TRUE,FALSE)
-
-        m<-m[,-1]
-        z<-vector()
-        for(j in tem$phe){
-          if(which(colnames(m)==j)==1){
-            z[j]<-0
-          }else{
-            n<-m[m[,j],1:which(colnames(m)==j)]
-            wh.allf<-apply(n,2,function(k) all(!k))
-            if(any(wh.allf)){
-              z[j]<-min(which(wh.allf))
-              m[m[,j],z[j]]<-TRUE
-              z[j]<-z[j]-1
-            }else{
-              z[j]<-sum(apply(n,2,any)[-ncol(n)])
-            }
-          }
-        }
-        tem$x<-z
-      }
+      tem$x<-gravSeg(bx = tem$l, tem$h)
 
       xs<-0:max(tem$x)
       if(!all(xs %in% tem$x)){
