@@ -231,8 +231,8 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
     if(i %in% dat.ci$chr){
       tem<-dat.ci[dat.ci$chr == i,]
       tem<-tem[order(tem$l),]
-      tem$x<-gravSeg(bx = tem$l, tem$h)
-
+      tem$x<-0
+      if(nrow(tem)>1) tem$x<-gravSeg(bx = tem$l, tem$h)
       xs<-0:max(tem$x)
       if(!all(xs %in% tem$x)){
         wh<-xs[-which(xs %in% tem$x)]
