@@ -75,7 +75,7 @@
 #'
 #' @import qtl
 #' @export
-lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, ...){
+lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, returnData = FALSE,...){
 
   if(is.null(form) & is.null(attr(mod, "formula")))
       stop("formula must either be supplied, or included in mod (QTL model)\n")
@@ -130,50 +130,54 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, ...)
   if(!is.null(covar)){
     gp<-data.frame(gp, covar)
   }
-
-  addterms<-terms[!grepl(":",terms, fixed=T)]
-  # 4. calculate lsmeans for each term in model
-  if(requireNamespace("lsmeans", quietly = TRUE)){
-    lm.out<-lm(form,gp)
-    out<-lapply(terms, function(x){
-      lsmeans::lsmeans(lm.out, as.formula(paste("~",x,sep = "")))
-    })
-
-    # 5. reformat output so that it can be combined into a dataframe
-
-    out<-lapply(out, function(x){
-      x<-data.frame(summary(x))
-      naterms<-addterms[!addterms %in% colnames(x)]
-      for(i in naterms) x[,i]<-NA
-      x<-x[,c(addterms,"lsmean", "SE", "df", "lower.CL","upper.CL")]
-    })
-
-    # 6. combine into data.frame
-    out<-do.call(rbind, out)
-  }
-
-
-  # 7. Get generic means and ses
-
-  sem<-function(a) sd(a, na.rm = TRUE)/sqrt(sum(!is.na(a)))
-  m<-function(a) mean(a, na.rm = TRUE)
-  out.mean<-lapply(terms, function(y){
-    term.names = strsplit(y,":",fixed=T)[[1]]
-    term = lapply(term.names, function(x) gp[,x])
-    names(term)<-term.names
-    am<-aggregate(gp[,"y"], term, m)
-    as<-aggregate(gp[,"y"], term, sem)
-    colnames(am)[which(colnames(am)=="x")]<-"mean"
-    colnames(as)[which(colnames(as)=="x")]<-"sem"
-    oa<-merge(as,am, by=term.names)
-    for(x in addterms[!addterms %in% colnames(oa)]) oa[,x]<-NA
-    oa[,c(addterms,"mean","sem")]
-  })
-  out.mean<-do.call(rbind, out.mean)
-
-  if(requireNamespace("lsmeans", quietly = TRUE)){
-    return(merge(out, out.mean, by = addterms))
+  if(returnData){
+    return(gp)
   }else{
-    return(out.mean)
+
+    addterms<-terms[!grepl(":",terms, fixed=T)]
+    # 4. calculate lsmeans for each term in model
+    if(requireNamespace("lsmeans", quietly = TRUE)){
+      lm.out<-lm(form,gp)
+      out<-lapply(terms, function(x){
+        lsmeans::lsmeans(lm.out, as.formula(paste("~",x,sep = "")))
+      })
+
+      # 5. reformat output so that it can be combined into a dataframe
+
+      out<-lapply(out, function(x){
+        x<-data.frame(summary(x))
+        naterms<-addterms[!addterms %in% colnames(x)]
+        for(i in naterms) x[,i]<-NA
+        x<-x[,c(addterms,"lsmean", "SE", "df", "lower.CL","upper.CL")]
+      })
+
+      # 6. combine into data.frame
+      out<-do.call(rbind, out)
+    }
+
+
+    # 7. Get generic means and ses
+
+    sem<-function(a) sd(a, na.rm = TRUE)/sqrt(sum(!is.na(a)))
+    m<-function(a) mean(a, na.rm = TRUE)
+    out.mean<-lapply(terms, function(y){
+      term.names = strsplit(y,":",fixed=T)[[1]]
+      term = lapply(term.names, function(x) gp[,x])
+      names(term)<-term.names
+      am<-aggregate(gp[,"y"], term, m)
+      as<-aggregate(gp[,"y"], term, sem)
+      colnames(am)[which(colnames(am)=="x")]<-"mean"
+      colnames(as)[which(colnames(as)=="x")]<-"sem"
+      oa<-merge(as,am, by=term.names)
+      for(x in addterms[!addterms %in% colnames(oa)]) oa[,x]<-NA
+      oa[,c(addterms,"mean","sem")]
+    })
+    out.mean<-do.call(rbind, out.mean)
+
+    if(requireNamespace("lsmeans", quietly = TRUE)){
+      return(merge(out, out.mean, by = addterms))
+    }else{
+      return(out.mean)
+    }
   }
 }
