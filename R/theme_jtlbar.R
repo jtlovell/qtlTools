@@ -1,4 +1,3 @@
-#' @aliases theme_jtl theme_jtlbar
 #' @title simple custom themes
 #'
 #' @description
@@ -43,5 +42,5 @@ theme_jtlbar <- function()
           panel.border = element_blank(),
 
           axis.ticks.length = unit(0.15, "cm"),
-          axis.ticks = element_line(size = 0.5,  color = "black"))
+          axis.ticks = element_line(size = 0.5,  color = "grey"))
 }
