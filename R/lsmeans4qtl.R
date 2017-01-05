@@ -121,7 +121,7 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, ...)
   gp<-pull.argmaxgeno(ag, include.pos.info=F)
 
   marsInMod<-find.marker(cross, chr = mod$chr, pos = mod$pos)
-  gp<-gp[,marsInMod]
+  gp<-data.frame(gp[,marsInMod])
   colnames(gp)<-mod$altname
   for(i in 1:length(genotypes)) gp[gp==i]<-genotypes[i]
   gp<-data.frame(gp)
@@ -136,7 +136,7 @@ lsmeans4qtl<-function(cross, pheno.col = 1, form = NULL, mod, covar = NULL, ...)
   if(requireNamespace("lsmeans", quietly = TRUE)){
     lm.out<-lm(form,gp)
     out<-lapply(terms, function(x){
-      lsmeans::lsmeans(lm.out, as.formula(paste("~",x,sep = "")), ...)
+      lsmeans::lsmeans(lm.out, as.formula(paste("~",x,sep = "")))
     })
 
     # 5. reformat output so that it can be combined into a dataframe
