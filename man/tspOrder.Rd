@@ -4,8 +4,8 @@
 \alias{tspOrder}
 \title{Order markers within linkage groups}
 \usage{
-tspOrder(cross, markerList, method = "nn", hamiltonian = TRUE,
-  concorde_path = NULL, return = "cross")
+tspOrder(cross, method = "nn", hamiltonian = TRUE, concorde_path = NULL,
+  return = "cross")
 }
 \arguments{
 \item{cross}{The QTL cross object.}

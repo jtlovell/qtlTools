@@ -42,7 +42,7 @@
 #' }
 #' @import qtl
 #' @export
-tspOrder<-function(cross, markerList,
+tspOrder<-function(cross,
                    method = "nn",
                    hamiltonian = TRUE,
                    concorde_path = NULL,
@@ -60,6 +60,9 @@ tspOrder<-function(cross, markerList,
   rf<-data.matrix(pull.rf(cross, what = "rf"))
   class(rf)<-"matrix"
   diag(rf)<-0
+
+  markerList<-lapply(chrnames(cross), function(x) markernames(cross, chr = x))
+  names(markerList)<-chrnames(cross)
 
   chr.ord<-lapply(names(markerList),function(x){
     mnames<-markerList[[x]]

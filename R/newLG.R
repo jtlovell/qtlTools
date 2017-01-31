@@ -29,16 +29,16 @@
 #' }
 #' @import qtl
 #' @export
-newLG<-function(cross, markerlist){
-  markerlist<-markerlist[markerlist %in% markernames(cross)]
+newLG<-function(cross, markerList){
+  markerList<-markerList[markerList %in% markernames(cross)]
   cross<-clean(cross)
   n.mar<-nmar(cross)
   crosstype <- class(cross)[1]
   g <- pull.geno(cross)
-  cross$geno <- vector("list", length(markerlist))
-  names(cross$geno) <- names(markerlist)
-  for (i in names(markerlist)) {
-    mars<-markerlist[[i]]
+  cross$geno <- vector("list", length(markerList))
+  names(cross$geno) <- names(markerList)
+  for (i in names(markerList)) {
+    mars<-markerList[[i]]
     cross$geno[[i]]$data <- g[, mars, drop = FALSE]
     cross$geno[[i]]$map <- seq(0, by = 10, length = length(mars))
     if (crosstype == "4way") {
