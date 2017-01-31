@@ -53,7 +53,7 @@ geno2cross<-function(genomat,
   info<-t(cbind(chr,pos))
   towrite2<-rbind(info,towrite)
 
-  id[1:2]<-""
+  id<-c("","",id)
   towrite2<-cbind(id, towrite2)
   write.csv(towrite2,
             file = crossfile,
