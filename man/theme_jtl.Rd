@@ -2,7 +2,6 @@
 % Please edit documentation in R/theme_jtl.R
 \name{theme_jtl}
 \alias{theme_jtl}
-\alias{theme_jtlbar}
 \title{simple custom themes}
 \usage{
 theme_jtl()
