@@ -5,7 +5,7 @@
 \title{Format a genotype matrix to a R/qtl readable file}
 \usage{
 geno2cross(genomat, chr = NULL, pos = NULL, id = NULL, chrpos.sep = "_",
-  cross.file = "cross.csv")
+  crossfile = "cross.csv")
 }
 \arguments{
 \item{genomat}{A matrix of individual (row) * marker (col) genotype calls.}
@@ -23,7 +23,7 @@ marker names into chromosome and position information. For example, if
 chrpos.sep = "_", a marker named 01_100000 would be parsed into chr = 01
 pos = 100000.}
 
-\item{cross.file}{The name of the cross file to be written. Defaults to store
+\item{crossfile}{The name of the cross file to be written. Defaults to store
 in current working directory. Specify full path if you want to write to another
 location.}
 }

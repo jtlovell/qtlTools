@@ -14,7 +14,7 @@
 #' marker names into chromosome and position information. For example, if
 #' chrpos.sep = "_", a marker named 01_100000 would be parsed into chr = 01
 #' pos = 100000.
-#' @param cross.file The name of the cross file to be written. Defaults to store
+#' @param crossfile The name of the cross file to be written. Defaults to store
 #' in current working directory. Specify full path if you want to write to another
 #' location.
 #'
@@ -31,7 +31,7 @@
 geno2cross<-function(genomat,
                      chr=NULL, pos=NULL, id=NULL,
                      chrpos.sep = "_",
-                     cross.file = "cross.csv"){
+                     crossfile = "cross.csv"){
   if(is.null(chr) & is.null(pos)){
     if(!all(grepl(chrpos.sep,colnames(genomat), fixed=T)))
       stop("if chr and pos are not specified, they must be provided in the column names
@@ -56,7 +56,7 @@ geno2cross<-function(genomat,
   id[1:2]<-""
   towrite2<-cbind(id, towrite2)
   write.csv(towrite2,
-            file = cross.file,
+            file = crossfile,
             quote = F, row.names=F)
   cat("cross file written to", crossfile,"\n")
 }
