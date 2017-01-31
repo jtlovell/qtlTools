@@ -30,7 +30,7 @@
 #' @import qtl
 #' @export
 newLG<-function(cross, markerList){
-  markerList<-markerList[markerList %in% markernames(cross)]
+  markerList<-lapply(markerList, function(x) x[x %in% markernames(cross)])
   cross<-clean(cross)
   n.mar<-nmar(cross)
   crosstype <- class(cross)[1]
