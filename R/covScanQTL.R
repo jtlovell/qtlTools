@@ -42,6 +42,24 @@ covScanQTL<-function(cross, pheno.y, pheno.candidates,
                      chr, pos, qtl.method = "hk",
                      nperm = 0, plotit=TRUE){
 
+  extractGenoCalls<-function(cross, model, covar = NULL, threshold = 0){
+    temp<-model[[1]]
+    for(i in 1:length(temp)) temp[[i]][temp[[i]]<=threshold]<-NA
+    
+    gp <- lapply(temp, function(x){
+      apply(x, 1, function(y) {
+        ifelse(sum(is.na(y)) == length(y),NA, which.max(y))
+      })
+    })
+    gp2 <- data.frame(do.call(cbind, gp))
+    colnames(gp2) <- mod$altname
+    if(!is.null(covar)){
+      gp2<-cbind(covar, gp2)
+    }
+    return(gp2)
+  }
+  
+  
   if(!is.null(mod)){
     covBase<-extractGenoCalls(cross, model=mod, covar = experimental.covar, threshold = 0)
   }else{
@@ -56,22 +74,47 @@ covScanQTL<-function(cross, pheno.y, pheno.candidates,
 
   bs<-scanone(cross, pheno.col = pheno.y, method=qtl.method,
               addcovar = covBase, intcovar = covBase.int, chr = chr)
+  if(plotit) plot(bs, col = "darkred", main = pheno.y, xlab = paste("Chr",chr,"Map position (cM)"))
 
   wh<-which.min(abs(bs$pos - pos))
-  bsl<-data.frame(pheno = names(bs[wh,-c(1:2)]), baseLOD = as.numeric(bs[wh,-c(1:2)]))
+  bsl<-as.numeric(bs[wh,-c(1:2)])
 
-  maxScans<-data.frame(t(sapply(pheno.candidates, function(x){
+  maxScans<-sapply(pheno.candidates, function(x){
     covTemp<-data.frame(covBase, exp = pull.pheno(cross,x))
     cs<-scanone(cross, pheno.col = pheno.y, method=qtl.method,
                 addcovar = covTemp, intcovar = covBase.int, chr = chr)
-    csl<-as.numeric(cs[wh,-c(1:2)])
-    return(csl)
-  })))
-  colnames(maxScans)<-pheno.y
-  bsl.mat<-matrix(rep(bsl$baseLOD,length(pheno.candidates)),byrow=T,nrow=length(pheno.candidates))
-  diffScans<- bsl.mat-maxScans
-  rankScans<-apply(-diffScans, 2, rank)
-  return(list(ranks = rankScans, differences=diffScans, initial.s1max=bsl))
+    if(plotit) plot(cs, add = T, col = rgb(0,0,0,.2), lty=1)
+    return(as.numeric(cs[wh,-c(1:2)]))
+  })
+  diffScans<- bsl-maxScans
+  rankScans<-rank(-diffScans)
+  if(nperm>0){
+    permScans<-sapply(1:nperm, function(x){
+      perm.phes<-pull.pheno(cross,pheno.candidates)
+      perm.phes<-perm.phes[sample(1:nrow(perm.phes)),]
+      sapply(pheno.candidates, function(y){
+        covTemp<-data.frame(covBase, exp = perm.phes[,y])
+        cs<-scanone(cross, pheno.col = pheno.y, method=qtl.method,
+                    addcovar = covTemp, intcovar = covBase.int, chr = chr)
+        return(as.numeric(cs[wh,-c(1:2)]))
+      })
+    })
+    ps<-sapply(names(maxScans), 
+               function(x) sum(permScans[x,]<=maxScans[x])/nperm)
+  }else{
+    ps<-NA
+  }
+
+  out<-data.frame(phenotype = pheno.y, 
+                  candidateID = pheno.candidates, 
+                  lodAtPeak = maxScans, 
+                  diffAtPeak = diffScans, 
+                  rank = rankScans, 
+                  perm.p = ps,
+                  stringsAsFactors=F)
+  rownames(out)<-NULL
+  out<-out[order(out$rank),]
+  return(out)
 }
 
 
