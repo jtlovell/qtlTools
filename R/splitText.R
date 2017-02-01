@@ -10,5 +10,5 @@
 #' @export
 splitText<-function(x, sep = "_", num = 1){
   x<-as.character(x)
-  sapply(x, function(y) strsplit(x, sep)[[1]][num])
+  sapply(x, function(y) strsplit(y, sep)[[1]][num])
 }
