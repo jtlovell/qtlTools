@@ -1,0 +1,422 @@
+---
+title: "*De novo* linkage maps using R and R/qtl"
+author: "JT Lovell"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Introduction
+The following is a tutorial to take a large genotype matrix and produce a linkage map. The important elements we will cover include:
+
+1) Formatting a genotype matrix for R/qtl
+2) Culling the matrix to evenly spaced markers
+3) Making linkage groups
+4) Ordering markers within linkage groups
+5) Ordering the linkage groups to match known chromosome names and orders
+6) Fine tuning and documentation
+
+Step 2 is particularly important for genotype matrices generated from whole genome sequencing, RAD or other NGS technology. These techniques produce markers with a random distribution across the genome and have a relatively high error rate. If recombination is absent or very rare, genotyping errors will look like recombination events and cause marker miss-ordering. Also, the speed of map construction scales exponentially with the number of markers (since we operate on an nMarker * nMarker matrix). Retaining only the best and most informative markers is therefore pretty important. 
+
+
+## Setup
+#### Overview
+We will employ a set of tools developed by Karl Broman and published in the `qtl` package. The `qtlTools` package, available on github (https://github.com/jtlovell/qtlTools) contains the necessary functions to order and cull markers. We will also use `ggplot2` to visualize some patterns, `TSP` to order markers and `devtools` to update the qtlTools package. 
+
+#### Install qtlTools
+Before we get started, make sure you have all these packages: qtl, qtlTools, TSP, ggplot2, devtools. All except qtlTools can be installed from CRAN. To get qtlTools:
+```{r get.qtlTools, eval = FALSE}
+library(devtools)
+install_github("jtlovell/qtlTools")
+library(qtlTools)
+```
+
+#### Load all the packages
+```{r loadLibs}
+libs2load<-c("qtl","qtlTools","TSP","ggplot2")
+suppressMessages(sapply(libs2load, require, character.only = TRUE))	
+```
+
+#### Load the genotype data
+See appendix 1 for the script to generate the simulated genotype matrix
+```{r simData, eval = T, echo = F, include=FALSE}
+# Grab genotype data from qtl::fake.f2 and recode a/h/b, drop X chromosome
+set.seed(42)
+data(fake.f2)
+genmat<-pull.geno(fake.f2)
+genmat<-apply(genmat, 2, as.character)
+genmat<-apply(genmat, 2, function(x) 
+  ifelse(is.na(x),NA,
+         ifelse(x == "1", "a",
+                ifelse(x == "2", "h","b"))))
+genmat<-genmat[,-grep("X", colnames(genmat))]
+
+# Add in a bunch of markers that have just a few differences from the original data
+chrs<-as.numeric(sapply(gsub("D","",colnames(genmat)), function(x) strsplit(x, "M")[[1]][1]))
+poss<-pull.map(fake.f2, as.table=T)$pos[-grep("X", markernames(fake.f2))]
+colnames(genmat)<-paste(chrs,poss,sep = "_")
+newmars<-lapply(1:4,function(x){
+  newmar<-genmat
+  for(i in colnames(newmar)) {
+    s<-sample(1:nrow(newmar),8,replace = F)
+    for(j in s){
+      newmar[s,i]<-sample(c("a","h","b"), 1)
+    }
+  }
+  return(newmar)
+})
+genmat<-cbind(genmat, do.call(cbind,newmars))
+
+# Slightly randomize positions of markers
+chr<-splitText(colnames(genmat), sep = "_", num = 1)
+chr[sample(1:length(chr),40, replace=F)]<-sample(unique(chr),40, replace=T)
+pos<-as.numeric(splitText(colnames(genmat), sep = "_", num = 2))
+pos<-(pos+runif(length(pos), min = .5, max = 1.5))*runif(length(pos), min = .5, max = 1.5)
+pos<-round(pos-min(pos),3)
+# Re assign column names
+colnames(genmat)<-paste(chr, pos, sep = "_")
+genmat<-genmat[,order(chr, pos)]
+rownames(genmat)<-as.character(1:nrow(genmat))
+```
+
+## Part 1: From a genotype matrix to a cross object
+#### Overview 
+This tutorial assumes that a genotype matrix has been generated and alleles have been coded following R/qtl specifications. The matrix must contain one individual/row and one marker/column. For details see `?read.cross`. Here, we analyze an F2 (intercross) mapping population with a genotype matrix called `genmat` that looks like this:
+
+```{r genmat,echo = F}
+genmat[1:8,1:8]
+```
+
+#### Marker Names
+I recommend storing individual identifiers in the `rownames` of the matrix and marker IDs in the `colnames`. If physical positions are known about the markers, it is really useful to name the markers as chr_position (e.g. marker @ Chr1 and 150kb might be '1_150').  Here, I extract the chr and position information from the marker names and the F2 line IDs from the rownames. I use qtlTools `splitText` function which takes a character string and splits it by a character. It is a wrapper for `strsplit` and is similar to excel's `text to columns`. 
+```{r crossIDs}
+chr<-splitText(colnames(genmat), sep = "_", num = 1)
+pos<-splitText(colnames(genmat), sep = "_", num = 2)
+ids<-rownames(genmat)
+```
+
+#### Build an R/qtl cross file
+R/qtl takes a very specific genotype matrix type; `geno2cross` helps make this happen. 
+```{r}
+geno2cross(genomat = genmat,
+           chr=chr, pos=pos, id=ids,
+           crossfile = "~/Downloads/cross.csv")
+```
+
+#### Read the genotype matrix into R/qtl
+```{r}
+cross<-read.cross("csv", file = "~/Downloads/cross.csv", crosstype = "f2",
+                  genotypes = c("a","h","b"))
+```
+
+## Part 2: Cull and process the genotype matrix in R/qtl
+#### Overview
+For all downstream calculations, it is important that each linkage group contains no more markers than is necessary. The number needed depends on the number of individuals in your mapping population and the length/n crossovers (cM) for each chromosome. A general rule of thumb is that you want no more than 1 marker for each cM and and each 100 individuals. As such, each recombination event is covered by one marker. You can get this, using the following equation:
+
+`nmar = (nind(cross)/100)*chrlen(cross)`
+
+We can also think about this in terms of the fraction of individuals that recombine between any two markers: the 'recombination fraction'. The maximum recombination fraction that gives us all possible recombination envents is  
+
+`1/n.individuals` or `1/nind(cross)`
+
+And the minimum mapping distance between any marker pairs can then be determined as: 
+`100/nind(cross)`
+
+**A note on marker density and error probability**: *It is important to note that if the error rate of genotyping is high, it is much better to have fewer high-confidence markers than a dense map. See appendix 2 for an explanation and simulation*
+
+```{r}
+print(nind(cross)) # number of individuals
+print(min.rf<-1/nind(cross)) # minimum recombination fraction
+print(min.cm<-100/nind(cross)) # minimum distance between any two markers
+```
+
+#### Drop markers by chromosome
+To drop very close markers, we use the function "dropSimilarMarkers". We set the minimum recombination fraction at the threshold determined above. This requires a pairwise recombination fraction matrix, which is very memory intensive for large genotype matrices. Therefore we first run chromosome-by-chromosome. If we do not know the physical chromosomes of each marker, this step will not help much. 
+```{r chrEstRf}
+goodMars<-lapply(chrnames(cross), function(x){
+  cr<-subset(cross, chr = x)
+  cr<-est.rf(cr)
+  cr<-dropSimilarMarkers(cr, rf.threshold = 0.01, verbose = F)
+  return(markernames(cr))
+})
+toKeep<-unlist(goodMars)
+toDrop<-markernames(cross)[!markernames(cross) %in% toKeep]
+```
+
+This produces a vector of markers that were too close to other markers and had more missing data and/or worse segregation distortion than its closest marker. 
+```{r dropMars}
+print(length(toDrop))
+cross<-drop.markers(cross, markers = toDrop)
+```
+
+#### Drop markers across the whole matrix
+This will only help if some markers were given physical positions that are not on the correct linkage group. 
+```{r fullEstRf}
+cross<-est.rf(cross)
+cross<-dropSimilarMarkers(cross, rf.threshold = 0.01)
+```
+
+## Part 3: Assign markers to linkage groups
+#### Overview
+Even if we are pretty sure that all markers are assigned to their correct linkage group (chromosome), this step is still important - if a marker is incorrectly placed it will cause major problems. For example, if a marker is thought to be on Chr1, but is actually on Chr2, it will be uncorrelated with all markers on Chr1. This will cause a huge observerd fraction of individuals that recombine and will expand the map, making inference of QTL much more difficult and imprecise.
+
+#### Group markers into arbitrary linkage groups
+The R/qtl function `formLinkageGroups` uses the recombination fraction among markers and the strength of the LOD score of recombination fractions to determine linkage groups. Both the maximum rfs and minimum LOD scores can be adjusted to get the markers into good groups. This step might be more of an art than science and require adjustment of both parameters. 
+```{r}
+lgmar<-formLinkageGroups(cross, reorgMarkers=F)
+```
+
+#### Rename linkage groups
+In a typical reference-based genotyping approach, we have a pretty good idea of the chromosome on which a marker resides, however, we might be wrong some small (or large) % of the time. If the markers are completely annonymous, once can skip this step. Remember the name of the original chromosome is stored in the name of the marker.
+```{r}
+origchr<-as.numeric(splitText(markernames(cross), sep = "_", num = 1))
+lgmar$origchr<-origchr
+tab<-table(lgmar)
+```
+
+We can visualize the overlap by looking at the tabulation of the new linkage groups and the original chromosomes. Notice near, but not complete overlap
+```{r}
+print(tab)
+```
+
+#### Rename linkage group names based on maximum overlap
+```{r}
+newnames<-sapply(1:nchr(cross),function(x) rownames(tab)[which.max(tab[,x])])
+```
+
+#### Reassign markers to each linkage group
+It is important to produce a list of markers where each list element is named as the ordered linkage group ID and the markers are in order within each list element. 
+```{r}
+marlist<-lapply(1:nchr(cross), function(x) rownames(lgmar)[lgmar$LG==x])
+names(marlist)<-newnames
+marlist<-marlist[order(as.numeric(names(marlist)))]
+```
+
+For Chrs 1 and 2, it looks like this:
+```{r}
+marlist[1:2]
+```
+
+#### Reorganize the cross with new linkage group names and marker groupings
+The function `newLG` take the cross object and the markerlist generated above to reorganize markers. 
+```{r}
+cross.newlg<-newLG(cross = cross, markerList = marlist)
+cross.newlg<-est.rf(cross.newlg)
+```
+
+Note that markers now have high correlations within linkage groups (yellow), and low correlation among groups (blue), but the order within chromosomes is not necessarily correct. 
+```{r rfnewlg}
+plot.rf(cross.newlg)
+```
+
+## Part 4: Reorder markers
+#### Overview
+There are many methods to order markers. While joinmap4 remains the industry standard, it has a bunch of drawbacks - it's slow, costly and is point-and-click. Recently several other methods have been proposed using graph theory. MSTmap is a good option, but it can only handle populations with 2-genotype markers (BC/RIL/DH/etc), not F2, 4-way etc. mapping populations. 
+To overcome these issues, it is optimal to assess marker orders through evaluation of the recombination fraction matrix only. 
+
+#### Marker ordering using TSP solvers
+Here, I build upon Grey Monroe's `TSPmap` protocol and employ a travelling salesperson problem solver to find the shortest path through the recombination fraction matrix. 
+The optimal method is `concorde`, however, this requires a separate installation of the concorde program. See `?tspOrder` for details on how to do this. 
+```{r tsp, include=FALSE}
+cross.ordered<-tspOrder(cross = cross.newlg, 
+                  hamiltonian = TRUE,
+                  method="concorde",
+                  concorde_path = "/Users/John/Documents/concorde/TSP",
+                  return = "cross")
+```
+
+```{r tsp2, eval=FALSE}
+cross.ordered<-tspOrder(cross = cross.newlg, 
+                  hamiltonian = TRUE,
+                  method="concorde",
+                  concorde_path = "/Users/John/Documents/concorde/TSP",
+                  return = "cross")
+```
+
+#### Look at marker order
+Note that following the marker reordering, there is a decay in correlations between markers from the diagonal.
+```{r rford}
+cross.ordered<-est.rf(cross.ordered)
+plot.rf(cross.ordered) # overall
+```
+
+#### Refine marker order
+TSP is not perfect and sometimes chooses orders that result in a few more crossovers than necessary. Check for these errors and fix them using `ripple`.
+```{r reprip}
+cross.rip<-repRipple(cross.ordered, window = 4, re.est.map = F, verbose = F)
+```
+
+#### Estimate the genetic map
+Now that we have an ordered genetic map, we need to estimate distances between markers.
+```{r estmaprip}
+map<-est.map(cross.rip, map.function = "kosambi")
+cross.rip<-replace.map(cross.rip, map)
+```
+
+#### Drop markers that are too close to eachother
+Like we did before with recombination fractions, we need to drop close markers. Here we use a sliding window and choose the best marker within a minimum distance window. We then re-estimate the genetic map and replace the old map with the new one. 
+```{r pickmarsub}
+print(min.cm<-100/nind(cross)) # minimum distance between any two markers
+cross.sub<-repPickMarkerSubset(cross = cross.rip, verbose=T, min.distance = min.cm)
+map<-est.map(cross.sub, map.function = "kosambi")
+cross.sub<-replace.map(cross.sub, map)
+```
+
+#### Compare maps
+We can see how we did by comparing genetic maps.
+For example, befoe and after dropping a few close markers.
+```{r}
+plot.map(cross.rip, cross.sub)
+```
+
+
+## Part 5: Compile final map
+#### Overview
+To produce a publishable map, we need to orient the markers according to previously published work.
+
+#### Look at how marker orders in the new map compare to published orders
+Make sure the orientation of each chromosome matches that of previously known positions
+```{r initialflipggplot}
+map<-pullMap(cross.sub)
+map$chr.orig<-as.numeric(splitText(markernames(cross.sub), sep = "_", num = 1))
+map$pos.orig<-as.numeric(splitText(markernames(cross.sub), sep = "_", num = 2))
+
+map<-map[map$chr == map$chr.orig,]
+
+ggplot(map, aes(x = pos, y = pos.orig, col = chr))+
+  geom_point()+stat_smooth(method = "loess")+
+  scale_color_manual(values = rainbow(19), guide = F)+
+  theme_jtl()+
+  theme(axis.text=element_blank(),
+        axis.ticks=element_blank())+
+  facet_wrap(~chr, scale = "free")+
+  labs(x = "final mapping position", y = "position of marker on reference",
+       main = "order of markers")
+```
+
+#### Find marker orders in chromosomes that are opposite to published orders
+To do this, we extract the slope of a linear model for each chromosome. If negative, we note it. 
+```{r findchr2flip}
+flipIt<-sapply(unique(map$chr), function(i){
+  out<-lm(pos ~ pos.orig, data = map[map$chr==i,])$coefficients["pos.orig"]
+  names(out)<-i
+  ifelse(out>0,FALSE,TRUE)
+})
+
+print(toflip<-names(flipIt)[flipIt])
+```
+
+#### Flip the order of markers that have reversed order relative to the reference
+```{r flipchrs}
+cross.final<-cross.sub
+for(i in toflip) cross.final<-flip.order(cross.final, chr = i)
+```
+
+#### Make sure this worked
+```{r reordggplot}
+map<-pullMap(cross.final)
+map$chr.orig<-as.numeric(splitText(markernames(cross.final), sep = "_", num = 1))
+map$pos.orig<-as.numeric(splitText(markernames(cross.final), sep = "_", num = 2))
+
+map<-map[map$chr == map$chr.orig,]
+
+ggplot(map, aes(x = pos, y = pos.orig, col = chr))+
+  geom_point()+stat_smooth(method = "loess")+
+  scale_color_manual(values = rainbow(19), guide = F)+
+  theme_jtl()+
+  theme(axis.text=element_blank(),
+        axis.ticks=element_blank())+
+  facet_wrap(~chr, scale = "free")+
+  labs(x = "final mapping position", y = "position of marker on reference",
+       main = "order of markers after flipping")
+```
+
+#### Make some final diagnostic plots
+```{r finalplots}
+plot.map(cross.final)
+cross.final<-est.rf(cross.final)
+plot.rf(cross.final)
+```
+
+#### Write the cross to file
+```{r writecross}
+write.cross(cross.final, format = "csv", filestem = "~/Downloads/crossfinal")
+```
+
+## Appendix 1: Make simulated data
+#### Make some fake data that mimics what a real genotype matrix might look like
+
+```{r, eval = F}
+# Grab genotype data from qtl::fake.f2 and recode a/h/b, drop X chromosome
+data(fake.f2)
+genmat<-pull.geno(fake.f2)
+genmat<-apply(genmat, 2, as.character)
+genmat<-apply(genmat, 2, function(x) 
+  ifelse(is.na(x),NA,
+         ifelse(x == "1", "a",
+                ifelse(x == "2", "h","b"))))
+genmat<-genmat[,-grep("X", colnames(genmat))]
+
+# Add in a bunch of markers that have just a few differences from the original data
+newmars1<-genmat; substr(colnames(newmars1),1,1)<-"a"
+newmars2<-genmat; substr(colnames(newmars2),1,1)<-"b"
+newmars3<-genmat; substr(colnames(newmars3),1,1)<-"c"
+newmar<-cbind(newmars1, newmars2, newmars3)
+for(i in colnames(newmar)) {
+  s<-sample(1:nrow(newmar),10,replace = F)
+  for(j in s){
+    newmar[s,i]<-sample(c("a","h","b"), 1)
+  }
+}
+genmat<-cbind(genmat, newmar)
+# Randomize positions of markers
+chr<-sample(1:19, ncol(genmat), replace = T)
+pos<-runif(n = ncol(genmat), min = 0, max = 100)
+```
+
+
+## Appendix 2: Understanding the effect of genotyping errors. 
+Take the case of two markers. The probability of a genotyping error `P(E)` for each is identical. The observed proportion of recombinant individuals (cM/100) between markers is `d`, which can be due to genotyping error or true crossover events. We can then calculate the probability of true crossovers `P(XO)` as:
+
+P(XO) = (1 - P(E)) * d
+
+and the probability of false crossovers, which are caused by errors as:
+
+P(XOe) = P(E) * (1 - d).
+
+Therefore, the proporition of true crossover individuals as:
+
+P(XOt) = P(XO) / (P(XOe) + P(XO)).
+
+To illustrate this, lets compare distance between markers and error rates.
+
+```{r echo = F}
+cMdists = seq(0.05, 10, by = 0.01)/100
+
+pxot = function(e,d){
+  tp = (1 - e) * d
+  fp = e * (1 - d)
+  fp / (fp+tp)
+}
+xdat = log2(cMdists*100)
+plot(xdat, rep(0, length(xdat)), ylim = c(0,1), type = "n", bty = "n",
+     xaxt = "n",
+     xlab = "log scale distance between marker pair (cM)",
+     ylab = "proportion of recombinant individuals that are erroneous")
+axis(1, at = xdat[cMdists %in% c(0.001, 0.01, 0.1)], labels = c(0.001, 0.01, 0.1)*100 )
+
+errs = c(0.00001, 0.0001, 0.001, 0.005, 0.01,.02)
+cols = c("darkred","darkorange","gold","lightgreen","cornflowerblue","darkblue")
+for(i in 1:length(errs)){
+  lines(x = xdat, sapply(cMdists, function(x) pxot(e = errs[i], d = x)),
+        col = cols[i])
+}
+legend("topright", as.character(errs), col = cols, lty = 1, title = "error rate")
+abline(h = 0.05, lty = 2)
+lines(c(log2(1), log2(1), log2(0.05)), c(0,.5,.5))
+```
+
