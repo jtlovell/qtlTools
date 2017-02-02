@@ -11,11 +11,15 @@
 #' @param marker.chr The inferred chromsomes of the markers - must match chrnames of
 #' the cross.
 #' @param marker.pos The inferred cM positions of the markers.
+#' @param return4newLG Logical, Should the gaps be combined with the genetic map to pipe
+#' straight into the newLG function?
 #' @param ... Not currently in use.
 #' @details A simple function to parse output from inferMarker postion
 #'
-#' @return A named list of the markers that could be added. List element names match
-#' the chromosomes that they belong to.
+#' @return If return4newLG = TRUE, a named and ordered list of all markers, including
+#' those in the map. This output can be input directly into the newLG argument 'markerList'.
+#' If return4newLG = FALSE, returns a simple named list of the markers that could be added.
+#' List element names match the chromosomes that they belong to.
 #'
 #' @examples
 #' library(qtlTools)
@@ -30,7 +34,8 @@ fillGapsInMap<-function(cross,
                         minGapSize = 1,
                         marker.names,
                         marker.chr,
-                        marker.pos, ...){
+                        marker.pos,
+                        return4newLG = F, ...){
   out<-lapply(chrnames(cross), function(x){
     map<-pullMap(cross, chr = x)
     gaps<-diff(map$pos)
@@ -47,6 +52,20 @@ fillGapsInMap<-function(cross,
       return(as.character(out.chr))
     }
   })
+
   names(out)<-chrnames(cross)
+  if(return4newLG){
+    newmars<-unlist(out)
+    outn<-data.frame(marker.name = marker.names,
+                     chr = marker.chr,
+                     pos = marker.pos, stringsAsFactors=F)
+    outn<-outn[outn$marker.names %in% newmars,]
+    outd<-rbind(pullMap(cross), outn)
+    outd<-outd[with(outd, order(chr, pos)),]
+    outd$chr<-as.character(outd$chr)
+    out<-lapply(chrnames(cross), function(x)
+      as.characterout(d$marker.name[d$chr == x]))
+    names(out)<-chrnames(cross)
+  }
   return(out)
 }

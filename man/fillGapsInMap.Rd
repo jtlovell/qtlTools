@@ -5,7 +5,7 @@
 \title{Find markers that have inferred positions within gaps in a map}
 \usage{
 fillGapsInMap(cross, minGapSize = 1, marker.names, marker.chr, marker.pos,
-  ...)
+  return4newLG = F, ...)
 }
 \arguments{
 \item{cross}{The QTL cross object.}
@@ -20,11 +20,16 @@ the cross.}
 
 \item{marker.pos}{The inferred cM positions of the markers.}
 
+\item{return4newLG}{Logical, Should the gaps be combined with the genetic map to pipe
+straight into the newLG function?}
+
 \item{...}{Not currently in use.}
 }
 \value{
-A named list of the markers that could be added. List element names match
-the chromosomes that they belong to.
+If return4newLG = TRUE, a named and ordered list of all markers, including
+those in the map. This output can be input directly into the newLG argument 'markerList'.
+If return4newLG = FALSE, returns a simple named list of the markers that could be added.
+List element names match the chromosomes that they belong to.
 }
 \description{
 \code{fillGapsInMap} Using known cM positions and chromosomes,
