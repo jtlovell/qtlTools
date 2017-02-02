@@ -4,7 +4,7 @@
 \alias{pullMap}
 \title{Pull the genetic map and marker names}
 \usage{
-pullMap(cross)
+pullMap(cross, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object.}

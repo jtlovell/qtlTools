@@ -6,8 +6,8 @@
 #'
 #' @import qtl
 #' @export
-pullMap<-function(cross){
-  map <- pull.map(cross, as.table = TRUE)
+pullMap<-function(cross,...){
+  map <- pull.map(cross, as.table = TRUE,...)
   map <- data.frame(marker.name = row.names(map),
                   map, stringsAsFactors = FALSE)
   rownames(map) <- NULL
