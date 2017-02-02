@@ -17,6 +17,9 @@ to the "pheno.col" argument of qtl::scanone.}
 \item{pheno.candidates}{Character vector specifying the names of the expression phenotypes to
 be extracted from the cross object that serve as the covariate.}
 
+\item{experimental.covar}{data.frame containing the experimental covariate. Passed on to
+addcovar in qtl::scanone. If QTLxE is TRUE, also passed to intcovar}
+
 \item{mod}{A qtl model object that can supply additional marker covariates that
 are held constant during the covariate scan.}
 
@@ -35,9 +38,6 @@ computationally efficient and take forever when using eQTL data.}
 
 \item{plotit}{Logical, when more than 1 pheno.y is specified, presents a boxplot of
 covariate scan ranks.}
-
-\item{exp.covar}{data.frame containing the experimental covariate. Passed on to
-addcovar in qtl::scanone. If QTLxE is TRUE, also passed to intcovar}
 }
 \value{
 Either a list or a dataframe, containing the maximum scanone outputs at

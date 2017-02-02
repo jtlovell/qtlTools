@@ -12,7 +12,7 @@
 #' to the "pheno.col" argument of qtl::scanone.
 #' @param pheno.candidates Character vector specifying the names of the expression phenotypes to
 #' be extracted from the cross object that serve as the covariate.
-#' @param exp.covar data.frame containing the experimental covariate. Passed on to
+#' @param experimental.covar data.frame containing the experimental covariate. Passed on to
 #' addcovar in qtl::scanone. If QTLxE is TRUE, also passed to intcovar
 #' @param mod A qtl model object that can supply additional marker covariates that
 #' are held constant during the covariate scan.
@@ -45,7 +45,7 @@ covScanQTL<-function(cross, pheno.y, pheno.candidates,
   extractGenoCalls<-function(cross, model, covar = NULL, threshold = 0){
     temp<-model[[1]]
     for(i in 1:length(temp)) temp[[i]][temp[[i]]<=threshold]<-NA
-    
+
     gp <- lapply(temp, function(x){
       apply(x, 1, function(y) {
         ifelse(sum(is.na(y)) == length(y),NA, which.max(y))
@@ -58,8 +58,8 @@ covScanQTL<-function(cross, pheno.y, pheno.candidates,
     }
     return(gp2)
   }
-  
-  
+
+
   if(!is.null(mod)){
     covBase<-extractGenoCalls(cross, model=mod, covar = experimental.covar, threshold = 0)
   }else{
@@ -99,17 +99,17 @@ covScanQTL<-function(cross, pheno.y, pheno.candidates,
         return(as.numeric(cs[wh,-c(1:2)]))
       })
     })
-    ps<-sapply(names(maxScans), 
+    ps<-sapply(names(maxScans),
                function(x) sum(permScans[x,]<=maxScans[x])/nperm)
   }else{
     ps<-NA
   }
 
-  out<-data.frame(phenotype = pheno.y, 
-                  candidateID = pheno.candidates, 
-                  lodAtPeak = maxScans, 
-                  diffAtPeak = diffScans, 
-                  rank = rankScans, 
+  out<-data.frame(phenotype = pheno.y,
+                  candidateID = pheno.candidates,
+                  lodAtPeak = maxScans,
+                  diffAtPeak = diffScans,
+                  rank = rankScans,
                   perm.p = ps,
                   stringsAsFactors=F)
   rownames(out)<-NULL
