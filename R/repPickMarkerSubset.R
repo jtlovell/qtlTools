@@ -36,19 +36,18 @@ repPickMarkerSubset<-function(cross, chr = NULL,
   smallmarkers<-unlist(
     sapply(chr, function(i){
       gt<-geno.table(cross, chr = i)
+      
       if(class(cross)[1]=="4way"){
-        rABCD<-apply(gt[,3:6], 1, function(x) sum(x>0))
-        rNA<-1-(gt$missing/max(gt$missing))
-        wts<-rNA+rABCD
-        pickMarkerSubset(pull.map(cross)[[i]][1,], min.distance = min.distance, wts)
-      }else{
-        rNA<-rank(-gt$missing)*na.weight
-        rP<-rank(log10(gt$P.value))*sd.weight
-        wts<-log(rNA*rP)
-        pickMarkerSubset(pull.map(cross)[[i]], min.distance = min.distance, wts)
+        gt.names<-colnames(gt)[3:6]
+        gt$P.value<-apply(gt[,gt.names],1,function(x) 
+          min(x, na.rm = T)/nind(cross))
       }
-
-    }))
+      gt$rank.p<-with(gt, rank(rank(-P.value, ties.method = "min")*sd.weight))
+      gt$rank.sd<-with(gt, rank(rank(missing, ties.method = "min")*na.weight))
+      wts<-with(gt, rank(rank.p+rank.sd))
+      
+      pickMarkerSubset(pull.map(cross)[[i]][1,], min.distance = min.distance, wts)
+  }))
   dupmar<-markernames(cross)[!markernames(cross) %in% smallmarkers]
   cross2<-drop.markers(cross, dupmar)
   if(verbose) cat("dropped ", length(dupmar), " markers")

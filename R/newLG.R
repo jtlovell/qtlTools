@@ -31,6 +31,15 @@
 #' @export
 newLG<-function(cross, markerList){
   markerList<-lapply(markerList, function(x) x[x %in% markernames(cross)])
+  
+  if ("rf" %in% names(cross)){
+    has.rf<-TRUE
+    mars<-unlist(markerList)
+    o <- match(mars, colnames(cross$rf))
+    rf<-cross$rf[o,o]
+  }else{
+    has.rf<-FALSE
+  }
   cross<-clean(cross)
   n.mar<-nmar(cross)
   crosstype <- class(cross)[1]
@@ -49,6 +58,10 @@ newLG<-function(cross, markerList){
       names(cross$geno[[i]]$map) <- colnames(cross$geno[[i]]$data)
     }
     class(cross$geno[[i]]) <- "A"
+  }
+  
+  if(has.rf) {
+    cross$rf <- rf
   }
   return(cross)
 }

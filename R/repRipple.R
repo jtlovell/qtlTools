@@ -8,8 +8,6 @@
 #' @param chr The chromosome to scan. Can be a vector of chromosome names or a single name.
 #' @param window The window size passed on to ripple
 #' @param method The method passed on to ripple
-#' @param makePlots Should the recombination fraction be iteratively plotted?
-#' @param repeatloop Should ripple be run once, or iteratively?
 #' @param re.est.map Should the map be re-estimated after drop.similar.markers?
 #' @param map.function If re.est.map = TRUE, what map function should be used?
 #' @param error.prob If re.est.map = TRUE, what error probability should be used?
@@ -37,47 +35,40 @@
 #' }
 #' @import qtl
 #' @export
-repRipple<-function(cross, chr = NULL, window=6,
-                    repeatloop = TRUE, makePlots = FALSE,
-                    method = "countxo", re.est.map = TRUE,
-                    map.function = "kosambi", error.prob = 0.001,
-                    verbose = TRUE,
-                    ...){
-  if(is.null(chr)) chr <- chrnames(cross)
-  for(i in chr){
-    if(verbose) cat("running ripple for chromosome: ", i,"\n")
-    diff<-1
-    reps<-1
-
-    while(diff>0){
-      if(verbose & repeatloop) cat("ripple run #", reps, "... ")
-      if(makePlots) plot.rf(cross,
-                            chr = i,
-                            main = paste("chr",i,"before ripple"))
-      rip<-summary(ripple(cross,
-                          chr = i,
-                          window = window,
-                          method = method,
-                          verbose = F,
-                          ...))
-      diff<-rip[1,ncol(rip)] - rip[2,ncol(rip)]
-      if(diff>0){
-        cross <- switch.order(cross, i, rip[2,-ncol(rip)])
-        if(verbose) cat("n crossovers reduced by", diff,"\n")
-        if(makePlots) plot.rf(cross,
-                              chr = i,
-                              main = paste("chr",i,"after ripple"))
-      }else{
-        if(verbose) cat("n crossovers not reduced\n")
+repRipple<-function(cross, chr = NULL, window = 5, 
+                    method = "countxo", verbose = T, 
+                    map.function = "kosambi", sex.sp=F, clean1st = FALSE, ripVerb = TRUE, ...){
+  if(clean1st) cross<-clean(cross)
+  if(is.null(chr)){
+    chr<-chrnames(cross)
+  }
+  for(j in chr){
+    if(verbose) cat(j,"...")
+    new.xo<-0
+    orig.xo<-1
+    while(new.xo<orig.xo){
+      mars<-lapply(pull.map(cross), colnames)
+      verb<-ifelse(new.xo == 0 & ripVerb , TRUE, FALSE)
+      
+      s<-summary(ripple(cross, chr = j, window = window, 
+                        method = method, verbose = verb))
+      best<-as.numeric(which.min(s[,ncol(s)])[1])
+      ord<-s[best,-ncol(s)]
+      orig.xo<-s[1,ncol(s)]
+      new.xo<- s[best,ncol(s)]
+      if(verbose){
+        if(orig.xo == new.xo){
+          cat("no reduction in XOs found\n") 
+        }else{
+          cat("orig n XO = ", orig.xo, "new n XO = ",new.xo,"\n")
+        }
       }
-      reps<-reps+1
-      if(!repeatloop) diff <- 0
+      mars[[j]]<-mars[[j]][ord]
+      cross<-newLG(cross = cross, markerList = mars)
     }
   }
-  if(re.est.map){
-    if(verbose) cat("re-estimating genetic map\n")
-    em<-est.map(cross, map.function = map.function, error.prob = error.prob)
-    cross<-replace.map(cross, map = em)
-  }
+  if(verbose) cat("final map estimation")
+  map<-est.map(cross, map.function = map.function, sex.sp=sex.sp,...)
+  cross<-replace.map(cross, map)
   return(cross)
 }

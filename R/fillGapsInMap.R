@@ -32,22 +32,40 @@
 #' @export
 fillGapsInMap<-function(cross,
                         minGapSize = 1,
+                        newMarGap = 1,
                         marker.names,
                         marker.chr,
                         marker.pos,
-                        return4newLG = F, ...){
+                        marker.lod,
+                        return4newLG = F,
+                        which.position = 3,
+                        ...){
   out<-lapply(chrnames(cross), function(x){
     map<-pullMap(cross, chr = x)
+    colnames(map)[which.position]<-"pos"
+    map<-map[,c("marker.name", "chr","pos")]
     gaps<-diff(map$pos)
 
     if(any(gaps>minGapSize)){
       wh<- which(gaps>minGapSize)
       gap.start<-map$pos[wh]
       gap.end<-map$pos[wh+1]
-      out.chr<-sapply(1:length(wh), function(y){
-        marker.names[marker.chr == x &
-                       marker.pos>gap.start[y] &
-                       marker.pos<gap.end[y] ]
+      out.chr<-lapply(1:length(wh), function(y){
+        sq<-seq(from = ceiling(gap.start[y]),
+            to = floor(gap.end[y]),
+            by = newMarGap)
+        sapply(1:(length(sq)-1), function(z){
+          gsz<-sq[z]
+          gez<-sq[z+1]
+          
+          mout<-marker.names[marker.chr == x &
+                         marker.pos>gsz &
+                         marker.pos<gez]
+          mlods<-marker.names[marker.chr == x &
+                                marker.pos>gsz &
+                                marker.pos<gez]
+          return(mout[which.max(mlods)])
+        })
       })
       return(as.character(out.chr))
     }
