@@ -138,13 +138,13 @@ dropSimilarMarkers<-function(cross,
     toKeep<-unlist(goodMars)
     toDrop<-markernames(cross)[!markernames(cross) %in% toKeep]
     cross<-drop.markers(cross, markers = toDrop)
-    if(verbose) cat("n markers after chromosome-wise culling:", totmar(cross),"\n")
+    if(verbose) cat("n markers after block-wise culling:", totmar(cross),"\n")
   }
 
   if(byChr){
     if(verbose) cat("running on each chromosome\ninitial n markers:", nmar(cross),"\n")
     goodMars<-lapply(chrnames(cross), function(x){
-      if(verbose) cat("Chromosome: ",x,"\n")
+      if(verbose) cat("Chromosome: ",x,"")
       cr<-subset(cross, chr = x)
       cr<-dsm(cr, rf.threshold = rf.threshold,
               sd.weight = sd.weight,verbose = FALSE,
@@ -155,7 +155,7 @@ dropSimilarMarkers<-function(cross,
     toKeep<-unlist(goodMars)
     toDrop<-markernames(cross)[!markernames(cross) %in% toKeep]
     cross<-drop.markers(cross, markers = toDrop)
-    if(verbose) cat("n markers after chromosome-wise culling:", nmar(cross),"\n")
+    if(verbose) cat("\nn markers after chromosome-wise culling:", nmar(cross),"\n")
   }
   if(runFullMatrix){
     if(verbose) cat("running for the whole matrix of",totmar(cross),"markers\n")
