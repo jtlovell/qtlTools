@@ -58,7 +58,7 @@ dropSimilarMarkers<-function(cross,
                              runFullMatrix = FALSE,
                              ...){
   dsm<-function(cross,
-                rf.threshold=0.02,
+                rf.threshold=0.01,
                 sd.weight=1,
                 na.weight=1,
                 keepEnds = FALSE,
@@ -67,11 +67,11 @@ dropSimilarMarkers<-function(cross,
     # 1. Get the rfs, geno table and chromosomes in order
     gt<-geno.table(cross)
     if(!"rf" %in% names(cross)){
-      if(verbose) cat("running est.rf\n")
       cross<-est.rf(cross)
     }
     rf<-pull.rf(cross, what = "rf")
     rf[!upper.tri(rf)]<-1
+    diag(rf)<-1
 
     # 1.1 Fancy calculation of sd.weight
     if(class(cross)[1]=="4way"){
@@ -85,12 +85,10 @@ dropSimilarMarkers<-function(cross,
 
     # 2. drop the markers to retain from the matrix
     if(!is.null(doNotDrop)){
-      if(verbose) cat("retaining markers: ",paste(doNotDrop, collapse=", "),"\n")
       dnd.index<-which(colnames(rf) %in% doNotDrop)
       rf<-rf[-dnd.index, -dnd.index]
     }
     if(keepEnds){
-      if(verbose) cat("retaining first and last markers on each chromosome\n")
       tokeep<-as.character(
         unlist(
           lapply(pull.map(cross),function(x)
@@ -102,7 +100,6 @@ dropSimilarMarkers<-function(cross,
     # 3. Loop through the rf matrix, dropping one of the two markers with the lowest
     # recombination fraction.
     nmarstart<-sum(nmar(cross))
-    if(verbose) cat("initial n markers: ",nmarstart,"\n")
     while(min(rf)<rf.threshold){
       worst<-colnames(rf)[which(rf == min(rf, na.rm=TRUE), arr.ind=T)[1,]]
       gtm<-gt[worst,]
@@ -114,7 +111,6 @@ dropSimilarMarkers<-function(cross,
       cross<-drop.markers(cross, markers = badmars)
     }
     nmarend<-sum(nmar(cross))
-    if(verbose) cat("final n markers: ",nmarend,"\n")
     return(cross)
   }
 
@@ -132,7 +128,6 @@ dropSimilarMarkers<-function(cross,
       ctp<-ifelse(length(spl)>1000, 100, ifelse(length(spl)>100,10, ifelse(length(spl)>50,5,1)))
       if(which(chrnames(temp.cross) == x) %% ctp == 0) cat(x,"")
       cr<-subset(temp.cross, chr = x)
-      cr<-est.rf(cr)
       cr<-dsm(cr, rf.threshold = rf.threshold,
               sd.weight = sd.weight,verbose = FALSE,
               keepEnds = keepEnds,
@@ -151,7 +146,6 @@ dropSimilarMarkers<-function(cross,
     goodMars<-lapply(chrnames(cross), function(x){
       if(verbose) cat("Chromosome: ",x,"\n")
       cr<-subset(cross, chr = x)
-      cr<-est.rf(cr)
       cr<-dsm(cr, rf.threshold = rf.threshold,
               sd.weight = sd.weight,verbose = FALSE,
               keepEnds = keepEnds,
@@ -165,7 +159,6 @@ dropSimilarMarkers<-function(cross,
   }
   if(runFullMatrix){
     if(verbose) cat("running for the whole matrix of",totmar(cross),"markers\n")
-    cross<-est.rf(cross)
     cross<-dsm(cross, rf.threshold = rf.threshold,
                sd.weight = sd.weight,verbose = FALSE,
                keepEnds = keepEnds,
