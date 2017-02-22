@@ -25,43 +25,85 @@
 #' data(fake.bc)
 #' cross<-fake.bc
 #' \dontrun{
-#' ... more here ...
+#' fake.f2<-est.rf(fake.f2)
+#' cross<-fake.f2
+#' #Perturb the marker order and chromosome names
+#' markerlist<-lapply(chrnames(cross), function(x) markernames(cross, chr =x))
+#' names(markerlist) = sample(chrnames(cross),replace = F)
+#' markerList<-lapply(markerlist, function(x) sample(x, replace = F))
+#' #Make new cross with new marker order and chromosome names
+#' cross2<-newLG(cross, markerList = markerList)
+#'
+#' # completely perturb the genotype matrix, then pull back together
+#' markerlist = list("1" = sample(markernames(cross), replace = F))
+#' cross.noOrder<-newLG(cross, markerList = markerlist)
+#' lgmar <- formLinkageGroups(cross.noOrder)
+#' print(tab<-table(lgmar))
+#' marlist<-lapply(1:length(unique(lgmar$LG)),
+#'   function(x) rownames(lgmar)[lgmar$LG==x])
+#' cross2<-newLG(cross = cross.noOrder,
+#'               markerList = marlist)
 #' }
 #' @import qtl
 #' @export
 newLG<-function(cross, markerList){
-  markerList<-lapply(markerList, function(x) x[x %in% markernames(cross)])
-  
-  if ("rf" %in% names(cross)){
-    has.rf<-TRUE
-    mars<-unlist(markerList)
-    o <- match(mars, colnames(cross$rf))
-    rf<-cross$rf[o,o]
-  }else{
-    has.rf<-FALSE
+  if(any(is.null(names(markerList)))){
+    names(markerList)<-as.character(1:length(markerList))
   }
-  cross<-clean(cross)
-  n.mar<-nmar(cross)
+  # drop markers not in markerList
+  newmars<-unlist(markerList)
+  oldmars<-markernames(cross)
+  cross <- drop.markers(cross, oldmars[!oldmars %in% newmars])
+
+  if(any(duplicated(mar.df$marker))){
+    stop("duplicated markers found in markerList, all markers must be unique\n")
+  }
+
+  # pull out rf matrix before reformatting cross
+  n.mar <- nmar(cross)
+  tot.mar <- totmar(cross)
+  rf <- cross$rf
+  lod <- rf
+  lod[lower.tri(rf)] <- t(rf)[lower.tri(rf)]
+  rf[upper.tri(rf)] <- t(rf)[upper.tri(rf)]
+  diagrf <- diag(rf)
+  diag(lod) <- 0
+  if(ncol(rf) != tot.mar)
+    stop("dimension of recombination fractions inconsistent with no. markers in cross.")
+
+
+  marnam <- colnames(rf)
+  chrstart <- rep(names(cross$geno), n.mar)
+
+  # clean the cross
+  cross <- clean(cross)
   crosstype <- class(cross)[1]
   g <- pull.geno(cross)
+
+
   cross$geno <- vector("list", length(markerList))
   names(cross$geno) <- names(markerList)
-  for (i in names(markerList)) {
-    mars<-markerList[[i]]
-    cross$geno[[i]]$data <- g[, mars, drop = FALSE]
-    cross$geno[[i]]$map <- seq(0, by = 10, length = length(mars))
-    if (crosstype == "4way") {
+
+  for(i in names(markerList)) {
+    cross$geno[[i]]$data <- g[,markerList[[i]],drop=FALSE]
+
+    cross$geno[[i]]$map <- seq(0, by=10, length=length(markerList[[i]]))
+    if(crosstype=="4way") {
       cross$geno[[i]]$map <- rbind(cross$geno[[i]]$map,
                                    cross$geno[[i]]$map)
-      colnames(cross$geno[[i]]$map) <- colnames(cross$geno[[i]]$data)
+      colnames(cross$geno[[i]]$map) <- markerList[[i]]
     }else{
-      names(cross$geno[[i]]$map) <- colnames(cross$geno[[i]]$data)
+      names(cross$geno[[i]]$map) <- markerList[[i]]
     }
-    class(cross$geno[[i]]) <- "A"
+      class(cross$geno[[i]]) <- "A"
   }
-  
-  if(has.rf) {
-    cross$rf <- rf
-  }
+
+  mname <- markernames(cross)
+  m <- match(mname, marnam)
+  rf <- rf[m,m]
+  lod <- lod[m,m]
+  rf[upper.tri(rf)] <- lod[upper.tri(lod)]
+  diag(rf) <- diagrf[m]
+  cross$rf <- rf
   return(cross)
 }

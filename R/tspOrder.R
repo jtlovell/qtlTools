@@ -8,7 +8,8 @@
 #' the Concorde program. See details.
 #'
 #' @param cross The QTL cross object.
-#' @param method The solve_TSP method to employ.
+#' @param method The solve_TSP method to employ. We highly encourage using method = "condcorde".
+#' Simulations show that this method outperforms all others significantly. See details.
 #' @param hamiltonian Logical, should a hamiltonian circuit be enforced?
 #' @param concorde_path Required if method = "concorde". The directory containing
 #' concorde executables.
@@ -38,12 +39,27 @@
 #' data(fake.bc)
 #' cross<-fake.bc
 #' \dontrun{
-#' ... more here ...
+#' fake.f2<-est.rf(fake.f2)
+#' cross<-fake.f2
+#' #Perturb the marker order and chromosome names
+#' markerlist<-lapply(chrnames(cross), function(x) sample(markernames(cross, chr =x)))
+#' names(markerlist)<-as.character(chrnames(cross))
+#' cross2<-newLG(cross, markerList = markerlist)
+#' library(TSP)
+#' plot.rf(cross2)
+#' cross3<-cross3<-tspOrder(cross = cross2,
+                        #'   hamiltonian = T,
+                        #'   method="nn") # change to your path
+#' cross3<-cross3<-tspOrder(cross = cross2,
+#'   hamiltonian = T,
+#'   method="concorde",
+#'   concorde_path = "/Users/John/Documents/concorde/TSP") # change to your path
+#' plot.rf(cross3)
 #' }
 #' @import qtl
 #' @export
 tspOrder<-function(cross,
-                   method = "nn",
+                   method = "concorde",
                    hamiltonian = TRUE,
                    concorde_path = NULL,
                    return = "cross"){
