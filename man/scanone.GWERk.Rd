@@ -16,4 +16,3 @@ scanone.GWERk(cross, chr, pheno.col = 1, model = c("normal", "binary",
 \code{scanone.GWERk}  see qtl::scanone for details. GWERk = 0 runs normal scanone
 permutations. Otherwise GWERk perms are used.
 }
-

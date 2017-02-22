@@ -10,4 +10,3 @@ dropSmallCovInt(cross, qtl, formula, covar, pheno.col, method = "hk",
 \description{
 \code{dropSmallCovInt}  Drops non-significant QTL*covariate interactions
 }
-

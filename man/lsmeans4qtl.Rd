@@ -91,4 +91,3 @@ ggplot(tp, aes(x = Q1, y = mean, shape = sex,
 }
 
 }
-

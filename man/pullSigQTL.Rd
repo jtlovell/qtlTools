@@ -47,4 +47,3 @@ pullSigQTL(cross, s1.output=s1, perm.output=perm, returnQTLModel=FALSE)
 }
 
 }
-

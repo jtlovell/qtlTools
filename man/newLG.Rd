@@ -35,7 +35,23 @@ library(qtlTools)
 data(fake.bc)
 cross<-fake.bc
 \dontrun{
-... more here ...
-}
-}
+fake.f2<-est.rf(fake.f2)
+cross<-fake.f2
+#Perturb the marker order and chromosome names
+markerlist<-lapply(chrnames(cross), function(x) markernames(cross, chr =x))
+names(markerlist) = sample(chrnames(cross),replace = F)
+markerList<-lapply(markerlist, function(x) sample(x, replace = F))
+#Make new cross with new marker order and chromosome names
+cross2<-newLG(cross, markerList = markerList)
 
+# completely perturb the genotype matrix, then pull back together
+markerlist = list("1" = sample(markernames(cross), replace = F))
+cross.noOrder<-newLG(cross, markerList = markerlist)
+lgmar <- formLinkageGroups(cross.noOrder)
+print(tab<-table(lgmar))
+marlist<-lapply(1:length(unique(lgmar$LG)),
+  function(x) rownames(lgmar)[lgmar$LG==x])
+cross2<-newLG(cross = cross.noOrder,
+              markerList = marlist)
+}
+}

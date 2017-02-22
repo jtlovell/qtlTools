@@ -83,4 +83,3 @@ plot(s1, chr = c(2,5))
 segmentsOnPeaks(cross, s1.output=s1, calcCisOutput = cis, chr = c(2,5))
 }
 }
-

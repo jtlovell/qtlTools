@@ -10,4 +10,3 @@ theme_jtl()
 \code{theme_jtl}  two themes for ggplot similar to theme bw, but better (i think). One is
 appropriate for most types of plots (theme_jtl). The other is better for barplots (theme_jtlbar)
 }
-

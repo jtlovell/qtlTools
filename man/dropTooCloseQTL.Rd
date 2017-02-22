@@ -10,4 +10,3 @@ dropTooCloseQTL(cross, qtl, formula, covar, pheno.col, method = "hk",
 \description{
 \code{dropTooCloseQTL}  Assists in simplifying models following stepwise model selection
 }
-

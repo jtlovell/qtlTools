@@ -52,4 +52,3 @@ plot(s1, main = "linear mixed effect model")
 plot(scanone(cross, pheno.col = "pheno2", intcovar = sex), col = "grey", main = "scanone")
 }
 }
-

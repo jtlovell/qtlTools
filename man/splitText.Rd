@@ -17,4 +17,3 @@ splitText(x, sep = "_", num = 1)
 \code{splitText} Loops along a string splitting text by sep and returning
 the element num of that split text
 }
-

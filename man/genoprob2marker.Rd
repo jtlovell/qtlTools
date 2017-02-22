@@ -27,4 +27,3 @@ genoprob2marker(cross, useGrid = TRUE, prob.thresh = 0, chr = NULL,
 \description{
 \code{genoprob2marker} Not intended for external use.
 }
-

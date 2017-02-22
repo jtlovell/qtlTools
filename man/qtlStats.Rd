@@ -63,4 +63,3 @@ mod <- refineqtl(cross, mod, pheno.col = 1, qtl = mod,
 qtlStats(cross, pheno.col = 1,form = nform, mod = mod, covar=sex)
 
 }
-

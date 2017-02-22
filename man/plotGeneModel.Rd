@@ -50,4 +50,3 @@ A data.frame containing all mutations in the plot.
 \code{plotGeneModel} Using an annotated vcf and gff file, plot the gene model with
 mutations.
 }
-

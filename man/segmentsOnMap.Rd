@@ -118,4 +118,3 @@ segmentsOnMap(cross, calcCisResults = cis, legendCex = .5,
    palette = rainbow)
 }
 }
-

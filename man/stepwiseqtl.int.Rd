@@ -13,4 +13,3 @@ stepwiseqtl.int(cross, chr, pheno.col = 1, qtl, formula, max.qtl = 10,
 \description{
 \code{stepwiseqtl.int}  see qtl::stepwiseqtl for details
 }
-

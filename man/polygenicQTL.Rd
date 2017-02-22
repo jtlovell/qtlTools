@@ -67,4 +67,3 @@ polygenicQTL(cross = cross, qtl = qtl,covar = covar, formula = "~ Q1 + Q1*sex + 
 }
 
 }
-

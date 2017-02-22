@@ -32,4 +32,3 @@ hist(pull.pheno(cross, pheno.col = "pheno1"), breaks=20,
    xlab = "qn pheno1")
 
 }
-

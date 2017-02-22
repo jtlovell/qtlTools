@@ -12,4 +12,3 @@ pullMap(cross, ...)
 \description{
 \code{pullMap} An extension of qtl::pull.map
 }
-

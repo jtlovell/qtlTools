@@ -17,4 +17,3 @@ n=100
 plot(1:n,runif(n), col=highContrastColors(n), pch=19)
 
 }
-

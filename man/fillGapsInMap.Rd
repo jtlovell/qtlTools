@@ -4,8 +4,9 @@
 \alias{fillGapsInMap}
 \title{Find markers that have inferred positions within gaps in a map}
 \usage{
-fillGapsInMap(cross, minGapSize = 1, marker.names, marker.chr, marker.pos,
-  return4newLG = F, ...)
+fillGapsInMap(cross, minGapSize = 1, newMarGap = 1, marker.names,
+  marker.chr, marker.pos, marker.lod, return4newLG = F, which.position = 3,
+  ...)
 }
 \arguments{
 \item{cross}{The QTL cross object.}
@@ -46,4 +47,3 @@ cross<-fake.bc
 ... more here ...
 }
 }
-

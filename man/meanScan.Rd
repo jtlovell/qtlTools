@@ -90,4 +90,3 @@ ms<-meanScan(cross, covar = sex, chr = c(2,7))
 }
 
 }
-

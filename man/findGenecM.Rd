@@ -107,4 +107,3 @@ with(map[map$chr==i,], points(pos,bp, col=i, pch = 19, cex=.8))
 }
 }
 }
-

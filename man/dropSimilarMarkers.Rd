@@ -4,15 +4,12 @@
 \alias{dropSimilarMarkers}
 \title{Method to improve a genetic map.}
 \usage{
-dropSimilarMarkers(cross, chr = NULL, rf.threshold = 0.02, sd.weight = 1,
+dropSimilarMarkers(cross, chr = NULL, rf.threshold = 0.01, sd.weight = 1,
   na.weight = 1, keepEnds = FALSE, doNotDrop = NULL, verbose = TRUE,
-  ...)
+  blockSize = 100, byChr = TRUE, runFullMatrix = FALSE, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object to search}
-
-\item{chr}{The chromosome to scan. Can be a vector of chromosome names or a single name.
-If NULL, run on all chromosomes.}
 
 \item{rf.threshold}{The recombination fraction threshold to drop a marker. If est.rf has
 not been run on cross, it will be done so automatically. See qtl::est.rf for details}
@@ -28,6 +25,16 @@ of 0 removes sd as a factor in choosing the best marker.}
 \item{doNotDrop}{Character vector of markers to retain no matter their rfs.}
 
 \item{verbose}{Logical, should updates be printed?}
+
+\item{blockSize}{If not NULL, do an initial culling by splitting markers into
+blocks of this size. Smaller blocks run more quickly than large blocks, but when the total
+number of blocks excedes ~ 2000, it can take a very long time to parse the cross object
+into blocks.}
+
+\item{byChr}{Should the procedure be run chromosome-by-chromosome. If blocksize != NULL,
+this procedure is run following block-wise culling. If there are many thousands of markers
+it is recommended to run multiple block-wise calls prior to whole-chromosome procedures. In
+general, chromosomes with > 1k markers should first be culled using blockSize != NULL.}
 
 \item{...}{if recombination fractions are not included in the cross object,
 pass on additional arguments to est.rf.}
@@ -54,4 +61,3 @@ plot.map(cross0, cross1, main = "comparison of full and culled maps")
 plot.map(cross0, cross2, main = "comparison of full and culled maps")
 
 }
-

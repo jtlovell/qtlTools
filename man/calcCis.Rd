@@ -67,4 +67,3 @@ perm<-scanone(cross, n.perm=100, method="hk",pheno.col=c("pheno1", "pheno2"), ve
 calcCis(cross,s1.output=s1, perm.output=perm)
 }
 }
-

@@ -42,4 +42,3 @@ par(mfrow=c(2,1))
 plot.map(cross0, cross1, main = "comparison of full and culled maps")
 
 }
-

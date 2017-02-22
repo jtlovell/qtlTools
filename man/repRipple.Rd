@@ -4,9 +4,9 @@
 \alias{repRipple}
 \title{Method to improve a genetic map.}
 \usage{
-repRipple(cross, chr = NULL, window = 6, repeatloop = TRUE,
-  makePlots = FALSE, method = "countxo", re.est.map = TRUE,
-  map.function = "kosambi", error.prob = 0.001, verbose = TRUE, ...)
+repRipple(cross, chr = NULL, window = 5, method = "countxo",
+  verbose = T, map.function = "kosambi", sex.sp = F, clean1st = FALSE,
+  ripVerb = TRUE, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object to search}
@@ -15,21 +15,17 @@ repRipple(cross, chr = NULL, window = 6, repeatloop = TRUE,
 
 \item{window}{The window size passed on to ripple}
 
-\item{repeatloop}{Should ripple be run once, or iteratively?}
-
-\item{makePlots}{Should the recombination fraction be iteratively plotted?}
-
 \item{method}{The method passed on to ripple}
-
-\item{re.est.map}{Should the map be re-estimated after drop.similar.markers?}
-
-\item{map.function}{If re.est.map = TRUE, what map function should be used?}
-
-\item{error.prob}{If re.est.map = TRUE, what error probability should be used?}
 
 \item{verbose}{logical, should updates be reported?}
 
+\item{map.function}{If re.est.map = TRUE, what map function should be used?}
+
 \item{...}{Additional arguments passed to qtl::ripple}
+
+\item{re.est.map}{Should the map be re-estimated after drop.similar.markers?}
+
+\item{error.prob}{If re.est.map = TRUE, what error probability should be used?}
 }
 \value{
 A new cross object with the optimal rippled marker order
@@ -57,4 +53,3 @@ plot.rf(cross0, chr = 1, main = "recombination fractions before ripple")
 plot.rf(cross1, chr = 1, main = "recombination fractions after ripple")
 }
 }
-

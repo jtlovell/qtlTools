@@ -42,4 +42,3 @@ candidate genes for each QTL.
 \code{findGenesInterval} Use the mapping position (inferred) of each gene to
 find potential candidates under a QTL confidence interval
 }
-
