@@ -143,8 +143,9 @@ dropSimilarMarkers<-function(cross,
 
   if(byChr){
     if(verbose) cat("running on each chromosome\ninitial n markers:", nmar(cross),"\n")
+    if(verbose) cat("Chromosome:")
     goodMars<-lapply(chrnames(cross), function(x){
-      if(verbose) cat("Chromosome: ",x,"")
+      if(verbose) cat(x,"")
       cr<-subset(cross, chr = x)
       cr<-dsm(cr, rf.threshold = rf.threshold,
               sd.weight = sd.weight,verbose = FALSE,
