@@ -36,8 +36,8 @@
 #'
 #' @examples
 #' library(qtlTools)
-#' data(fake.bc)
-#' cross<-fake.bc
+#' data(fake.f2)
+#' cross<-fake.f2
 #' \dontrun{
 #' fake.f2<-est.rf(fake.f2)
 #' cross<-fake.f2
@@ -65,6 +65,8 @@ tspOrder<-function(cross,
                    return = "cross"){
   if(!requireNamespace("TSP", quietly = TRUE)){
     stop("install the TSP package to use tspOrder\n")
+  }else{
+    requireNamespace("TSP", quietly = TRUE)
   }
   if(method == "concorde"){
     if(is.null(concorde_path)){

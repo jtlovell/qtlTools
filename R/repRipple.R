@@ -35,38 +35,42 @@
 #' }
 #' @import qtl
 #' @export
-repRipple<-function(cross, chr = NULL, window = 5, 
-                    method = "countxo", verbose = T, 
+repRipple<-function(cross, chr = NULL, window = 5,
+                    method = "countxo", verbose = T,
                     map.function = "kosambi", sex.sp=F, clean1st = FALSE, ripVerb = TRUE, ...){
   if(clean1st) cross<-clean(cross)
   if(is.null(chr)){
     chr<-chrnames(cross)
   }
   for(j in chr){
-    if(verbose) cat(j,"...")
-    new.xo<-0
-    orig.xo<-1
-    while(new.xo<orig.xo){
-      mars<-lapply(pull.map(cross), colnames)
-      verb<-ifelse(new.xo == 0 & ripVerb , TRUE, FALSE)
-      
-      s<-summary(ripple(cross, chr = j, window = window, 
-                        method = method, verbose = verb))
-      best<-as.numeric(which.min(s[,ncol(s)])[1])
-      ord<-s[best,-ncol(s)]
-      orig.xo<-s[1,ncol(s)]
-      new.xo<- s[best,ncol(s)]
-      if(verbose){
-        if(orig.xo == new.xo){
-          cat("no reduction in XOs found\n") 
-        }else{
-          cat("orig n XO = ", orig.xo, "new n XO = ",new.xo,"\n")
+    if(length(markernames(cross, chr = j))>=3){
+      if(verbose) cat(j,"...")
+      new.xo<-0
+      orig.xo<-1
+      while(new.xo<orig.xo){
+        mars<-lapply(chrnames(cross), function(x) markernames(cross,chr = x))
+        names(mars)<-chrnames(cross)
+        verb<-ifelse(new.xo == 0 & ripVerb , TRUE, FALSE)
+
+        s<-summary(ripple(cross, chr = j, window = window,
+                          method = method, verbose = verb))
+        best<-as.numeric(which.min(s[,ncol(s)])[1])
+        ord<-s[best,-ncol(s)]
+        orig.xo<-s[1,ncol(s)]
+        new.xo<- s[best,ncol(s)]
+        if(verbose){
+          if(orig.xo == new.xo){
+            cat("no reduction in XOs found\n")
+          }else{
+            cat("orig n XO = ", orig.xo, "new n XO = ",new.xo,"\n")
+          }
         }
+        mars[[j]]<-mars[[j]][ord]
+        cross<-newLG(cross = cross, markerList = mars)
       }
-      mars[[j]]<-mars[[j]][ord]
-      cross<-newLG(cross = cross, markerList = mars)
     }
   }
+
   if(verbose) cat("final map estimation")
   map<-est.map(cross, map.function = map.function, sex.sp=sex.sp,...)
   cross<-replace.map(cross, map)
