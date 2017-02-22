@@ -1,4 +1,3 @@
-
 #' @title Run a set of functions that improve the genetic map
 #'
 #' @description
@@ -35,6 +34,8 @@
 #' plot.map(cross, cross2)
 #' }
 #'
+#' @import qtl
+#' @export
 reDoCross<-function(cross,  window = 5, min.distance = 1,
                     map.function = "kosambi", sex.sp=F,
                     verbose=T, initialEstMap = TRUE,...){
