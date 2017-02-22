@@ -52,27 +52,30 @@ newLG<-function(cross, markerList){
   }
   # drop markers not in markerList
   newmars<-unlist(markerList)
+  if(any(duplicated(newmars))){
+    stop("duplicated markers found in markerList, all markers must be unique\n")
+  }
   oldmars<-markernames(cross)
   cross <- drop.markers(cross, oldmars[!oldmars %in% newmars])
 
-  if(any(duplicated(mar.df$marker))){
-    stop("duplicated markers found in markerList, all markers must be unique\n")
-  }
+
 
   # pull out rf matrix before reformatting cross
   n.mar <- nmar(cross)
   tot.mar <- totmar(cross)
-  rf <- cross$rf
-  lod <- rf
-  lod[lower.tri(rf)] <- t(rf)[lower.tri(rf)]
-  rf[upper.tri(rf)] <- t(rf)[upper.tri(rf)]
-  diagrf <- diag(rf)
-  diag(lod) <- 0
-  if(ncol(rf) != tot.mar)
-    stop("dimension of recombination fractions inconsistent with no. markers in cross.")
+  has.rf<-ifelse("rf" %in% names(cross), TRUE, FALSE)
+  if(has.rf){
+    rf <- cross$rf
+    lod <- rf
+    lod[lower.tri(rf)] <- t(rf)[lower.tri(rf)]
+    rf[upper.tri(rf)] <- t(rf)[upper.tri(rf)]
+    diagrf <- diag(rf)
+    diag(lod) <- 0
+    if(ncol(rf) != tot.mar)
+      stop("dimension of recombination fractions inconsistent with no. markers in cross.")
+    marnam <- colnames(rf)
+  }
 
-
-  marnam <- colnames(rf)
   chrstart <- rep(names(cross$geno), n.mar)
 
   # clean the cross
@@ -98,12 +101,17 @@ newLG<-function(cross, markerList){
       class(cross$geno[[i]]) <- "A"
   }
 
-  mname <- markernames(cross)
-  m <- match(mname, marnam)
-  rf <- rf[m,m]
-  lod <- lod[m,m]
-  rf[upper.tri(rf)] <- lod[upper.tri(lod)]
-  diag(rf) <- diagrf[m]
-  cross$rf <- rf
+  if(has.rf){
+    mname <- markernames(cross)
+    m <- match(mname, marnam)
+    rf <- rf[m,m]
+    lod <- lod[m,m]
+    rf[upper.tri(rf)] <- lod[upper.tri(lod)]
+    diag(rf) <- diagrf[m]
+    cross$rf <- rf
+  }
+  if("X" %in% chrnames(cross)){
+    class(cross$geno[["X"]]) <- "X"
+  }
   return(cross)
 }
