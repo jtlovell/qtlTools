@@ -128,10 +128,12 @@ dropSimilarMarkers<-function(cross,
       ctp<-ifelse(length(spl)>1000, 100, ifelse(length(spl)>100,10, ifelse(length(spl)>50,5,1)))
       if(which(chrnames(temp.cross) == x) %% ctp == 0) cat(x,"")
       cr<-subset(temp.cross, chr = x)
-      cr<-dsm(cr, rf.threshold = rf.threshold,
-              sd.weight = sd.weight,verbose = FALSE,
-              keepEnds = keepEnds,
-              doNotDrop = doNotDrop)
+      if(totmar(cr)>1){
+        cr<-dsm(cr, rf.threshold = rf.threshold,
+                sd.weight = sd.weight,verbose = FALSE,
+                keepEnds = keepEnds,
+                doNotDrop = doNotDrop)
+      }
       return(markernames(cr))
     })
     if(verbose) cat("\n")
@@ -147,10 +149,12 @@ dropSimilarMarkers<-function(cross,
     goodMars<-lapply(chrnames(cross), function(x){
       if(verbose) cat(x,"")
       cr<-subset(cross, chr = x)
-      cr<-dsm(cr, rf.threshold = rf.threshold,
-              sd.weight = sd.weight,verbose = FALSE,
-              keepEnds = keepEnds,
-              doNotDrop = doNotDrop)
+      if(totmar(cr)>1){
+        cr<-dsm(cr, rf.threshold = rf.threshold,
+                sd.weight = sd.weight,verbose = FALSE,
+                keepEnds = keepEnds,
+                doNotDrop = doNotDrop)
+      }
       return(markernames(cr))
     })
     toKeep<-unlist(goodMars)
