@@ -39,6 +39,7 @@
 reDoCross<-function(cross,  window = 5, min.distance = 1,
                     map.function = "kosambi", sex.sp=F,
                     verbose=T, initialEstMap = TRUE,...){
+  loadNamespace("qtl")
   if(initialEstMap){
     if(verbose) cat("initial estimation of map \n")
     map<-est.map(cross, map.function = map.function, sex.sp=sex.sp, ...)

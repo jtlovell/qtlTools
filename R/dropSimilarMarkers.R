@@ -57,6 +57,7 @@ dropSimilarMarkers<-function(cross,
                              byChr = TRUE,
                              runFullMatrix = FALSE,
                              ...){
+  loadNamespace("qtl")
   dsm<-function(cross,
                 rf.threshold=0.01,
                 sd.weight=1,

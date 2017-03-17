@@ -38,6 +38,7 @@
 repRipple<-function(cross, chr = NULL, window = 5,
                     method = "countxo", verbose = T,
                     map.function = "kosambi", sex.sp=F, clean1st = FALSE, ripVerb = TRUE, ...){
+  loadNamespace("qtl")
   if(clean1st) cross<-clean(cross)
   if(is.null(chr)){
     chr<-chrnames(cross)

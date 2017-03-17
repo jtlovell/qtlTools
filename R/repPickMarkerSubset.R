@@ -32,6 +32,7 @@
 repPickMarkerSubset<-function(cross, chr = NULL,
                                na.weight = 2, sd.weight=1,
                                min.distance = 1, verbose=TRUE){
+  loadNamespace("qtl")
   if(is.null(chr)) chr<-chrnames(cross)
   smallmarkers<-unlist(
     sapply(chr, function(i){
