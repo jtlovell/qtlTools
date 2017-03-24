@@ -100,7 +100,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
     out<-data.frame(l = bx, h = ex)
     out$id<-paste0("qtl",1:nrow(out))
     for(j in out$id) m[,j]<-ifelse(m$pos>=out$l[out$id==j] &
-                                      m$pos<=out$h[out$id==j],TRUE,FALSE)
+                                     m$pos<=out$h[out$id==j],TRUE,FALSE)
 
     m<-m[,-1]
     z<-vector()
@@ -122,7 +122,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
     return(z)
   }
 
-  if(lwd == "byLod" & is.na(peaklod) & is.null(calcCisResults)) lwd = 2
+  if(lwd[1] == "byLod" & is.na(peaklod)[1] & is.null(calcCisResults)) lwd = 2
   ############
   # 1. Combine the results into a dataframe
   if(!is.null(calcCisResults)){
@@ -148,7 +148,7 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
   dat$phenonum<-as.numeric(as.factor(dat$phe))
   dat$col<-NA
 
-  for(i in c("chr","l","lod","h","cm")) dat[,i]<-as.numeric(as.character(dat[,i]))
+  for(i in c("l","lod","h","cm")) dat[,i]<-as.numeric(as.character(dat[,i]))
 
   ############
   # 2. Get the colors in order
@@ -181,7 +181,6 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
       dat$lwd<-rep(lwd, nrow(dat))
     }
   }
-  dat.ci<-dat
 
   ############
   # 4. Plot the map
@@ -194,15 +193,22 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
     map<-pull.map(cross, as.table=T)
   }
   map<-as.data.frame(map, stringsAsFactors=F)
+  map$chr.orig<-map$chr
   map$chr <- as.numeric(map$chr)
   chrns<-unique(map$chr)
+
+  dat$chr.orig<-dat$chr
+  for(i in unique(dat$chr.orig))
+    dat$chr[dat$chr.orig==i]<-map$chr[which(map$chr.orig==i)[1]]
+
+  dat.ci<-dat
 
   plot(chrns, rep(0, nchr(cross)), bty="n",type="n",
        ylim=c(max(chrlens),0),
        xlab="chromosome", ylab = "mapping position (cM)",
        xlim=c(min(chrns), max(chrns)+1),
        xaxt = "n")
-  axis(1, at = chrns)
+  axis(1, at = chrns, labels = chrnames(cross))
   segments(x0=chrns, x1=chrns, y0=rep(0, nchr(cross)), y1=chrlens)
   if(is.null(tick.width)){
     scl<-length(chrns)/100
