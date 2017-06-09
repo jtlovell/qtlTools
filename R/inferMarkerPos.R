@@ -15,6 +15,10 @@
 #' marker position, but slow down the algorithm.
 #' @param est.ci Logical, should confidence intervals around the inferred position be
 #' estimated?
+#' @param jitterMars logical, should a small amount of noise be added to
+#' the numeric genotype codes? In the case where a perfect association exists, LOD = inf.
+#' Setting this to TRUE makes all LOD scores numeric and finite.
+#' @param verbose Logical, should updates be reported
 #' @param ... Additional arguments passed to scanone. Cannot be "chr" or "method" as
 #' these are hard coded in the function.
 #' @details There are many methods to find the most likely position of a new marker.
@@ -91,7 +95,7 @@ inferMarkerPos<-function(cross, marker.matrix,
 
   names(chr.max)<-mnames
   names(pos.max)<-mnames
-  
+
   if(verbose) cat("running final scanone to refine best position\n")
   out.f<-lapply(unique(chr.max), function(x){
     if(verbose) cat("analyzing chr",x,"\n")

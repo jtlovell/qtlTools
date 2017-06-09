@@ -48,7 +48,6 @@
 #' @export
 tspOrder<-function(cross,
                    concorde_path,
-                   max.rf = 1,
                    return = "cross"){
   if(!requireNamespace("TSP", quietly = TRUE)){
     stop("install the TSP package to use tspOrder\n")
@@ -64,7 +63,6 @@ tspOrder<-function(cross,
   rf<-data.matrix(pull.rf(cross, what = "rf"))
   class(rf)<-"matrix"
   diag(rf)<-0
-  rf[rf>max.rf]<-max.rf
 
   markerList<-lapply(chrnames(cross), function(x) markernames(cross, chr = x))
   names(markerList)<-chrnames(cross)

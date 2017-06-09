@@ -76,7 +76,6 @@ covScanQTL<-function(cross,
                      expression.covariates,
                      qtl.method = "hk",
                      nperm = 0,
-                     which.perm = NA,
                      plotit=TRUE,
                      verbose = TRUE){
 
