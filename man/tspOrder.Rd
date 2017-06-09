@@ -4,19 +4,12 @@
 \alias{tspOrder}
 \title{Order markers within linkage groups}
 \usage{
-tspOrder(cross, method = "concorde", hamiltonian = TRUE,
-  concorde_path = NULL, return = "cross")
+tspOrder(cross, concorde_path, max.rf = 1, return = "cross")
 }
 \arguments{
 \item{cross}{The QTL cross object.}
 
-\item{method}{The solve_TSP method to employ. We highly encourage using method = "condcorde".
-Simulations show that this method outperforms all others significantly. See details.}
-
-\item{hamiltonian}{Logical, should a hamiltonian circuit be enforced?}
-
-\item{concorde_path}{Required if method = "concorde". The directory containing
-concorde executables.}
+\item{concorde_path}{Required. The directory containing concorde executables.}
 
 \item{return}{If "cross" is specified, pass the marker order through newLG, which quickly
 reorders the markers of the original cross to follow the TSP order. Otherwise,
@@ -31,9 +24,7 @@ of markers in a new order.
 \description{
 \code{tspOrder} Apply a traveling salesperson problem solver to find the
 shortest path through the recombination fraction matrix. Requires that
-the TSP package is installed. Optimal performance is provided by the
-"Concorde" method; however, this requires independent installation of
-the Concorde program. See details.
+the TSP R package and the TSP solver "Concorde" program are installed. See details.
 }
 \details{
 This function relies on the TSP R packages to perform the TSP solvers. See documentation
@@ -42,34 +33,28 @@ Hamiltonian circuit by adding a dummy node that has 0 distance to all other node
 allows for discrete start and end points and is more appropriate for genetic map construction
 than forcing a complete route through all markers.
 
-The best performance seems to result from using hamiltonian = T and method = "concorde".
-
-We recommend using the concorde algorithm. To do this, install the concorde program:
+To install the concorde program:
 http://www.math.uwaterloo.ca/tsp/concorde/downloads/codes/src/co031219.tgz.
 If on a mac, this is not super easy.
 See https://qmha.wordpress.com/2015/08/20/installing-concorde-on-mac-os-x/
 for details on the best way to do this.
 }
 \examples{
-library(qtlTools)
-data(fake.f2)
-cross<-fake.f2
 \dontrun{
-fake.f2<-est.rf(fake.f2)
-cross<-fake.f2
-#Perturb the marker order and chromosome names
+library(qtlTools)
+set.seed(42)
+map<-sim.map(len = 200, n.mar = 200, include.x = F, eq.spacing=T)
+cross<-sim.cross(map, type = "riself", map.function = "kosambi", error.prob = 0)
+cross<-est.rf(cross)
 markerlist<-lapply(chrnames(cross), function(x) sample(markernames(cross, chr =x)))
 names(markerlist)<-as.character(chrnames(cross))
-cross2<-newLG(cross, markerList = markerlist)
-library(TSP)
-plot.rf(cross2)
-cross3<-cross3<-tspOrder(cross = cross2,
-  hamiltonian = T,
-  method="nn") # change to your path
-cross3<-cross3<-tspOrder(cross = cross2,
-  hamiltonian = T,
-  method="concorde",
-  concorde_path = "/Users/John/Documents/concorde/TSP") # change to your path
-plot.rf(cross3)
+cross.rand<-newLG(cross, markerList = markerlist)
+set.seed(42)
+cross.ord<-tspOrder(cross = cross.rand,
+  max.rf = .5,
+  concorde_path = "/Users/John/Documents/concorde/TSP")
+
+plot(match(markernames(cross), markernames(cross.ord)),
+xlab = "position in similated map", ylab = "position in ordered map")
 }
 }

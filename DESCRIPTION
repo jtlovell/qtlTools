@@ -1,10 +1,10 @@
 Package: qtlTools
 Type: Package
 Title: Data Processing and Plotting in Association with R/qtl
-Version: 1.1.0
+Version: 1.2.0
 Author: J.T. Lovell
 Maintainer: J.T. Lovell <johntlovell@gmail.com>
-Description: QTL visualization and processing: includes pipelines to present results from multiple-QTL modeling and improve genetic maps.
+Description: QTL visualization and processing: includes pipelines to extract results from multiple-QTL modeling, search for candidate genes and build genetic maps.
 License: GPL-3
 LazyData: TRUE
 Depends:

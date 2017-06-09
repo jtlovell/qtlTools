@@ -1,6 +1,8 @@
 #' @title Remove close QTL from stepwiseqtl model selection
 #'
 #' @description
+#' Under development, use with care.
+#'
 #' \code{dropTooCloseQTL}  Assists in simplifying models following stepwise model selection
 #' @import qtl
 #' @export

@@ -86,6 +86,7 @@ for(i in unique(map$chr)){
 ## Part 4: Find genes in the interval
 ##### Make qtl intervals
 ```{r}
+multitrait<-calc.genoprob(multitrait)
 s1<-scanone(multitrait, method="hk", pheno.col=1)
 perm<-scanone(multitrait, n.perm=100, method="hk",pheno.col=1, verbose=FALSE)
 cis<-calcCis(cross = multitrait, s1.output=s1, perm.output=perm, drop=5)
@@ -108,3 +109,82 @@ print(candGenes)
 3. Genes with annotations similar to the trait of interest
 4. Covariance of expression and trait of interest in mapping population (Lovell et al. 2015, Plant Cell)
 5. Causal Inference testing
+
+### Here, we will explore the 4th option.
+First, we must simulate some gene expression data:
+Let's just focus on the chromosome 5 QTL and say there are 50 genes under the QTl interval. Here, we simulate expression (normalized around 0) with a few genes with correlated expression with the focal marker.
+
+```{r}
+cross<-subset(multitrait, ind = !is.na(pull.pheno(multitrait, 1)))
+phe<-pull.pheno(cross, 1)
+
+mult.fact<-exp(seq(from = 0, to = 50, length.out = 50))
+facs<-sapply(1:50, function(x){
+  scale(sapply(scale(phe), function(y) rnorm(n = 1, mean = y, sd = mult.fact[x])))
+})
+plot(sapply(1:50, function(x) cor(phe, facs[,x])),
+     ylab = "cor. coef. (expression ~ chr5 QTL genotype)",
+     xlab = "gene id")
+```
+
+In this simplistic example, we are simulating a case where expression drives a linear, additive QTL effect. However, this approach is extensible and permits inference of QTL*Treatment, epistasis, multiple QTL models and other cases. 
+
+So, lets run the covariate scan, testing how the QTL profile is affected by the presence of gene expression in the model. 
+
+```{r}
+expression.covariates = facs
+colnames(expression.covariates)<-paste0("gene",1:ncol(expression.covariates))
+pheno.col = 1
+
+qtl = makeqtl(cross, chr = max(s1)$chr, pos = max(s1)$pos, what = "prob")
+
+test<-covScanQTL(cross = cross,
+                 pheno.col = 1,
+                 qtl = qtl,
+                 expression.covariates = expression.covariates,
+                 qtl.method = "hk",
+                 nperm = 100)
+```
+
+Now include another QTL in the model and enforce an epistatic interaction between the 2nd (focal) and 1st QTL.
+```{r}
+qtl2 = makeqtl(cross, chr = summary(s1)$chr[4:5], 
+               pos = summary(s1)$pos[4:5], what = "prob")
+test2<-covScanQTL(cross = cross,
+                 pheno.col = 1,
+                 qtl = qtl2,
+                 which.epiqtl = 1,
+                 focalqtl.index = 2,
+                 expression.covariates = expression.covariates,
+                 qtl.method = "hk",
+                 nperm = 100)
+```
+
+
+Now a little more complexity with an F2 cross and experimental covariates
+```{r}
+data(fake.f2)
+cross<-fake.f2
+phe<-pull.pheno(cross, 1)
+mult.fact<-exp(seq(from = 0, to = 50, length.out = 50))
+facs<-sapply(1:50, function(x){
+  scale(sapply(scale(phe), function(y) rnorm(n = 1, mean = y, sd = mult.fact[x])))
+})
+facs<-data.frame(facs)
+colnames(facs)<-paste0("gene",1:ncol(facs))
+cross<-calc.genoprob(cross)
+sex = data.frame(sex = pull.pheno(cross, pheno.col = "sex"))
+s1<-scanone(cross, addcovar = sex)
+qtl = makeqtl(cross, chr = summary(s1)$chr[1], pos = summary(s1)$pos[1], what = "prob")
+
+test<-covScanQTL(cross = cross,
+                 pheno.col = 1,
+                 qtl = qtl,
+                 addcovar = sex,
+                 expression.covariates = facs,
+                 qtl.method = "hk",
+                 which.perm = 10,
+                 nperm = 100)
+
+```
+

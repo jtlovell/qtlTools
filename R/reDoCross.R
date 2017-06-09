@@ -54,7 +54,7 @@ reDoCross<-function(cross,  window = 5, min.distance = 1,
   if(verbose) cat(" --- tossed", orig.nmar-sum(nmar(cross)),"markers\n")
 
   if(verbose) cat("ripple marker order")
-  cross<-repRipple(cross, window = window, verbose = F, ripVerb=F)
+  cross<-repRipple(cross, window = window, verbose = T, ripVerb=T)
   if(verbose) cat(" --- reduced map size by", orig.len-sum(chrlen(cross)),"\n")
 
   orig.len<-sum(chrlen(cross))

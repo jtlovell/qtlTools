@@ -28,8 +28,8 @@ findGenesInterval<-function(findGenecM.output = NULL, calcCis.output = NULL,
                             qtlname = NULL, chr, lowposition, highposition,
                             geneID, geneChr, geneBp, genecM){
   if(is.null(calcCis.output)){
-    if(any(is.null(c(chr,l,h))))
-      stop("if calcCis.output is not specified, chr, l and h must be\n")
+    if(any(is.null(c(chr,lowposition,highposition))))
+      stop("if calcCis.output is not specified, chr, lowposition and highposition must be\n")
     if(is.null(qtlname)){
       qtlname<-1:length(chr)
     }

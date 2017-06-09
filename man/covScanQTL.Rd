@@ -4,32 +4,34 @@
 \alias{covScanQTL}
 \title{Find the effect of candidate genes based on gene expression.}
 \usage{
-covScanQTL(cross, pheno.y, pheno.candidates, experimental.covar = NULL,
-  mod = NULL, QTLxE = TRUE, chr, pos, qtl.method = "hk", nperm = 0,
-  plotit = TRUE)
+covScanQTL(cross, pheno.col = 1, qtl, addcovar = NULL, intcovar = NULL,
+  which.epiqtl = NULL, focalqtl.index = 1, expression.covariates,
+  qtl.method = "hk", nperm = 0, which.perm = NA, plotit = TRUE,
+  verbose = TRUE)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}
 
-\item{pheno.y}{Character vector specifying the phenotypes modelled. Is passed
-to the "pheno.col" argument of qtl::scanone.}
+\item{pheno.col}{Character vector specifying the phenotypes modelled.}
 
-\item{pheno.candidates}{Character vector specifying the names of the expression phenotypes to
-be extracted from the cross object that serve as the covariate.}
+\item{qtl}{A qtl model that supplies the position of the focal QTL
+(see focalqtl.index). If qtl only contains a single locus, this is assumed
+to be the qtl of interest. If a multiple qtl model is supplied, the genotypes
+of those QTL are inferred using the Viterbi algorithm and added to the addcovar
+dataframe of covariates.}
 
-\item{experimental.covar}{data.frame containing the experimental covariate. Passed on to
-addcovar in qtl::scanone. If QTLxE is TRUE, also passed to intcovar}
+\item{addcovar}{data.frame of experimental additive covariates (see scanone)}
 
-\item{mod}{A qtl model object that can supply additional marker covariates that
-are held constant during the covariate scan.}
+\item{intcovar}{data.frame of experimental interactive covariates (see scanone)}
 
-\item{QTLxE}{Logical, should the focal QTL have an interactive covariate.
-See exp.covar.}
+\item{which.epiqtl}{Numeric, which qtl (if any) in the model should be forced
+to interact with the focal qtl. The inferred genotypes of this marker are added to
+the intcovar dataframe.}
 
-\item{chr}{Numeric or character, of length 1, specifying the chromosome on which
-the QTL peak to scan exists}
+\item{focalqtl.index}{Numeric, which qtl in the model is the the QTL to test?}
 
-\item{pos}{Numeric, of length 1, specifying the QTL peak position on chromosome chr.}
+\item{expression.covariates}{Numeric matrix with normalized expression values
+of candidate genes. Rows must exactly match the individuals in the cross}
 
 \item{qtl.method}{The method passed to scanone}
 
@@ -38,11 +40,12 @@ computationally efficient and take forever when using eQTL data.}
 
 \item{plotit}{Logical, when more than 1 pheno.y is specified, presents a boxplot of
 covariate scan ranks.}
+
+\item{verbose}{Logical, should updates be printed?}
 }
 \value{
-Either a list or a dataframe, containing the maximum scanone outputs at
-chromosome chr and position pos for each phenotype and covariate. If nperm > 0, also
-gives the permutation results as a second list element.
+A dataframe, containing the maximum scanone outputs at
+chromosome chr and position pos for each phenotype and covariate.
 }
 \description{
 \code{covScanQTL} Employs the covariate scan approach (Lovell et al. (2015),
@@ -52,6 +55,35 @@ or on a set of QTL underlying a trand-band. In the latter case, a boxplot of ran
 can be output.
 }
 \examples{
-# See tutorial - findingCandidateGenes
+\dontrun{
+data(multitrait)
+cross<-subset(multitrait, ind = !is.na(pull.pheno(multitrait, 1)))
+phe<-pull.pheno(cross, 1)
+mult.fact<-exp(seq(from = 0, to = 50, length.out = 50))
+#ssimulate some gene expression data, some of which are correlated with the phenotype
+facs<-sapply(1:50, function(x){
+  scale(sapply(scale(phe), function(y) rnorm(n = 1, mean = y, sd = mult.fact[x])))
+  })
+plot(sapply(1:50, function(x) cor(phe, facs[,x])),
+     ylab = "cor. coef. (expression ~ chr5 QTL genotype)",
+     xlab = "gene id")
 
+expression.covariates = facs
+colnames(expression.covariates)<-paste0("gene",1:ncol(expression.covariates))
+qtl = makeqtl(cross, chr = max(s1)$chr, pos = max(s1)$pos, what = "prob")
+test<-covScanQTL(cross = cross,
+                 pheno.col = 1,
+                 qtl = qtl,
+                 expression.covariates = expression.covariates,
+                 qtl.method = "hk",
+                 nperm = 100)
+qtl2 = makeqtl(cross, chr = summary(s1)$chr[4:5],
+               pos = summary(s1)$pos[4:5], what = "prob")
+test2<-covScanQTL(cross = cross, pheno.col = 1,qtl = qtl2,
+                 which.epiqtl = 1,
+                 focalqtl.index = 2,
+                 expression.covariates = expression.covariates,
+                 qtl.method = "hk",
+                 nperm = 100)
+}
 }

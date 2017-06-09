@@ -196,13 +196,11 @@ segmentsOnMap<-function(cross, phe, chr, l, h, peaklod = NA, peakcM = NA, calcCi
   map$chr.orig<-map$chr
   map$chr <- as.numeric(map$chr)
   chrns<-unique(map$chr)
-
   dat$chr.orig<-dat$chr
+  dat$chr<-1
   for(i in unique(dat$chr.orig))
     dat$chr[dat$chr.orig==i]<-map$chr[which(map$chr.orig==i)[1]]
-
   dat.ci<-dat
-
   plot(chrns, rep(0, nchr(cross)), bty="n",type="n",
        ylim=c(max(chrlens),0),
        xlab="chromosome", ylab = "mapping position (cM)",

@@ -130,7 +130,7 @@ meanScan<-function(cross, pheno.col = 1,
   if(is.null(ylab)) ylab = paste0(pheno.col," mean")
   if(plotit){
     plot(s1, type = "n", ylim = ylim, ylab = ylab, ...)
-    for(i in 1:(ncol(s1)-2)) plot(s1, lodcolumn = i, col = cols[i],lty=ltys[i], add = T)
+    for(i in 1:(ncol(s1)-2)) plot(s1, lodcolumn = i, col = cols[i],lty=ltys[i], add = T, ...)
     if(draw.legend){
       legend(leg.pos, inset = leg.inset, colnames(out1), col = cols, lty = ltys, bty = leg.bty)
     }

@@ -4,8 +4,7 @@
 \alias{matchMarkerOrder}
 \title{Orient chromosomes to match some previously found marker order.}
 \usage{
-matchMarkerOrder(cross, marker.chr.bp = NULL, marker.pos.bp = NULL,
-  marker.sep = "_", marker.char.rm = "Chr0", plotit = F)
+matchMarkerOrder(cross, physicalMarkerOrder)
 }
 \arguments{
 \item{cross}{The QTL cross object. If marker names
@@ -15,21 +14,9 @@ the chromosome names of the cross.*
 If there are additional characters (e.g. "Chr01" = "1"), specify the character
 string to sub stripped in marker.char.rm. In this example, marker.char.rm = "Chr0".}
 
-\item{marker.chr.bp}{If marker names are not as specified above, provide chromosome
+\item{physicalMarkerOrder}{If marker names are not as specified above, provide chromosome
 identities of each marker here. Must match chromosome names of the cross exactly.
 See qtlTools::newLG to rename the chromosomes in the cross object.}
-
-\item{marker.pos.bp}{If marker names are not as specified above, provide the physical
-positions (e.g. bp) of each marker.}
-
-\item{marker.sep}{If markers are named as chr and pos, but the separating character is
-not "_", specify here.}
-
-\item{marker.char.rm}{See above. The character string to drop from the marker name so that
-it matches the chromosome names exactly.}
-
-\item{plotit}{If the ggplot2 package is available, should plots be made? Increases
-run time substantially.}
 }
 \value{
 A cross object with flipped marker order on chromosomes that seem to be in the
@@ -46,34 +33,27 @@ For each chromosome, fits a linear model and asks if the slope < 0. If so,
 flips the maker order on that chromosome.
 }
 \examples{
-library(qtlTools)
-data(fake.f2)
-cross<-fake.f2
 \dontrun{
-fake.f2<-est.rf(fake.f2)
-cross<-fake.f2
-#Perturb the marker order and chromosome names
-markerlist<-lapply(chrnames(cross), function(x) sample(markernames(cross, chr =x)))
+library(qtlTools)
+set.seed(42)
+map<-sim.map(len = c(100,200,50), n.mar = c(50,100,25),
+include.x = F, eq.spacing=T)
+cross<-sim.cross(map, type = "riself",
+map.function = "kosambi", error.prob = 0)
+cross<-est.rf(cross)
+markerlist<-lapply(chrnames(cross), function(x)
+sample(markernames(cross, chr =x)))
 names(markerlist)<-as.character(chrnames(cross))
-cross2<-newLG(cross, markerList = markerlist)
-library(TSP)
-plot.rf(cross2)
-cross3<-cross3<-tspOrder(cross = cross2,
-  hamiltonian = T,
-  method="nn") # change to your path
-cross3<-cross3<-tspOrder(cross = cross2,
-  hamiltonian = T,
-  method="concorde",
-  concorde_path = "/Users/John/Documents/concorde/TSP") # change to your path
-plot.rf(cross3)
+cross.rand<-newLG(cross, markerList = markerlist)
+cross.ord<-tspOrder(cross = cross.rand,
+                    max.rf = .5,
+                    concorde_path = "/Users/John/Documents/concorde/TSP")
+cross.ord<-replace.map(cross.ord, est.map(cross.ord, map.function = "kosambi"))
+orig.marker.order<-lapply(chrnames(cross), function(x)
+markernames(cross, chr = x))
+names(orig.marker.order)<-chrnames(cross)
 
-orig.marker.info<-pull.map(cross, as.table = T)
-orig.marker.info$marker<-rownames(orig.marker.info)
-orig.marker.info<-orig.marker.info[match(markernames(cross3),orig.marker.info$marker),]
-
-cross4<-matchMarkerOrder(cross3,
-  marker.chr.bp = orig.marker.info$chr,
-  marker.pos.bp = orig.marker.info$pos,
-  plotit=T)
+cross.match<-matchMarkerOrder(cross = cross.ord,
+  physicalMarkerOrder = orig.marker.order)
 }
 }

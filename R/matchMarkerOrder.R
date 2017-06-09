@@ -12,17 +12,9 @@
 #' the chromosome names of the cross.*
 #' If there are additional characters (e.g. "Chr01" = "1"), specify the character
 #' string to sub stripped in marker.char.rm. In this example, marker.char.rm = "Chr0".
-#' @param marker.chr.bp If marker names are not as specified above, provide chromosome
+#' @param physicalMarkerOrder If marker names are not as specified above, provide chromosome
 #' identities of each marker here. Must match chromosome names of the cross exactly.
 #' See qtlTools::newLG to rename the chromosomes in the cross object.
-#' @param marker.pos.bp If marker names are not as specified above, provide the physical
-#' positions (e.g. bp) of each marker.
-#' @param marker.sep If markers are named as chr and pos, but the separating character is
-#' not "_", specify here.
-#' @param marker.char.rm See above. The character string to drop from the marker name so that
-#' it matches the chromosome names exactly.
-#' @param plotit If the ggplot2 package is available, should plots be made? Increases
-#' run time substantially.
 #'
 #' @details For each chromosome, fits a linear model and asks if the slope < 0. If so,
 #' flips the maker order on that chromosome.
@@ -31,123 +23,54 @@
 #' reverse orientation of the annotation.
 #'
 #' @examples
-#' library(qtlTools)
-#' data(fake.f2)
-#' cross<-fake.f2
 #' \dontrun{
-#' fake.f2<-est.rf(fake.f2)
-#' cross<-fake.f2
-#' #Perturb the marker order and chromosome names
-#' markerlist<-lapply(chrnames(cross), function(x) sample(markernames(cross, chr =x)))
+#' library(qtlTools)
+#' set.seed(42)
+#' map<-sim.map(len = c(100,200,50), n.mar = c(50,100,25),
+#' include.x = F, eq.spacing=T)
+#' cross<-sim.cross(map, type = "riself",
+#' map.function = "kosambi", error.prob = 0)
+#' cross<-est.rf(cross)
+#' markerlist<-lapply(chrnames(cross), function(x)
+#' sample(markernames(cross, chr =x)))
 #' names(markerlist)<-as.character(chrnames(cross))
-#' cross2<-newLG(cross, markerList = markerlist)
-#' library(TSP)
-#' plot.rf(cross2)
-#' cross3<-cross3<-tspOrder(cross = cross2,
-#'   hamiltonian = T,
-#'   method="nn") # change to your path
-#' cross3<-cross3<-tspOrder(cross = cross2,
-#'   hamiltonian = T,
-#'   method="concorde",
-#'   concorde_path = "/Users/John/Documents/concorde/TSP") # change to your path
-#' plot.rf(cross3)
+#' cross.rand<-newLG(cross, markerList = markerlist)
+#' cross.ord<-tspOrder(cross = cross.rand,
+#'                     max.rf = .5,
+#'                     concorde_path = "/Users/John/Documents/concorde/TSP")
+#' cross.ord<-replace.map(cross.ord, est.map(cross.ord, map.function = "kosambi"))
+#' orig.marker.order<-lapply(chrnames(cross), function(x)
+#' markernames(cross, chr = x))
+#' names(orig.marker.order)<-chrnames(cross)
 #'
-#' orig.marker.info<-pull.map(cross, as.table = T)
-#' orig.marker.info$marker<-rownames(orig.marker.info)
-#' orig.marker.info<-orig.marker.info[match(markernames(cross3),orig.marker.info$marker),]
-#'
-#' cross4<-matchMarkerOrder(cross3,
-#'   marker.chr.bp = orig.marker.info$chr,
-#'   marker.pos.bp = orig.marker.info$pos,
-#'   plotit=T)
+#' cross.match<-matchMarkerOrder(cross = cross.ord,
+#'   physicalMarkerOrder = orig.marker.order)
 #' }
 #' @import qtl
 #' @export
 
-matchMarkerOrder<-function(cross, marker.chr.bp = NULL, marker.pos.bp = NULL,
-                           marker.sep = "_", marker.char.rm = "Chr0", plotit = F){
+matchMarkerOrder<-function(cross, physicalMarkerOrder){
 
-  if(!requireNamespace("ggplot2", quietly = TRUE) & plotit){
-    warning("install the ggplot2 package to use plotit\n")
-    plotit = FALSE
-  }else{
-    require("ggplot2", quietly = TRUE)
-  }
-
-  map<-pullMap(cross)
-  map$marker.name<-gsub(marker.char.rm,"", map$marker.name)
-
-  if(is.null(marker.chr.bp)){
-    map$chr.orig<-sapply(map$marker.name,
-                         function(x) strsplit(x, "_")[[1]][1])
-  }else{
-    map$chr.orig<-marker.chr.bp
-  }
-  if(is.null(marker.pos.bp)){
-    map$pos.orig<-as.numeric(sapply(map$marker.name,
-                                    function(x) strsplit(x, "_")[[1]][2]))
-  }else{
-    map$pos.orig<-marker.pos.bp
-  }
-  if(class(cross)[1]=="4way"){
-    colnames(map)[3]<-"pos"
-    map$pos.male<-NULL
-  }
-
-  if(any(!unique(map$chr) %in% unique(map$chr.orig)) |
-     any(!unique(map$chr.orig) %in% unique(map$chr)))
+  marord<-lapply(chrnames(cross), function(x)
+    markernames(cross, chr = x))
+  names(marord)<-chrnames(cross)
+  physicalMarkerOrder<-physicalMarkerOrder[chrnames(cross)]
+  if(!identical(chrnames(cross), names(physicalMarkerOrder)))
     stop("some marker chromosome names do not match the annotation chromosome names\n")
 
-  if(plotit){
-    p1<-ggplot(map, aes(x = pos, y = pos.orig, col = chr))+
-      geom_point(size=.3)+
-      theme(axis.text=element_blank(),
-            axis.ticks=element_blank())+
-      facet_grid(chr.orig~chr, as.table=F, scale = "free", space="free")+
-      labs(x = "mapping position of marker (cM)",
-           y = "annotation position of marker (bp)",
-           title = "initial position comparison")
-  }
+  matched<-lapply(chrnames(cross), function(x){
+    data.frame(old = 1:length(marord[[x]]),
+               new = match(marord[[x]], physicalMarkerOrder[[x]]))
+  })
+  names(matched)<-chrnames(cross)
 
-  map.same<-map[map$chr == map$chr.orig,]
-  flipIt<-sapply(unique(map.same$chr), function(i){
-    out<-lm(pos ~ pos.orig,
-            data = map.same[map.same$chr==i,])$coefficients["pos.orig"]
+  flipIt<-sapply(chrnames(cross), function(x){
+    out<-lm(old~new,data = matched[[x]])$coefficients["new"]
     ifelse(out>0,FALSE,TRUE)
   })
+
   toflip<-chrnames(cross)[flipIt]
   for(i in toflip) cross<-flip.order(cross, chr = i)
 
-  map<-pullMap(cross)
-  map$marker.name<-gsub(marker.char.rm,"", map$marker.name)
-
-  if(is.null(marker.chr.bp)){
-    map$chr.orig<-sapply(map$marker.name,
-                         function(x) strsplit(x, "_")[[1]][1])
-  }else{
-    map$chr.orig<-marker.chr.bp
-  }
-  if(is.null(marker.pos.bp)){
-    map$pos.orig<-as.numeric(sapply(map$marker.name,
-                                    function(x) strsplit(x, "_")[[1]][2]))
-  }else{
-    map$pos.orig<-marker.pos.bp
-  }
-  if(class(cross)[1]=="4way"){
-    colnames(map)[3]<-"pos"
-    map$pos.male<-NULL
-  }
-  if(plotit){
-    p2<-ggplot(map, aes(x = pos, y = pos.orig, col = chr))+
-      geom_point(size=.3)+
-      theme(axis.text=element_blank(),
-            axis.ticks=element_blank())+
-      facet_grid(chr.orig~chr, as.table=F, scale = "free", space="free")+
-      labs(x = "mapping position of marker (cM)",
-           y = "annotation position of marker (bp)",
-           title = "marker position comparison, following order matching")
-    print(p1)
-    print(p2)
-  }
   return(cross)
 }

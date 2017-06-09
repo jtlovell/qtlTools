@@ -96,17 +96,31 @@ findGenecM<-function(cross, marker.info, gff, gffCols = NULL,
                      attributeParse = c("ID="),seqnameParse = c("Chr","scaffold_"),
                      dropNonColinearMarkers=TRUE, verbose = TRUE,...){
 
-  findColinearMarkers<-function(bpsOrderdBycM){
-    diffs<-sapply(2:(length(bpsOrderdBycM)-1), function(x){
-      sum(abs(diff(bpsOrderdBycM[-x])))
-    })
-    if(length(unique(diffs))>1){
-      bads<-which(diffs<mean(diffs))+1
-    }else{
-      bads<-NA
+  dropNonColMar<-function(map, plotit = F, maxBpPercM = 5000000){
+    tdiff<-function(y){
+      d1<-diff(c(y,y[length(y)]))
+      d2<-diff(c(0,y))
+      return(d1<0|d2<0)
     }
-    index<-1:length(bpsOrderdBycM)
-    return(index[!index %in% bads])
+    tmp<-map
+    tmp$ord<-1:nrow(tmp)
+    good<-unlist(lapply(unique(map$chr), function(x){
+      tc<-tmp[tmp$chr == x,]
+      tc<-tc[order(tc$pos),]
+      tc$bpPcm<-
+      d<-tdiff(tc$bp)
+      bads<-numeric()
+      while(any(d)){
+        bads<-c(bads, tc$ord[d])
+        tc<-tc[!d,]
+        d<-tdiff(tc$bp)
+      }
+      return(tc$ord)
+    }))
+    return(map[tmp$ord %in% good,])
+  }
+  if(dropNonColinearMarkers){
+    marker.info<-dropNonColMar(marker.info)
   }
 
   if(is.null(gffCols) & ncol(gff) != 9)
@@ -143,20 +157,17 @@ findGenecM<-function(cross, marker.info, gff, gffCols = NULL,
   for(i in seqnameParse){
     gff$chr<-gsub(i,"",gff$chr, fixed=T)
   }
-  gff$chr<-as.character(as.numeric(gff$chr))
+  
+  gff$chr<-as.character(gff$chr)
   gff<-gff[gff$chr %in% as.character(chrnames(cross)),]
 
   gff$bp<-(gff[,4]+gff[,5])/2
-
   if(verbose) cat("inferring mapping position for:\n")
   out<-lapply(unique(gff$chr), function(i){
     tgff<-gff[gff$chr==i,]
     if(verbose) cat("chr ",i, " (n. features = ", nrow(tgff),")\n", sep="")
     tmap<-marker.info[marker.info$chr == i,]
-    if(dropNonColinearMarkers){
-      good<-findColinearMarkers(tmap$bp)
-      tmap<-tmap[good,]
-    }
+
     outint<-lapply(2:nrow(tmap), function(j) {
       bpcm<-tmap[(j-1):j,c("pos","bp")]
       gffbp<-tgff[tgff$bp >= min(bpcm$bp) &
