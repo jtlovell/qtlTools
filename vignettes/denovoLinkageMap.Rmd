@@ -1,15 +1,13 @@
 ---
 title: "*De novo* linkage maps using R and R/qtl"
-author: "John T. Lovell"
+author: "JT Lovell"
 date: "`r Sys.Date()`"
-output: 
-  pdf_document:
-    toc: true
-    toc_depth: 1
-    number_sections: true
-    fig_caption: yes
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
-
 
 ***
 
@@ -277,8 +275,8 @@ There are many methods to order markers. While joinmap4 remains the industry sta
 ## Marker ordering using TSP solvers
 Here, I build upon the `TSPmap` protocol and employ a travelling salesperson problem solver to find the shortest path through the recombination fraction matrix. The optimal method is `concorde`, however, this requires a separate installation of the concorde program. See `?tspOrder` for details on how to do this.
 ```{r tsp, message=FALSE, results="hide", error=FALSE, warning = FALSE}
-cross3<-tspOrder(cross = cross2,hamiltonian = TRUE,
-                  method="concorde",concorde_path = "/Users/John/Documents/concorde/TSP")
+cross3<-tspOrder(cross = cross2,
+                 concorde_path = "/Users/John/Documents/concorde/TSP")
 ```
 
 ## Look at marker order
@@ -357,38 +355,6 @@ cross5<-drop.markers(cross4, toDrop)
 ```{r, echo = F, fig.cap = "Segregation distortion plot after filtering markers with a major allele frequences > 0.58"}
 plot(geno.table(cross5, scanone.output=T), lod = 3:4, ylim = c(.4,.6),
      ylab = "genotype freq. of AA (black) and BB (blue)")
-```
-
-\newpage
-
-# Match the order of markers to known orders (e.g. annotation)
-We often have a pretty good idea of the general order of markers. For example, what were the positions of the markers on the reference genome? Or where do the reads BLAST to on a related genome? When generating a genetic map, we often will want to make sure the map reflects know marker orders.
-To do this, we need to have some information about the chromosome and positions of marker - e.g. the position of the markers on some reference.
-```{r}
-cross5<-matchMarkerOrder(cross4, plotit=F)
-```
-
-```{r, echo = F, fig.cap = "original (top) and new (bottom) marker order. Note that the initial slopes in the first plot may be negative (i.e. the marker order is inverted relative to the reference); however, after matchMarkerOrder the slopes are always positive"}
-m<-pullMap(cross4)
-m$orig.chr = splitText(m$marker.name)
-m$orig.pos = as.numeric(splitText(m$marker.name, num = 2))
-par(mfrow = c(2,3))
-par(mar = c(1, 4, 4, 2) + 0.1)
-for(i in 1:3) with(m[m$chr == i,],
-                   plot(orig.pos, pos,
-                        xaxt="n",
-                        xlab = "",
-                        ylab = "mapping position",
-                        main = paste0("Chr",i), col = i, pch = 19))
-m<-pullMap(cross5)
-m$orig.chr = splitText(m$marker.name)
-m$orig.pos = as.numeric(splitText(m$marker.name, num = 2))
-par(mar = c(5, 4, 0, 2) + 0.1)
-for(i in 1:3) with(m[m$chr == i,],
-                   plot(orig.pos, pos,
-                        xlab = "annotation marker position",
-                        ylab = "map. pos. after reordering",
-                        main = "", col = i, pch=19))
 ```
 
 \newpage

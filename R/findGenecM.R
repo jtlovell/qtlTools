@@ -96,18 +96,19 @@ findGenecM<-function(cross, marker.info, gff, gffCols = NULL,
                      attributeParse = c("ID="),seqnameParse = c("Chr","scaffold_"),
                      dropNonColinearMarkers=TRUE, verbose = TRUE,...){
 
-  dropNonColMar<-function(map, plotit = F, maxBpPercM = 5000000){
+  dropNonColMar<-function(map){
     tdiff<-function(y){
       d1<-diff(c(y,y[length(y)]))
       d2<-diff(c(0,y))
-      return(d1<0|d2<0)
+      out<-d1<0|d2<0
+      out[is.na(out)]<-FALSE
+      return(out)
     }
     tmp<-map
     tmp$ord<-1:nrow(tmp)
     good<-unlist(lapply(unique(map$chr), function(x){
       tc<-tmp[tmp$chr == x,]
       tc<-tc[order(tc$pos),]
-      tc$bpPcm<-
       d<-tdiff(tc$bp)
       bads<-numeric()
       while(any(d)){
@@ -157,8 +158,11 @@ findGenecM<-function(cross, marker.info, gff, gffCols = NULL,
   for(i in seqnameParse){
     gff$chr<-gsub(i,"",gff$chr, fixed=T)
   }
-  
-  gff$chr<-as.character(gff$chr)
+
+  if(is.factor(gff$chr)){
+    gff$chr<-as.character(gff$chr)
+  }
+
   gff<-gff[gff$chr %in% as.character(chrnames(cross)),]
 
   gff$bp<-(gff[,4]+gff[,5])/2

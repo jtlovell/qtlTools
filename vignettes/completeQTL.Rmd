@@ -1,0 +1,283 @@
+---
+title: "Candidate Gene Search Tutorial"
+author: "JT Lovell"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE, message=FALSE}
+suppressPackageStartupMessages(library(knitr))
+knitr::opts_chunk$set(echo = FALSE, fig.width = 7, fig.height = 5, warning = FALSE)
+
+suppressPackageStartupMessages(library(qtlTools))
+suppressPackageStartupMessages(library(qtlDesign))
+```
+
+## Overview - developing expectations for QTL interval sizes and number of candidate genes.
+One goal of QTL mapping is to determine the genes that have the potential to effect phenotypic trait variation **candidate genes**. While highly accurate, the precision of linkage mapping in experimental populations is limitted by the scale of recombination - QTL often span 100's of kb's and contain many gene models. 
+
+To illustrate this, let's model the size of confidence intervals for a single large effect QTL in a 200 individual F2 population.
+
+```{r, fig.cap = "Distribution of QTL confidence intervals (calculated as the 1-LOD drop interval) from 100 simulated linkage maps. For each map, a single QTL was simulated with a LOD score of approximately 25 (Additive effect = 1, dominance effect = 0)"}
+set.seed(42)
+qtlWidth<-sapply(1:100,function(x){
+  diff(
+    lodint(
+      scanone(
+        sim.cross(
+          map = sim.map(len = 100, n.mar = 50, include.x = F),
+          model = rbind(c(1,45,1,0)),
+          n.ind = 200, 
+          type = "f2"), 
+        method = "hk"))[c(1,3),2])
+})
+hist(qtlWidth, breaks = 20, xlab = "Width of QTL confidence interval (cM)",
+     main = "Histogram of 100 QTL intervals")
+```
+
+Note that most QTL's are 5-20cM wide. A typical **A. thaliana** genetic map is 500cM and 212Mb ... ~400Kb / cM. If the ~30k genes are distributed evenly, we might expect 300-1200 genes under any given QTL with a LOD of 25. As such, there is considerable work remaining after finding a QTL peak. 
+
+*Note* **Higher LOD QTL, more recombination (e.g. RIL/MAGIC populations) or more individuals will reduce the width of QTL intervals. If there is little additional information in a mapping population, it is best to get information from as many recombinant genotypes as possible (e.g. subsequent fine mapping or very large populations).**
+
+## The dataset
+Here we will look at an F2 population with __ individuals.
+
+
+
+
+
+## Find genes under a QTL
+The first step to deterimining candidate genes is pulling out all gene models within the interval. To do this, we need three datasets:
+
+#### An annotation (e.g. gff3) file with the location of all genes
+
+```{r}
+gff<-read.delim("/Users/John/Desktop/juengerLabProjects/ph2015ril/hallii.v2.0.prot308.gene_exons.gff3",  header = F, stringsAsFactors = F)
+kable(head(gff))
+```
+
+#### The mapping and physical position of markers
+
+```{r}
+map<-pullMap(cr)
+map$chr<-as.numeric(map$chr)
+gffgene<-gff[gff[,3]=="gene",]
+gffgene$marker.name = sapply(gffgene[,9], function(x) strsplit(x, "=", fixed = T)[[1]][3])
+map<-merge(map, data.frame(marker.name = gffgene$marker.name, bp = gffgene$V4, stringsAsFactors = F),
+         by = "marker.name", all.x = T)
+map<-map[order(map$chr, map$bp),]
+map<-map[complete.cases(map),]
+
+kable(head(map))
+```
+
+#### The mapping postion of all genes
+This can be calculated using any number of approaches. Here we employ a marker-by-marker linear model. In short, we pull two adjacent markers and calculate the slope and intercept of the relationship between physical (bp) and genetic mapping (cM) positions. We then pull all genes that have physical positions between those markers and predict their mapping from physical positions. 
+```{r, echo = T, fig.height = 7, fig.width = 7, fig.cap = "The relationship between phyical and mapping positions of all genes. The red points are the markers in the genetic map. The black points are all genes in the annotation. Note the low recombination rates in the pericentromeric regions ... not surprising given that this is a grass."}
+geneCM<-findGenecM(cross = cr, # the cross object
+                   marker.info = map, # the genetic map with a column including bp position
+                   gff = gff[gff[,3]=="gene",], # the gff file. For speed I cull to only 'genes'
+                   attributeParse = c("ID=",".v2.0"), # the strings to drop from the gene name
+                   seqnameParse = "Chr0" # the strings to drop from the Chr identifier.
+                   )
+
+kable(head(geneCM))
+
+library(ggplot2)
+ggplot(map, aes(x = bp/1000000, y = pos))+
+  geom_point(col = "red", pch = 8, cex = .5)+
+  geom_point(data = geneCM, pch = ".")+
+  facet_wrap(~chr)+theme_jtl()+
+  labs(x = "physical position (Mbp)",
+       y = "genetic mapping position (cM)")
+```
+
+
+
+<!-- ### Datasets -->
+
+<!-- The first step towards finding QTL candidate loci is determining the genes within the confidence interval of the QTL peak.  -->
+
+<!-- 1. gff - the gene model position dataset -->
+<!-- 2. markerBp - the basepair position of markers  -->
+<!-- 3. cross - the QTL cross object used to identify QTL -->
+<!-- 4. interval - the numeric confidence interval of the QTL (chr, lower ci, upper ci) -->
+
+<!-- *With these data, one can cull lists of genes to those within a QTL interval* -->
+
+<!-- #### To infer the potential effect of a candidate gene you need at least one of 7 datasets -->
+<!-- 1. vcf - the polymorphisms between parents, in "vcf" format. It is optimal to have this annotated by snpEff or similar.  -->
+<!-- 2. parentGeneExp - results of differential expression analysis between parents -->
+<!-- 3. cisEQtl - a list of genes with cis-eQTL -->
+<!-- 4. methyl - dataset containing the degree of methylation for each gene -->
+<!-- 5. geneDescr - Gene descriptions -->
+<!-- 6. GO - GO annotations -->
+<!-- 7. geneExp - gene expression of the mapping population -->
+<!-- ##### With these data, one can infer whether a gene is likely to contain the causal QTN(s) -->
+
+<!-- ## Part 2: Getting set up -->
+
+
+<!-- ##### To start, you need the qtlTools package. Get it from github. -->
+<!-- ```{r env.set.up, warning = F, message=FALSE} -->
+<!-- library(devtools) -->
+<!-- install_github("jtlovell/qtlTools") -->
+<!-- library(qtlTools) -->
+<!-- ``` -->
+
+<!-- ##### Load the multitrait data from R/qtl -->
+<!-- ```{r loadmultitrait} -->
+<!-- data(multitrait) -->
+<!-- ``` -->
+
+<!-- ##### Create some fake physical positions of the markers allowing for low recombination in the middle of the chromosomes (as would be expected in the pericentromeric region) -->
+<!-- ```{r fakemap} -->
+<!-- map<-pullMap(multitrait) -->
+<!-- map$bp<-0 -->
+<!-- for(i in unique(map$chr)){ -->
+<!--   n<-sum(map$chr==i) -->
+<!--   p<-sin((1:n/n)*pi) -->
+<!--   map$bp[map$chr==i]<-cumsum(p*1000000) -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- ##### Create a fake gff file -->
+<!-- ```{r fakegff} -->
+<!-- gff<-data.frame(chr = rep(paste0("scaffold_",1:5),each = 200), -->
+<!--    feature = rep("gene",1000), -->
+<!--    start = rep(seq(from = 0, to = max(map$bp), length = 200), 5), -->
+<!--    end = rep(seq(from = 0, to = max(map$bp), length = 200))+1000, -->
+<!--    strand = rep("+",1000), -->
+<!--    attribute = paste0("gene",1:1000,";","gene",1:1000,".1"), stringsAsFactors=F) -->
+<!-- ``` -->
+
+<!-- ## Part 3: Infer the physical position of the genes, using the position of the markers -->
+<!-- ```{r} -->
+<!-- geneCM<-findGenecM(cross = multitrait, marker.info = map, gff = gff, -->
+<!--    gffCols = c("chr","feature","start","end","strand","attribute")) -->
+<!-- ``` -->
+<!-- ##### Plots showing the bp/cM patterns -->
+<!-- ```{r plotrecom} -->
+<!-- par(mfrow=c(3,2)) -->
+<!-- for(i in unique(map$chr)){ -->
+<!--   with(geneCM[geneCM$chr==i,], plot(pos,bp, col="grey",  -->
+<!--                                 main = "cM and bp positions of genes and markers", -->
+<!--                                 ylab = "physical position (bp)", -->
+<!--                                 xlab = "mapping position (cM)")) -->
+<!--   with(map[map$chr==i,], points(pos,bp, col=i, pch = 19, cex=.8)) -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- ## Part 4: Find genes in the interval -->
+<!-- ##### Make qtl intervals -->
+<!-- ```{r} -->
+<!-- multitrait<-calc.genoprob(multitrait) -->
+<!-- s1<-scanone(multitrait, method="hk", pheno.col=1) -->
+<!-- perm<-scanone(multitrait, n.perm=100, method="hk",pheno.col=1, verbose=FALSE) -->
+<!-- cis<-calcCis(cross = multitrait, s1.output=s1, perm.output=perm, drop=5) -->
+
+<!-- par(mfrow = c(1,1)) -->
+<!-- plot(s1) -->
+<!-- segmentsOnPeaks(multitrait, s1.output=s1, calcCisOutput = cis, int.y = 13.1) -->
+<!-- ``` -->
+
+<!-- ##### Pull out genes in the intervals -->
+<!-- ```{r} -->
+<!-- candGenes<-findGenesInterval(findGenecM.output = geneCM, calcCis.output = cis) -->
+<!-- print(candGenes) -->
+<!-- ``` -->
+
+<!-- ## Part 5: next steps -->
+<!-- ##### There are a number of approaches to define how likely any gene is to be the candidate.  -->
+<!-- 1. Genes with non-synonymous SNPs -->
+<!-- 2. Genes with cis-eQTL (Lowry et al. 2013, Plant Cell) -->
+<!-- 3. Genes with annotations similar to the trait of interest -->
+<!-- 4. Covariance of expression and trait of interest in mapping population (Lovell et al. 2015, Plant Cell) -->
+<!-- 5. Causal Inference testing -->
+
+<!-- ### Here, we will explore the 4th option. -->
+<!-- First, we must simulate some gene expression data: -->
+<!-- Let's just focus on the chromosome 5 QTL and say there are 50 genes under the QTl interval. Here, we simulate expression (normalized around 0) with a few genes with correlated expression with the focal marker. -->
+
+<!-- ```{r} -->
+<!-- cross<-subset(multitrait, ind = !is.na(pull.pheno(multitrait, 1))) -->
+<!-- phe<-pull.pheno(cross, 1) -->
+
+<!-- mult.fact<-exp(seq(from = 0, to = 50, length.out = 50)) -->
+<!-- facs<-sapply(1:50, function(x){ -->
+<!--   scale(sapply(scale(phe), function(y) rnorm(n = 1, mean = y, sd = mult.fact[x]))) -->
+<!-- }) -->
+<!-- plot(sapply(1:50, function(x) cor(phe, facs[,x])), -->
+<!--      ylab = "cor. coef. (expression ~ chr5 QTL genotype)", -->
+<!--      xlab = "gene id") -->
+<!-- ``` -->
+
+<!-- In this simplistic example, we are simulating a case where expression drives a linear, additive QTL effect. However, this approach is extensible and permits inference of QTL*Treatment, epistasis, multiple QTL models and other cases.  -->
+
+<!-- So, lets run the covariate scan, testing how the QTL profile is affected by the presence of gene expression in the model.  -->
+
+<!-- ```{r} -->
+<!-- expression.covariates = facs -->
+<!-- colnames(expression.covariates)<-paste0("gene",1:ncol(expression.covariates)) -->
+<!-- pheno.col = 1 -->
+
+<!-- qtl = makeqtl(cross, chr = max(s1)$chr, pos = max(s1)$pos, what = "prob") -->
+
+<!-- test_additive<-covScanQTL(cross = cross, -->
+<!--                  pheno.col = 1, -->
+<!--                  qtl = qtl, -->
+<!--                  expression.covariates = expression.covariates, -->
+<!--                  qtl.method = "hk", -->
+<!--                  nperm = 20) -->
+<!-- kable(head(test_additive)) -->
+<!-- ``` -->
+
+<!-- Now include another QTL in the model and enforce an epistatic interaction between the 2nd (focal) and 1st QTL. -->
+<!-- ```{r} -->
+<!-- qtl2 = makeqtl(cross, chr = summary(s1)$chr[4:5],  -->
+<!--                pos = summary(s1)$pos[4:5], what = "prob") -->
+<!-- test_epistasis<-covScanQTL(cross = cross, -->
+<!--                  pheno.col = 1, -->
+<!--                  qtl = qtl2, -->
+<!--                  which.epiqtl = 1, -->
+<!--                  focalqtl.index = 2, -->
+<!--                  expression.covariates = expression.covariates, -->
+<!--                  qtl.method = "hk", -->
+<!--                  nperm = 20) -->
+
+<!-- kable(head(test_epistasis)) -->
+<!-- ``` -->
+
+
+<!-- Now a little more complexity with an F2 cross and experimental covariates -->
+<!-- ```{r} -->
+<!-- data(fake.f2) -->
+<!-- cross<-fake.f2 -->
+<!-- phe<-pull.pheno(cross, 1) -->
+<!-- mult.fact<-exp(seq(from = 0, to = 50, length.out = 50)) -->
+<!-- facs<-sapply(1:50, function(x){ -->
+<!--   scale(sapply(scale(phe), function(y) rnorm(n = 1, mean = y, sd = mult.fact[x]))) -->
+<!-- }) -->
+<!-- facs<-data.frame(facs) -->
+<!-- colnames(facs)<-paste0("gene",1:ncol(facs)) -->
+<!-- cross<-calc.genoprob(cross) -->
+<!-- sex = data.frame(sex = pull.pheno(cross, pheno.col = "sex")) -->
+<!-- s1<-scanone(cross, addcovar = sex) -->
+<!-- qtl = makeqtl(cross, chr = summary(s1)$chr[1], pos = summary(s1)$pos[1], what = "prob") -->
+
+<!-- test_QTLxE<-covScanQTL(cross = cross, -->
+<!--                  pheno.col = 1, -->
+<!--                  qtl = qtl, -->
+<!--                  addcovar = sex, -->
+<!--                  intcovar = sex, -->
+<!--                  expression.covariates = facs, -->
+<!--                  qtl.method = "hk", -->
+<!--                  nperm = 20) -->
+
+<!-- kable(head(test_QTLxE)) -->
+<!-- ``` -->
+

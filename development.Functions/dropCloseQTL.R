@@ -15,7 +15,7 @@ dropCloseQTL<-function(cross, qtl, formula, covar, pheno.col, method = "hk",
     }
   })))
   while(anyClose){
-    fout<-data.frame(summary(fitqtl(cross, qtl = qtl, formula = formula(qtl),
+    fout<-data.frame(summary(fitqtl(cross, qtl = qtl, formula = formula,
                                     covar = covar, method = "hk",
                                     pheno.col = pheno.col))$result.drop)
     fout$id = rownames(fout)
@@ -45,7 +45,9 @@ dropCloseQTL<-function(cross, qtl, formula, covar, pheno.col, method = "hk",
       fout<-fout[!grepl("@",fout$new.id, fixed = T),]
 
       newform2 = paste("y ~ ", paste(fout$new.id, collapse = " + "))
-      attr(new.qtl, "formula")<-newform2
+      #attr(new.qtl, "formula")<-newform2
+      print(newform2)
+      print(new.qtl)
       qtl = refineqtl(cross, pheno.col = pheno.col, qtl = new.qtl, formula = newform2, method = "hk", covar = covar,
                       verbose = F)
     }
