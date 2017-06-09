@@ -43,6 +43,8 @@ inferMarkerPos<-function(cross, marker.matrix,
                          initial.geno.density = 20,
                          final.step = .1,
                          est.ci = FALSE,
+                         verbose=T,
+                         jitterMars = T,
                          ...){
 
   if(!"prob" %in% names(cross$geno[[1]]))
@@ -63,39 +65,48 @@ inferMarkerPos<-function(cross, marker.matrix,
   if(is.null(colnames(marker.matrix))){
     warning(paste0("no marker names (colnames(marker.matrix)) provided ...
                    assigning names as m1:m",ncol(marker.matrix)))
-    colnames(marker.matris)<-paste0("m",1:ncol(marker.matrix))
+    colnames(marker.matrix)<-paste0("m",1:ncol(marker.matrix))
   }
 
   if(verbose) cat("preparing cross objects for initial and final scans\n")
   mnames<-colnames(marker.matrix)
-  if(any(mcross$pheno %in% mnames)){
-    mcross$pheno<-data.frame(mcross$pheno[,-which(mcross$pheno %in% mnames)], marker.matrix)
-  }else{
-    mcross$pheno<-data.frame(mcross$pheno, marker.matrix)
-  }
+  if(jitterMars) marker.matrix<-jitter(marker.matrix, amount = 0.001)
+  mcross$pheno<-data.frame(marker.matrix)
 
-  icross<-repPickMarkerSubset(cross, na.weight = 2, sd.weight = 1,
+  icross<-repPickMarkerSubset(mcross, na.weight = 2, sd.weight = 1,
                               min.distance = initial.geno.density, verbose = FALSE)
+  icross<-calc.genoprob(icross, stepwidth = "fixed", step = 0,
+                        error.prob = error.prob, off.end = off.end, map.function = map.function)
   fcross<-clean(mcross)
-  fcross<-calc.genoprob(icross, stepwidth = "fixed", step = final.step,
+  fcross<-calc.genoprob(fcross, stepwidth = "fixed", step = final.step,
                         error.prob = error.prob, off.end = off.end, map.function = map.function)
 
   if(verbose) cat("running initial scanone to find best chromosome and position\n")
   s1s.i<-scanone(icross, pheno.col = mnames, method = "hk", ...)
-  chrs<-s1s.i[,"chr"]
-  pos<-s1s.i[,"pos"]
+  chrs<-as.character(s1s.i[,"chr"])
+  pos<-as.numeric(s1s.i[,"pos"])
   wh<-apply(s1s.i[,mnames], 2, which.max)
   chr.max<-chrs[wh]
   pos.max<-pos[wh]
 
+  names(chr.max)<-mnames
+  names(pos.max)<-mnames
+  
   if(verbose) cat("running final scanone to refine best position\n")
-  out.f<-lapply(chrnames(fcross), function(x){
+  out.f<-lapply(unique(chr.max), function(x){
     if(verbose) cat("analyzing chr",x,"\n")
     phes<-names(chr.max)[chr.max==x]
     s1s.f<-scanone(fcross, pheno.col = phes, method = "hk", chr = x, ...)
-    wh.f<-apply(s1s.f[,phes], 2, which.max)
-    pos.max<-pos[wh.f]
-    lod.max<-apply(s1s.f[,phes], 2, function(y) y[which.max(y)])
+    if(length(phes)==1){
+      wh.f<-which.max(s1s.f[,3])
+      pos.max<-pos[wh.f]
+      lod.max<-max(s1s.f[,3])
+    }else{
+      wh.f<-apply(s1s.f[,phes], 2, which.max)
+      pos.max<-pos[wh.f]
+      lod.max<-apply(s1s.f[,phes], 2, function(y) y[which.max(y)])
+    }
+
     out<-data.frame(marker.name = phes,
                     chr = x,
                     pos = pos.max,

@@ -12,9 +12,6 @@
 #' @param formula The formula for the qtl, names of columns in the covariate dataframe
 #' and altnames of the QTL need to match exactly, or will be ignored.
 #' @param covar the covariate specified in the model / formula. See fitqtl.
-#' @param kinship.matrix A kinship matrix as supplied by rrBLUP::A.mat, or similar.
-#' If not supplied, kinship matrix is calculated on the pseudomarker grid in the cross object
-#' @param prob.thresh What should the probability of an allele need to be to be called?
 #' @param rrBLUP.method should reml or ml be run?
 #' @param verbose Should a normal or binary model be fit?
 #' @param ... additional arguments passed on to rrBLUP::mixed.solve
@@ -33,7 +30,7 @@
 #' \dontrun{
 #' library(qtlTools)
 #' library(rrBLUP)
-#' data(fake.bc)
+#' data(fake.f2)
 #' cross<-fake.f2
 #' cross<-calc.genoprob(cross, step = 12, stepwidth = "fixed")
 #' qtl<-makeqtl(cross, chr = 13, pos = 28, what = "prob")
@@ -47,75 +44,98 @@
 #'
 #' @import qtl
 #' @export
-polygenicQTL<-function(cross, qtl = NULL, pheno.col = 1,
-                       prob.thresh=0, covar=NULL,
-                       formula = NULL,
+polygenicQTL<-function(cross,
+                       formula = NULL, qtl = NULL,
+                       pheno.col = 1, covar=NULL,
                        rrBLUP.method = "REML",
-                       kinship.matrix = NULL,
                        verbose = TRUE,
                        ...){
 
+  y <- pull.pheno(cross, pheno.col = pheno.col)
   if(!requireNamespace("rrBLUP", quietly = TRUE)){
     stop("install the rrBLUP package to run polygenicQTL\n")
   }else{
     requireNamespace("rrBLUP", quietly = TRUE)
   }
 
-  if(is.null(qtl) & is.null(covar)){
-
-    y = pull.pheno(cross, pheno.col=pheno.col)
-    cross = subset(cross, ind = !is.na(y))
-    covar<-covar[!is.na(y),]
-    y<-pull.pheno(cross, pheno.col=pheno.col)
-
-    if(is.null(kinship.matrix)){
-      if(verbose) cat("calculating allele probabilities on a grid \n")
-      gp<-genoprob2marker(cross, prob.thresh)
-
-      if(verbose) cat("calculating kinship matrix \n")
-      kinship.matrix<-rrBLUP::A.mat(gp)
+  if("prob" %in% names(cross$geno[[1]])){
+    atr<-attributes(cross$geno[[1]]$prob)
+    genotypes<-attr(cross$geno[[1]]$prob,"dimnames")[[3]]
+  }else{
+    if("draws" %in% names(cross$geno[[1]])){
+      atr<-attributes(cross$geno[[1]]$draws)
+      tmp<-calc.genoprob(cross)
+      genotypes<-attr(tmp$geno[[1]]$prob,"dimnames")[[3]]
+    }else{
+      stop("run either calc.genoprob or sim.geno first.\n")
     }
+  }
 
-    if(verbose) cat("running polygenic selection \n")
+  if(atr$step == 0) atr$step = 1
+  ag<-argmax.geno(cross, step = atr$step, error.prob = atr$error.prob,
+                  off.end = atr$off.end, map.function = atr$map.function,
+                  stepwidth = "fixed")
+  gp<-pull.argmaxgeno(ag, include.pos.info=F)
+
+  gpn<-gp
+  for(i in 1:length(genotypes)) gpn[gpn == i]<-genotypes[i]
+  if(!is.null(covar)){
+    gpn<-cbind(covar, gp)
+  }
+
+  genos<-unique(as.numeric(gp))[order(unique(as.numeric(gp)))]
+  ngeno<-length(genos)
+  if(ngeno == 2){
+    gp[gp == genos[1]]<- (-1)
+    gp[gp == genos[2]]<- 1
+  }else{
+    if(ngeno == 3){
+      gp[gp == genos[1]]<- (-1)
+      gp[gp == genos[2]]<- 0
+      gp[gp == genos[3]]<- 1
+    }else{
+      if(ngeno == 4){
+        gp1<-gp
+        gp2<-gp
+        gp1[gp1 == genos[1]]<- (-1)
+        gp1[gp1 == genos[2]]<- 1
+        gp2[gp2 == genos[3]]<- (-1)
+        gp2[gp2 == genos[4]]<- 1
+        gp<-cbind(gp1,gp2)
+      }else{
+        stop(cat("don't know how to deal with cross type",class(cross)[1]))
+      }
+    }
+  }
+
+
+  if(verbose) cat("calculating kinship matrix \n")
+  kinship.matrix<-rrBLUP::A.mat(gp)
+
+  if(verbose) cat("running polygenic selection \n")
+  if(is.null(covar) & is.null(qtl)){
     test<-rrBLUP::mixed.solve(y=y,
                               K = kinship.matrix,
                               method = rrBLUP.method, ...)
   }else{
-
-    while(substr(formula,1,1) == " ")
-      formula <- substr(formula,2,nchar(formula))
-    if(substr(formula,1,1) == "y")
-      formula <- substr(formula,2,nchar(formula))
-    while(substr(formula,1,1) == " ")
-      formula <- substr(formula,2,nchar(formula))
-
-    if(is.null(covar)) covar = "1"
-    if(is.null(qtl)) Q1 = "1"
-
-    dat<-data.frame(covar,
-                    genoprob2marker(cross,
-                                    qtl = qtl,
-                                    returnNumeric=FALSE,
-                                    prob.thresh))
-
-    y = pull.pheno(cross, pheno.col=pheno.col)
-    is.good<-complete.cases(data.frame(dat,y))
-    cross = subset(cross, ind = is.good)
-    dat<-dat[is.good,]
-    y<-pull.pheno(cross, pheno.col=pheno.col)
-
-    formula = as.formula(formula)
-    fixed.matrix<-model.matrix(formula, data = dat)
-
-    if(is.null(kinship.matrix)){
-      if(verbose) cat("calculating allele probabilities on a grid \n")
-      gp<-genoprob2marker(cross, prob.thresh)
-
-      if(verbose) cat("calculating kinship matrix \n")
-      kinship.matrix<-rrBLUP::A.mat(gp)
+    if(is.null(formula)){
+      warning("no formula specified, assuming an additive QTL model")
+      if(is.null(covar)){
+        formula <- paste0("~ ", paste0(qtl$altname, collapse = " + "))
+      }else{
+        if(is.null(qtl)){
+          formula <- paste0("~ ", paste0(colnames(covar), collapse = " + "))
+        }else{
+          formula <- paste0("~ ", paste0(qtl$altname, collapse = " + "), " + ",
+                            paste0(colnames(covar), collapse = " + "))
+        }
+      }
     }
-
-    if(verbose) cat("running polygenic selection \n")
+    if(!is.null(qtl)){
+      mars<-find.marker(cross, chr = qtl$chr, pos = qtl$pos)
+      for(i in 1:nqtl(qtl)) formula<-gsub(qtl$altname[i],mars[i],formula)
+    }
+    fixed.matrix<-model.matrix(as.formula(formula), data = data.frame(gpn))
     test<-rrBLUP::mixed.solve(y=y,
                               K = kinship.matrix,
                               X = fixed.matrix,

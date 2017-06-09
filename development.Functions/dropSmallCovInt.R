@@ -1,6 +1,8 @@
 #' @title Reduce covariate interactions following stepwiseqtl.int
 #'
 #' @description
+#' under development. Use with care.
+#'
 #' \code{dropSmallCovInt}  Drops non-significant QTL*covariate interactions
 #' @import qtl
 #' @export
