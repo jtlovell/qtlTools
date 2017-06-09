@@ -187,7 +187,6 @@ test_QTLxE<-covScanQTL(cross = cross,
                  intcovar = sex,
                  expression.covariates = facs,
                  qtl.method = "hk",
-                 which.perm = 10,
                  nperm = 20)
 
 kable(head(test_QTLxE))

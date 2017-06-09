@@ -4,7 +4,7 @@
 \alias{tspOrder}
 \title{Order markers within linkage groups}
 \usage{
-tspOrder(cross, concorde_path, max.rf = 1, return = "cross")
+tspOrder(cross, concorde_path, return = "cross")
 }
 \arguments{
 \item{cross}{The QTL cross object.}

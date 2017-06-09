@@ -11,6 +11,9 @@ dropSimilarMarkers(cross, chr = NULL, rf.threshold = 0.01, sd.weight = 1,
 \arguments{
 \item{cross}{The qtl cross object to search}
 
+\item{chr}{numeric, Should the analysis be restricted to a set of chromosomes.
+Defaults to all chromosomes in the cross object.}
+
 \item{rf.threshold}{The recombination fraction threshold to drop a marker. If est.rf has
 not been run on cross, it will be done so automatically. See qtl::est.rf for details}
 
@@ -35,6 +38,8 @@ into blocks.}
 this procedure is run following block-wise culling. If there are many thousands of markers
 it is recommended to run multiple block-wise calls prior to whole-chromosome procedures. In
 general, chromosomes with > 1k markers should first be culled using blockSize != NULL.}
+
+\item{runFullMatrix}{should the full matrix ever be assessed?}
 
 \item{...}{if recombination fractions are not included in the cross object,
 pass on additional arguments to est.rf.}
