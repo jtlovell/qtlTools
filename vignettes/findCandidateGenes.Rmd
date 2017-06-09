@@ -138,26 +138,29 @@ pheno.col = 1
 
 qtl = makeqtl(cross, chr = max(s1)$chr, pos = max(s1)$pos, what = "prob")
 
-test<-covScanQTL(cross = cross,
+test_additive<-covScanQTL(cross = cross,
                  pheno.col = 1,
                  qtl = qtl,
                  expression.covariates = expression.covariates,
                  qtl.method = "hk",
-                 nperm = 100)
+                 nperm = 20)
+kable(head(test_additive))
 ```
 
 Now include another QTL in the model and enforce an epistatic interaction between the 2nd (focal) and 1st QTL.
 ```{r}
 qtl2 = makeqtl(cross, chr = summary(s1)$chr[4:5], 
                pos = summary(s1)$pos[4:5], what = "prob")
-test2<-covScanQTL(cross = cross,
+test_epistasis<-covScanQTL(cross = cross,
                  pheno.col = 1,
                  qtl = qtl2,
                  which.epiqtl = 1,
                  focalqtl.index = 2,
                  expression.covariates = expression.covariates,
                  qtl.method = "hk",
-                 nperm = 100)
+                 nperm = 20)
+
+kable(head(test_epistasis))
 ```
 
 
@@ -177,14 +180,16 @@ sex = data.frame(sex = pull.pheno(cross, pheno.col = "sex"))
 s1<-scanone(cross, addcovar = sex)
 qtl = makeqtl(cross, chr = summary(s1)$chr[1], pos = summary(s1)$pos[1], what = "prob")
 
-test<-covScanQTL(cross = cross,
+test_QTLxE<-covScanQTL(cross = cross,
                  pheno.col = 1,
                  qtl = qtl,
                  addcovar = sex,
+                 intcovar = sex,
                  expression.covariates = facs,
                  qtl.method = "hk",
                  which.perm = 10,
-                 nperm = 100)
+                 nperm = 20)
 
+kable(head(test_QTLxE))
 ```
 

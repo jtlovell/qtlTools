@@ -110,14 +110,21 @@ covScanQTL<-function(cross,
         gp.info$marker[gp.info$chr == qtl$chr[x] & gp.info$pos == qtl$pos[x]])
       epicov<-data.frame(gp[,epi.marker.names])
       colnames(epicov)<-epi.marker.names
-      intcov<-data.frame(intcovar, epicov)
+      if(!is.null(intcovar)){
+        intcov<-data.frame(intcovar, epicov)
+      }
+      intcov<-data.frame(epicov)
     }else{
       intcov <- intcovar
     }
     addmar<-marker.names[-focalqtl.index]
     addgencov<-data.frame(gp[,addmar])
     colnames(addgencov)<-addmar
-    addcov<-cbind(addcovar, addgencov)
+    if(!is.null(addcovar)){
+      addcov<-cbind(addcovar, addgencov)
+    }else{
+      addcov<-cbind(addgencov)
+    }
   }else{
     addcov <- addcovar
     intcov <- intcovar
@@ -132,7 +139,7 @@ covScanQTL<-function(cross,
               addcovar = addcov, intcovar = intcov, chr = focal.chr)
 
   if(plotit) plot(bs, col = "darkred", main = pheno.col, type = "n",
-                  xlab = paste("Chr",chr,"Map position (cM)"))
+                  xlab = paste("Chr",focal.chr,"Map position (cM)"))
 
   wh<-which.min(abs(bs$pos - focal.pos))
   bsl<-as.numeric(bs[wh,-c(1:2)])
