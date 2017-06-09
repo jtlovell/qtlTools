@@ -23,7 +23,6 @@ install_github("jtlovell/qtlTools")
 
 ```{r env.set.up2}
 library(qtlTools)
-library(qtl)
 ```
 
 
