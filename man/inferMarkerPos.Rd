@@ -24,6 +24,12 @@ marker position, but slow down the algorithm.}
 \item{est.ci}{Logical, should confidence intervals around the inferred position be
 estimated?}
 
+\item{verbose}{Logical, should updates be reported}
+
+\item{jitterMars}{logical, should a small amount of noise be added to
+the numeric genotype codes? In the case where a perfect association exists, LOD = inf.
+Setting this to TRUE makes all LOD scores numeric and finite.}
+
 \item{...}{Additional arguments passed to scanone. Cannot be "chr" or "method" as
 these are hard coded in the function.}
 }
