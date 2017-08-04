@@ -28,6 +28,7 @@
 #' @param plotit Logical, when more than 1 pheno.y is specified, presents a boxplot of
 #' covariate scan ranks.
 #' @param verbose Logical, should updates be printed?
+#' @param ... additional arguments passed on to plot.
 #'
 #' @return A dataframe, containing the maximum scanone outputs at
 #' chromosome chr and position pos for each phenotype and covariate.
@@ -77,7 +78,8 @@ covScanQTL<-function(cross,
                      qtl.method = "hk",
                      nperm = 0,
                      plotit=TRUE,
-                     verbose = TRUE){
+                     verbose = TRUE,
+                     ...){
 
   if("prob" %in% names(cross$geno[[1]])){
     atr<-attributes(cross$geno[[1]]$prob)
@@ -137,8 +139,9 @@ covScanQTL<-function(cross,
   bs<-scanone(cross, pheno.col = pheno.col, method=qtl.method,
               addcovar = addcov, intcovar = intcov, chr = focal.chr)
 
-  if(plotit) plot(bs, col = "darkred", main = pheno.col, type = "n",
-                  xlab = paste("Chr",focal.chr,"Map position (cM)"))
+  if(plotit) plot(bs, col = "darkred", main = paste0("covariate scan output for ", pheno.col), type = "n",
+                  xlab = paste("Chr",focal.chr,"Map position (cM)"),
+                  ...)
 
   wh<-which.min(abs(bs$pos - focal.pos))
   bsl<-as.numeric(bs[wh,-c(1:2)])
