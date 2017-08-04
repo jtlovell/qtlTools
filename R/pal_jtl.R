@@ -13,8 +13,8 @@ pal_jtl3<-colors()[c(418,204,24,
                      509,456,645)]
 
 pal_jtl4<-c(
-  brewer.pal(9,"Greys")[c(3,6)],
-  colors()[c(536,404)],brewer.pal(9,"Reds")[c(6,8)],
+  Rcolorbrewer::brewer.pal(9,"Greys")[c(3,6)],
+  colors()[c(536,404)],Rcolorbrewer::brewer.pal(9,"Reds")[c(6,8)],
   colors()[c(622,92)],
   colors()[c(411)],"gold",
   colors()[c(259,48)],
