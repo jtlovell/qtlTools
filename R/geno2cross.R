@@ -43,14 +43,17 @@ geno2cross<-function(genomat,
   if(is.null(id)){
     if(is.null(rownames(genomat)))
       stop("if id is not specified, genomat rownames must be supplied\n")
+    id<-rownames(genomat)
   }else{
     rownames(genomat)<-id
   }
 
   towrite<-genomat[,order(chr, as.numeric(pos))]
+  for(i in 1:ncol(towrite)) towrite[,i]<-as.character(towrite[,i])
   chr<-chr[order(chr, as.numeric(pos))]
   pos<-pos[order(chr, as.numeric(pos))]
   info<-t(cbind(chr,pos))
+  colnames(info)<-colnames(towrite)
   towrite2<-rbind(info,towrite)
 
   id<-c("","",id)

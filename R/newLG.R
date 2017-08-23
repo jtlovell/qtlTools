@@ -55,63 +55,37 @@ newLG<-function(cross, markerList){
   if(any(duplicated(newmars))){
     stop("duplicated markers found in markerList, all markers must be unique\n")
   }
-  oldmars<-markernames(cross)
-  cross <- drop.markers(cross, oldmars[!oldmars %in% newmars])
-
-
-
-  # pull out rf matrix before reformatting cross
-  n.mar <- nmar(cross)
-  tot.mar <- totmar(cross)
-  has.rf<-ifelse("rf" %in% names(cross), TRUE, FALSE)
-  if(has.rf){
-    rf <- cross$rf
-    lod <- rf
-    lod[lower.tri(rf)] <- t(rf)[lower.tri(rf)]
-    rf[upper.tri(rf)] <- t(rf)[upper.tri(rf)]
-    diagrf <- diag(rf)
-    diag(lod) <- 0
-    if(ncol(rf) != tot.mar)
-      stop("dimension of recombination fractions inconsistent with no. markers in cross.")
-    marnam <- colnames(rf)
-  }
-
-  chrstart <- rep(names(cross$geno), n.mar)
-
-  # clean the cross
+  
+  mardf<-reshape2::melt(markerList)
+  
+  marnam<-mardf[,1]
+  revgrp<-mardf[,2]
+  
   cross <- clean(cross)
+  oldmars<-markernames(cross)
+  cross <- drop.markers(cross, oldmars[!oldmars %in% marnam])
+  chrtype <- rep(sapply(cross$geno, class), n.mar)
   crosstype <- class(cross)[1]
   g <- pull.geno(cross)
-
-
-  cross$geno <- vector("list", length(markerList))
-  names(cross$geno) <- names(markerList)
-
-  for(i in names(markerList)) {
-    cross$geno[[i]]$data <- g[,markerList[[i]],drop=FALSE]
-
-    cross$geno[[i]]$map <- seq(0, by=10, length=length(markerList[[i]]))
-    if(crosstype=="4way") {
-      cross$geno[[i]]$map <- rbind(cross$geno[[i]]$map,
+  cross$geno <- vector("list", length(unique(revgrp)))
+  names(cross$geno) <- unique(revgrp)
+  for (i in unique(revgrp)) {
+    cross$geno[[i]]$data <- g[, revgrp == i, drop = FALSE]
+    cross$geno[[i]]$map <- seq(0, by = 10, length = sum(revgrp == i))
+    if (crosstype == "4way") {
+      cross$geno[[i]]$map <- rbind(cross$geno[[i]]$map, 
                                    cross$geno[[i]]$map)
-      colnames(cross$geno[[i]]$map) <- markerList[[i]]
+      colnames(cross$geno[[i]]$map) <- colnames(cross$geno[[i]]$data)
     }else{
-      names(cross$geno[[i]]$map) <- markerList[[i]]
-    }
-      class(cross$geno[[i]]) <- "A"
-  }
-
-  if(has.rf){
-    mname <- markernames(cross)
-    m <- match(mname, marnam)
-    rf <- rf[m,m]
-    lod <- lod[m,m]
-    rf[upper.tri(rf)] <- lod[upper.tri(lod)]
-    diag(rf) <- diagrf[m]
-    cross$rf <- rf
-  }
-  if("X" %in% chrnames(cross)){
-    class(cross$geno[["X"]]) <- "X"
+      names(cross$geno[[i]]$map) <- colnames(cross$geno[[i]]$data)
+    } 
+    thechrtype <- unique(chrtype[revgrp == i])
+    if (length(thechrtype) > 1){
+      warning("Problem with linkage group ", i, ": A or X?\\n", 
+              paste(thechrtype, collapse = " "))
+    }else{
+      class(cross$geno[[i]]) <- thechrtype
+    } 
   }
   return(cross)
 }

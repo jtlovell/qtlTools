@@ -4,10 +4,8 @@
 \alias{meanScan}
 \title{Make a scanone plot of genotype means.}
 \usage{
-meanScan(cross, pheno.col = 1, covar = NULL, chr = NULL,
-  leg.pos = "topright", leg.inset = 0.001, leg.bty = "n", cols = NULL,
-  ltys = NULL, ylim = NULL, ylab = NULL, plotit = TRUE,
-  draw.legend = TRUE, ...)
+meanScan(cross, pheno.col = 1, covar = NULL, chr = NULL, plotit = T,
+  plotOverallMean = T)
 }
 \arguments{
 \item{cross}{The qtl cross. Must contain genotype probabilities or imputed genotypes}
@@ -18,6 +16,8 @@ Only 1 phenotype can be tested at a time.}
 \item{covar}{dataframe of covariates like addcovar in qtl::scanone.}
 
 \item{chr}{The chromosomes to analyze. If not supplied, all are tested.}
+
+\item{plotit}{Logical, should a plot be made?}
 
 \item{leg.pos}{The character of numeric (length 2) position of the legend. Default is "topright".}
 
@@ -32,8 +32,6 @@ Only 1 phenotype can be tested at a time.}
 \item{ylim}{optional limits for the y axis}
 
 \item{ylab}{optional label for the y axis}
-
-\item{plotit}{Logical, should a plot be made?}
 
 \item{draw.legend}{Logical, should a legend be drawn?}
 

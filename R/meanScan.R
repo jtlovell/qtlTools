@@ -65,17 +65,10 @@
 #' @import qtl
 #' @export
 meanScan<-function(cross, pheno.col = 1,
-                   covar = NULL, chr = NULL,
-                   leg.pos = "topright", leg.inset = 0.001, leg.bty = "n",
-                   cols = NULL, ltys = NULL, ylim = NULL, ylab =NULL,
-                   plotit = TRUE, draw.legend = TRUE, ...){
+                   covar = NULL, chr = NULL, plotit = T, plotOverallMean = T){
   if(!is.null(chr)) cross<-subset(cross, chr = chr)
   if(!pheno.col %in% phenames(cross)) pheno.col<-phenames(cross)[pheno.col]
-  if(is.null(covar)){
-    formula = paste0(pheno.col, " ~ QTL")
-  }else{
-    formula = paste0(pheno.col, " ~ ", "QTL + ", paste(colnames(covar), collapse = " + "))
-  }
+
 
   if("prob" %in% names(cross$geno[[1]])){
     atr<-attributes(cross$geno[[1]]$prob)
@@ -94,46 +87,49 @@ meanScan<-function(cross, pheno.col = 1,
                   stepwidth = atr$stepwidth)
 
   gen<-pull.argmaxgeno(ag, include.pos.info=F)
+  map<-pull.argmaxgeno(ag, include.pos.info=T, rotate = T)[,1:3]
+  
+  phe<-pull.pheno(cross, pheno.col)
+  genids<-attr(cross$geno[[1]]$prob,"dimnames")[[3]]
+  if(!is.null(covar)){
+    if(length(covar)!=nind(cross))
+      stop("covar must be a vector of length = nind (cross)\n")
+    
+    means<-data.frame(t(apply(gen,2, function(x){
+      tapply(phe, list(x,covar), mean)
+    })))
+    colnames(means)<-unlist(lapply(unique(covar), function(x) 
+      paste0(genids,"_",x)))
+  }else{
+    means<-data.frame(t(apply(gen,2, function(x){
+      tapply(phe, x,mean)
+    })))
+    colnames(means)<-genids
+  }
 
-  s1<-scanone(cross,method = ifelse("prob" %in% names(cross$geno[[1]]),"hk","imp"))[,-3]
-  mars<-gsub("[[:punct:]]", "", colnames(gen))
-  rownames(s1)<-mars
-  colnames(gen)<-mars
-
-  dat<-cbind(pull.pheno(cross, pheno.col), gen, covar)
-  colnames(dat)[1]<-pheno.col
-
-  out<-lapply(mars, function(x){
-    form <- as.formula(gsub("QTL",x,formula, fixed=T))
-    a<-aggregate(form, data = dat, mean)
-    res<-all.vars(form)[1]
-    of<-all.vars(form)[-1]
-    of<-of[of!=x]
-    a$mar.id = paste("geno",genotypes[a[,x]], sep = ":")
-    if(length(of)>=1){
-      a$covar.id<-sapply(1:nrow(a), function(y) paste(paste(of, collapse = "."),
-                                                      paste(a[,of][y], collapse = "."),sep = ":"))
-      a$ids<-paste(a$mar.id, a$covar.id, sep = " ")
-    }else{
-      a$ids<-a$mar.id
-    }
-    num<-a[,res]
-    names(num)<-a$ids
-    return(num)
-  })
-  n <- max(sapply(out, length))
-  out1 <- do.call(rbind, lapply(out, `[`, seq_len(n)))
-  for(i in colnames(out1)) s1[,i]<-out1[,i]
-  if(is.null(ylim)) ylim = c(min(out1, na.rm=T),max(out1, na.rm=T))
-  if(is.null(cols)) cols = highContrastColors(ncol(s1))
-  if(is.null(ltys)) ltys = rep(1, ncol(s1))
-  if(is.null(ylab)) ylab = paste0(pheno.col," mean")
+  
+  
+  
+  out<-cbind(map, means)
+  out$marker<-NULL
+  class(out)<-c("scanone","data.frame")
   if(plotit){
-    plot(s1, type = "n", ylim = ylim, ylab = ylab, ...)
-    for(i in 1:(ncol(s1)-2)) plot(s1, lodcolumn = i, col = cols[i],lty=ltys[i], add = T, ...)
-    if(draw.legend){
-      legend(leg.pos, inset = leg.inset, colnames(out1), col = cols, lty = ltys, bty = leg.bty)
+    cols = c("darkred","darkgrey","cornflowerblue","darkorange")
+    colnam<-c("red","grey","blue","orange")
+    par(mfrow = c(length(unique(covar)),1))
+    for(i in unique(covar)){
+      j<-paste0("_",i)
+      wh<-grep(j,colnames(out))
+      lims = c(min(as.matrix(out[,wh])),
+               max(as.matrix(out[,wh])))
+      plot(out, lod = wh-2, ylim = lims, ylab = "genotype_means",
+           col = cols[1:length(wh)],
+           main = paste(paste(colnam[1:length(wh)],colnames(out)[wh], sep = ":"), 
+                        collapse = ", "))
+      if(plotOverallMean){
+        abline(h = colMeans(out[,wh]), lwd = .5, lty = 2, col = cols[1:length(wh)])
+      }
     }
   }
-  return(s1)
+  return(out)
 }
