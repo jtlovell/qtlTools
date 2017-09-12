@@ -84,6 +84,7 @@ qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
   out<-merge(form.out,out , by = "altnames", all=T)
   out$phenotype = pheno.col
   out$formula <- form1
+  covar.name<-colnames(covar)
 
   # 2. Get the dropone stats and merge
   f<-summary(fitqtl(cross, qtl = mod, formula = form, pheno.col = pheno.col,
@@ -114,11 +115,17 @@ qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
     }else{
       qtype<-out.est$terms
       for(i in mod$name) qtype<-gsub(i,"q",qtype, fixed=T)
+      qtype<-gsub(paste0(":",covar.name),"",qtype, fixed = T)
+      qtype<-gsub(paste0(covar.name,":"),"",qtype, fixed = T)
       oed<-out.est[qtype == "qd",]
-      for(i in mod$name) oed$terms[grepl(i,oed$terms)]<-i
+      oed$terms<-rownames(oed)
       names(oed)[1:3]<-paste(names(oed)[1:3],"dom",sep="_")
       oea<-out.est[qtype == "qa" | out.est$terms %in% out$terms,]
-      for(i in mod$name) oea$terms[grepl(i,oea$terms)]<-i
+      oea$terms<-rownames(oea)
+      for(i in out$terms){
+        oea$terms<-gsub(paste0(i,"a"),i,oea$terms)
+        oed$terms<-gsub(paste0(i,"d"),i,oed$terms)
+      }
       out<-merge(out, oea, by = "terms", all.x=T)
       out<-merge(out, oed, by = "terms", all.x=T)
     }
