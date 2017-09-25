@@ -55,37 +55,24 @@ newLG<-function(cross, markerList){
   if(any(duplicated(newmars))){
     stop("duplicated markers found in markerList, all markers must be unique\n")
   }
-  
-  mardf<-reshape2::melt(markerList)
-  
-  marnam<-mardf[,1]
-  revgrp<-mardf[,2]
-  
-  cross <- clean(cross)
-  oldmars<-markernames(cross)
-  cross <- drop.markers(cross, oldmars[!oldmars %in% marnam])
-  chrtype <- rep(sapply(cross$geno, class), n.mar)
+
+  oc<-cross
   crosstype <- class(cross)[1]
+
+  cross <- clean(cross)
   g <- pull.geno(cross)
-  cross$geno <- vector("list", length(unique(revgrp)))
-  names(cross$geno) <- unique(revgrp)
-  for (i in unique(revgrp)) {
-    cross$geno[[i]]$data <- g[, revgrp == i, drop = FALSE]
-    cross$geno[[i]]$map <- seq(0, by = 10, length = sum(revgrp == i))
+  cross$geno <- vector("list", length(markerList))
+  names(cross$geno) <- names(markerList)
+  for (i in names(markerList)) {
+    cross$geno[[i]]$data <- g[, markerList[[i]]]
+    cross$geno[[i]]$map <- seq(0, by = 10, length = length(markerList[[i]]))
     if (crosstype == "4way") {
-      cross$geno[[i]]$map <- rbind(cross$geno[[i]]$map, 
+      cross$geno[[i]]$map <- rbind(cross$geno[[i]]$map,
                                    cross$geno[[i]]$map)
       colnames(cross$geno[[i]]$map) <- colnames(cross$geno[[i]]$data)
     }else{
       names(cross$geno[[i]]$map) <- colnames(cross$geno[[i]]$data)
-    } 
-    thechrtype <- unique(chrtype[revgrp == i])
-    if (length(thechrtype) > 1){
-      warning("Problem with linkage group ", i, ": A or X?\\n", 
-              paste(thechrtype, collapse = " "))
-    }else{
-      class(cross$geno[[i]]) <- thechrtype
-    } 
+    }
   }
   return(cross)
 }
