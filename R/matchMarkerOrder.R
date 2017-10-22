@@ -48,35 +48,34 @@
 #' @import qtl
 #' @export
 
-matchMarkerOrder<-function(cross, physicalMarkerOrder = NULL){
+matchMarkerOrder<-function(cross, physicalMarkerOrder = NULL, plotit = T){
 
   if(is.null(physicalMarkerOrder)){
     chr<-splitText(markernames(cross))
     pos<-as.numeric(splitText(markernames(cross),num = 2))
     physicalMarkerOrder<-markernames(cross)[order(chr,pos)]
   }
+  if(plotit){
+    plot(match(markernames(cross), physicalMarkerOrder),1:length(physicalMarkerOrder),
+         xlab = "order of markers", ylab = "physical order of markers",
+         pch = 16, col = "grey", cex = .5)
+  }
   flipIt<-sapply(chrnames(cross), function(x){
     marker.id = markernames(cross, chr = x)
-<<<<<<< HEAD
-<<<<<<< HEAD
     phys.order = match(markernames(cross, chr = x),physicalMarkerOrder)
     orig.order = 1:length(markernames(cross, chr = x))
     out<-lm(phys.order~orig.order)$coefficients["orig.order"]
     return(out<0)
-=======
-=======
->>>>>>> fd5dcaa9aa0701e8f69a6ae5fdfdef223d30b083
-    phys.order = match(physicalMarkerOrder,markernames(cross, chr = x))
-    orig.order = 1:length(markernames(cross, chr = x))
-    out<-lm(phys.order~orig.order)$coefficients["new"]
-    return(out>0)
-<<<<<<< HEAD
->>>>>>> fd5dcaa9aa0701e8f69a6ae5fdfdef223d30b083
-=======
->>>>>>> fd5dcaa9aa0701e8f69a6ae5fdfdef223d30b083
   })
   toflip<-chrnames(cross)[flipIt]
   for(i in toflip) cross<-flip.order(cross, chr = i)
 
+  if(plotit){
+    points(match(markernames(cross), physicalMarkerOrder),1:length(physicalMarkerOrder),
+         xlab = "order of markers", ylab = "physical order of markers",
+         pch = 16, col = "black", cex = .2)
+    legend("topright",c("initial order","corrected order"),
+           pch = c(16,16), col = c("grey","black"), pt.cex = c(.5,.2))
+  }
   return(cross)
 }
