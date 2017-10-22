@@ -57,23 +57,10 @@ matchMarkerOrder<-function(cross, physicalMarkerOrder = NULL){
   }
   flipIt<-sapply(chrnames(cross), function(x){
     marker.id = markernames(cross, chr = x)
-<<<<<<< HEAD
-<<<<<<< HEAD
     phys.order = match(markernames(cross, chr = x),physicalMarkerOrder)
     orig.order = 1:length(markernames(cross, chr = x))
     out<-lm(phys.order~orig.order)$coefficients["orig.order"]
     return(out<0)
-=======
-=======
->>>>>>> fd5dcaa9aa0701e8f69a6ae5fdfdef223d30b083
-    phys.order = match(physicalMarkerOrder,markernames(cross, chr = x))
-    orig.order = 1:length(markernames(cross, chr = x))
-    out<-lm(phys.order~orig.order)$coefficients["new"]
-    return(out>0)
-<<<<<<< HEAD
->>>>>>> fd5dcaa9aa0701e8f69a6ae5fdfdef223d30b083
-=======
->>>>>>> fd5dcaa9aa0701e8f69a6ae5fdfdef223d30b083
   })
   toflip<-chrnames(cross)[flipIt]
   for(i in toflip) cross<-flip.order(cross, chr = i)
