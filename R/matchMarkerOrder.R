@@ -12,9 +12,8 @@
 #' the chromosome names of the cross.*
 #' If there are additional characters (e.g. "Chr01" = "1"), specify the character
 #' string to sub stripped in marker.char.rm. In this example, marker.char.rm = "Chr0".
-#' @param physicalMarkerOrder If marker names are not as specified above, provide chromosome
-#' identities of each marker here. Must match chromosome names of the cross exactly.
-#' See qtlTools::newLG to rename the chromosomes in the cross object.
+#' @param physicalMarkerOrder If marker names are not as specified above, this is a vector of
+#' marker names in the order they should exist in the physical genome.
 #'
 #' @details For each chromosome, fits a linear model and asks if the slope < 0. If so,
 #' flips the maker order on that chromosome.
@@ -49,26 +48,33 @@
 #' @import qtl
 #' @export
 
-matchMarkerOrder<-function(cross, physicalMarkerOrder){
+matchMarkerOrder<-function(cross, physicalMarkerOrder = NULL){
 
-  marord<-lapply(chrnames(cross), function(x)
-    markernames(cross, chr = x))
-  names(marord)<-chrnames(cross)
-  physicalMarkerOrder<-physicalMarkerOrder[chrnames(cross)]
-  if(!identical(chrnames(cross), names(physicalMarkerOrder)))
-    stop("some marker chromosome names do not match the annotation chromosome names\n")
-
-  matched<-lapply(chrnames(cross), function(x){
-    data.frame(old = 1:length(marord[[x]]),
-               new = match(marord[[x]], physicalMarkerOrder[[x]]))
-  })
-  names(matched)<-chrnames(cross)
-
+  if(is.null(physicalMarkerOrder)){
+    chr<-splitText(markernames(cross))
+    pos<-as.numeric(splitText(markernames(cross),num = 2))
+    physicalMarkerOrder<-markernames(cross)[order(chr,pos)]
+  }
   flipIt<-sapply(chrnames(cross), function(x){
-    out<-lm(old~new,data = matched[[x]])$coefficients["new"]
-    ifelse(out>0,FALSE,TRUE)
+    marker.id = markernames(cross, chr = x)
+<<<<<<< HEAD
+<<<<<<< HEAD
+    phys.order = match(markernames(cross, chr = x),physicalMarkerOrder)
+    orig.order = 1:length(markernames(cross, chr = x))
+    out<-lm(phys.order~orig.order)$coefficients["orig.order"]
+    return(out<0)
+=======
+=======
+>>>>>>> fd5dcaa9aa0701e8f69a6ae5fdfdef223d30b083
+    phys.order = match(physicalMarkerOrder,markernames(cross, chr = x))
+    orig.order = 1:length(markernames(cross, chr = x))
+    out<-lm(phys.order~orig.order)$coefficients["new"]
+    return(out>0)
+<<<<<<< HEAD
+>>>>>>> fd5dcaa9aa0701e8f69a6ae5fdfdef223d30b083
+=======
+>>>>>>> fd5dcaa9aa0701e8f69a6ae5fdfdef223d30b083
   })
-
   toflip<-chrnames(cross)[flipIt]
   for(i in toflip) cross<-flip.order(cross, chr = i)
 
