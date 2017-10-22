@@ -46,7 +46,7 @@
 #' }
 #' @import qtl
 #' @export
-newLG<-function(cross, markerList){
+newLG<-function(cross, markerList, keep.rf = FALSE){
   if(any(is.null(names(markerList)))){
     names(markerList)<-as.character(1:length(markerList))
   }
@@ -56,7 +56,7 @@ newLG<-function(cross, markerList){
     stop("duplicated markers found in markerList, all markers must be unique\n")
   }
 
-  if (!("rf" %in% names(cross))) {
+  if (!("rf" %in% names(cross)) & keep.rf) {
     warning("Running est.rf.")
     cross <- est.rf(cross)
   }
@@ -72,19 +72,22 @@ newLG<-function(cross, markerList){
 
   n.mar <- nmar(cross)
   tot.mar <- totmar(cross)
-  rf <- cross$rf
-  diagrf <- diag(rf)
-  if (ncol(rf) != tot.mar)
-    stop("dimension of recombination fractions inconsistent with no. markers in cross.")
-  onlylod <- attr(cross$rf, "onlylod")
+  if(keep.rf) {
+    rf <- cross$rf
+    diagrf <- diag(rf)
+    if (ncol(rf) != tot.mar)
+      stop("dimension of recombination fractions inconsistent with no. markers in cross.")
+    onlylod <- attr(cross$rf, "onlylod")
+
+    lod <- rf
+    lod[lower.tri(rf)] <- t(rf)[lower.tri(rf)]
+    rf[upper.tri(rf)] <- t(rf)[upper.tri(rf)]
+    diag(rf) <- 1
+    diag(lod) <- 0
+  }
 
   marnam <- markernames(cross)
   chrstart <- rep(names(cross$geno), n.mar)
-  lod <- rf
-  lod[lower.tri(rf)] <- t(rf)[lower.tri(rf)]
-  rf[upper.tri(rf)] <- t(rf)[upper.tri(rf)]
-  diag(rf) <- 1
-  diag(lod) <- 0
   ingrp <- 1:tot.mar
   chrnum<-1:length(markerList)
   revgrp <- rep(chrnum,sapply(markerList, length))
@@ -116,10 +119,12 @@ newLG<-function(cross, markerList){
   }
   mname <- markernames(cross)
   m <- match(mname, marnam)
-  rf <- rf[m, m]
-  lod <- lod[m, m]
-  rf[upper.tri(rf)] <- lod[upper.tri(lod)]
-  diag(rf) <- diagrf[m]
-  cross$rf <- rf
+  if(keep.rf) {
+    rf <- rf[m, m]
+    lod <- lod[m, m]
+    rf[upper.tri(rf)] <- lod[upper.tri(lod)]
+    diag(rf) <- diagrf[m]
+    cross$rf <- rf
+  }
   return(cross)
 }

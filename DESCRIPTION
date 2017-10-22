@@ -10,6 +10,9 @@ LazyData: TRUE
 Depends:
     qtl
 RoxygenNote: 6.0.1
+Requires: qtl,
+    zoo,
+    TSP
 Suggests: knitr,
     rmarkdown,
     lsmeans,
