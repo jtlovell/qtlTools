@@ -74,7 +74,7 @@ matchMarkerOrder<-function(cross, physicalMarkerOrder = NULL, plotit = T){
     points(match(markernames(cross), physicalMarkerOrder),1:length(physicalMarkerOrder),
          xlab = "order of markers", ylab = "physical order of markers",
          pch = 16, col = "black", cex = .2)
-    legend("topright",c("initial order","corrected order"),
+    legend("bottomright",c("initial order","corrected order"),
            pch = c(16,16), col = c("grey","black"), pt.cex = c(.5,.2))
   }
   return(cross)
