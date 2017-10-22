@@ -45,6 +45,7 @@
 #' xlab = "position in similated map", ylab = "position in ordered map")
 #' }
 #' @import qtl
+#' @import TSP
 #' @export
 tspOrder<-function(cross,
                    concorde_path,
