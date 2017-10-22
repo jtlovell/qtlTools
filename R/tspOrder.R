@@ -84,7 +84,7 @@ tspOrder<-function(cross,
   if(return != "cross"){
     return(chr.ord)
   }else{
-    out<-newLG(cross = cross, markerList = chr.ord)
+    out<-newLG(cross = cross, markerList = chr.ord, keep.rf = T)
     return(out)
   }
 }
