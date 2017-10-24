@@ -34,11 +34,14 @@
 #'
 #'
 #' @import qtl
-#' @import zoo
 #' @export
 swGenotype<-function(reference.prop, chr, pos, marker.id,
                      width = 20, prop2call = .95, plot.diagnostics = FALSE, verbose = TRUE,
                      calcMeans = TRUE, makeSoftCalls = TRUE, makeHardCalls = TRUE){
+  if(!requireNamespace("zoo", quietly = TRUE)){
+    warning("install the zoo package to use this function\n")
+  }
+
   if(any(duplicated(marker.id))){
     stop("all marker.id's must be unique\n")
   }

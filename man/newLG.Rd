@@ -4,7 +4,7 @@
 \alias{newLG}
 \title{Re-order markers and re-form linkage groups}
 \usage{
-newLG(cross, markerList)
+newLG(cross, markerList, keep.rf = FALSE)
 }
 \arguments{
 \item{cross}{The QTL cross object.}

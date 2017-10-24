@@ -4,7 +4,7 @@
 \alias{matchMarkerOrder}
 \title{Orient chromosomes to match some previously found marker order.}
 \usage{
-matchMarkerOrder(cross, physicalMarkerOrder)
+matchMarkerOrder(cross, physicalMarkerOrder = NULL, plotit = T)
 }
 \arguments{
 \item{cross}{The QTL cross object. If marker names
@@ -14,9 +14,8 @@ the chromosome names of the cross.*
 If there are additional characters (e.g. "Chr01" = "1"), specify the character
 string to sub stripped in marker.char.rm. In this example, marker.char.rm = "Chr0".}
 
-\item{physicalMarkerOrder}{If marker names are not as specified above, provide chromosome
-identities of each marker here. Must match chromosome names of the cross exactly.
-See qtlTools::newLG to rename the chromosomes in the cross object.}
+\item{physicalMarkerOrder}{If marker names are not as specified above, this is a vector of
+marker names in the order they should exist in the physical genome.}
 }
 \value{
 A cross object with flipped marker order on chromosomes that seem to be in the
