@@ -8,15 +8,12 @@ Description: QTL visualization and processing: includes pipelines to extract res
 License: GPL-3
 LazyData: TRUE
 Depends:
-    qtl
+    qtl,
+    zoo,
+    TSP
 RoxygenNote: 6.0.1
 Requires: qtl,
     zoo,
     TSP
-Suggests: knitr,
-    rmarkdown,
-    lsmeans,
-    ggplot2,
-    qtlpvl,
-    rrBLUP
+Suggests: knitr
 VignetteBuilder: knitr
