@@ -6,21 +6,23 @@
 #'
 #' @param cross The qtl cross. Must contain genotype probabilities or imputed genotypes
 #' @param pheno.col Character or numeric vector indicating the phenotype to be tested.
-#' Only 1 phenotype can be tested at a time.
-#' @param covar dataframe of covariates like addcovar in qtl::scanone.
+#' Only 1 phenotype can be tested at a time. If numeric, converted to character.
+#' @param covar dataframe of covariates like addcovar in qtl::scanone. Can only be a single column.
+#' If the data is numeric, or character, converted to factor first.
 #' @param chr The chromosomes to analyze. If not supplied, all are tested.
 #' @param leg.pos The character of numeric (length 2) position of the legend. Default is "topright".
-#' @param leg.inset The numeric inset of the legend from the plot border.
-#' @param leg.bty The border setting for the legend
-#' @param cols optional vector of line colors.
-#' @param ltys optional vector of linetypes
-#' @param ylim optional limits for the y axis
-#' @param ylab optional label for the y axis
-#' @param plotit Logical, should a plot be made?
-#' @param draw.legend Logical, should a legend be drawn?
+#' @param mean.FUN The function applied to generate the line positions. Defaults to mean(x, na.rm = T)
+#' @param se.FUN The function applied to generate the confidence interval around the mean.
+#' Defaults to sd(x, na.rm = T)/sqrt(sum(!is.na(x)))
+#' @param sw.width The window size to use if smoothing is desired. If 1, no sliding window smoothing
+#' is conducted. Must be smaller than the number of markers on the smallest chromosome.
+#' @param plot.se Logical, should standard errors around the menas be plotted?
+#' @param se.alpha Numeric coding of the transparency for the standard error regions.
+#' @param col Character vector of colors to plot.
+#' @param leg.pos The position of the legend.
 #' @param ... additional arguments passed on to plot.scanone
 #' @details Calculates genotypic means at each marker/psuedomarker, plots them.
-#' @return The plot (if plotit) and an object of class scanone containing the means
+#' @return The plot and an object of class scanone containing the means
 #' for each combination of genotype and covariate.
 #'
 #' @examples

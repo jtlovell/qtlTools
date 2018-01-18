@@ -6,41 +6,42 @@
 \usage{
 meanScan(cross, pheno.col = 1, chr = NULL, covar = NULL,
   mean.FUN = function(x) mean(x, na.rm = T), se.FUN = function(x) sd(x,
-  na.rm = T)/sqrt(sum(!is.na(x))), sw.width = 1, sw.partial = T,
-  col = NULL, leg.pos = "topright", ...)
+  na.rm = T)/sqrt(sum(!is.na(x))), sw.width = 1, plot.se = T,
+  se.alpha = 0.2, col = NULL, leg.pos = "topright", ...)
 }
 \arguments{
 \item{cross}{The qtl cross. Must contain genotype probabilities or imputed genotypes}
 
 \item{pheno.col}{Character or numeric vector indicating the phenotype to be tested.
-Only 1 phenotype can be tested at a time.}
+Only 1 phenotype can be tested at a time. If numeric, converted to character.}
 
 \item{chr}{The chromosomes to analyze. If not supplied, all are tested.}
 
-\item{covar}{dataframe of covariates like addcovar in qtl::scanone.}
+\item{covar}{dataframe of covariates like addcovar in qtl::scanone. Can only be a single column.
+If the data is numeric, or character, converted to factor first.}
+
+\item{mean.FUN}{The function applied to generate the line positions. Defaults to mean(x, na.rm = T)}
+
+\item{se.FUN}{The function applied to generate the confidence interval around the mean.
+Defaults to sd(x, na.rm = T)/sqrt(sum(!is.na(x)))}
+
+\item{sw.width}{The window size to use if smoothing is desired. If 1, no sliding window smoothing
+is conducted. Must be smaller than the number of markers on the smallest chromosome.}
+
+\item{plot.se}{Logical, should standard errors around the menas be plotted?}
+
+\item{se.alpha}{Numeric coding of the transparency for the standard error regions.}
+
+\item{col}{Character vector of colors to plot.}
 
 \item{leg.pos}{The character of numeric (length 2) position of the legend. Default is "topright".}
 
 \item{...}{additional arguments passed on to plot.scanone}
 
-\item{leg.inset}{The numeric inset of the legend from the plot border.}
-
-\item{leg.bty}{The border setting for the legend}
-
-\item{cols}{optional vector of line colors.}
-
-\item{ltys}{optional vector of linetypes}
-
-\item{ylim}{optional limits for the y axis}
-
-\item{ylab}{optional label for the y axis}
-
-\item{plotit}{Logical, should a plot be made?}
-
-\item{draw.legend}{Logical, should a legend be drawn?}
+\item{leg.pos}{The position of the legend.}
 }
 \value{
-The plot (if plotit) and an object of class scanone containing the means
+The plot and an object of class scanone containing the means
 for each combination of genotype and covariate.
 }
 \description{
@@ -87,6 +88,12 @@ cross<-calc.genoprob(cross)
 ms<-meanScan(cross, covar = NULL)
 sex<-data.frame(sex = ifelse(pull.pheno(cross, "sex") == 0,"F","M"))
 ms<-meanScan(cross, covar = sex, chr = c(2,7))
+
+data("multitrait")
+cross =multitrait
+cross<-calc.genoprob(cross)
+ms<-meanScan(cross, covar = NULL)
+ms<-meanScan(cross, covar = NULL, sw.width = 5)
 }
 
 }
