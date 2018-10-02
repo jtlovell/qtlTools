@@ -46,8 +46,17 @@
 #' @import qtl
 #' @export
 
-calcCis<-function(cross, mod = NULL, s1.output = NULL, pheno.col = NA, perm.output = NULL, qtlnames = NULL,
-                  lodint = TRUE, drop=1.5, prob=0.95, expandtomarkers = FALSE,
+calcCis<-function(cross,
+                  mod = NULL,
+                  s1.output = NULL,
+                  pheno.col = NA,
+                  perm.output = NULL,
+                  qtlnames = NULL,
+                  lodint = TRUE,
+                  drop=1.5,
+                  prob=0.95,
+                  expandtomarkers = FALSE,
+                  chr = NULL,
                   ...){
   if(is.null(mod) & is.null(s1.output))
     stop("either scanone peaks, or qtl models must be supplied\n")
@@ -57,11 +66,22 @@ calcCis<-function(cross, mod = NULL, s1.output = NULL, pheno.col = NA, perm.outp
     if(is.null(attr(mod, "lodprofile")))
       stop("LOD profiles must be included in the QTL model\n")
     if(is.null(qtlnames))  qtlnames <- mod$name
+    if(is.null(chr)){
+      chr = chrnames(cross)
+    }
     out<-lapply(1:nqtl(mod), function(j){
       if(lodint){
-        ciout<-lodint(mod,qtl.index=j, drop=drop, expandtomarkers=expandtomarkers)
+        ciout<-lodint(mod,
+                      chr,
+                      qtl.index=j,
+                      drop=drop,
+                      expandtomarkers=expandtomarkers)
       }else{
-        ciout<-bayesint(mod,qtl.index=j, prob=prob, expandtomarkers=expandtomarkers)
+        ciout<-bayesint(mod,
+                        chr,
+                        qtl.index=j,
+                        prob=prob,
+                        expandtomarkers=expandtomarkers)
       }
       lowmarker<-rownames(ciout)[1]
       highmarker<-rownames(ciout)[3]
@@ -82,7 +102,8 @@ calcCis<-function(cross, mod = NULL, s1.output = NULL, pheno.col = NA, perm.outp
     phes<-colnames(s1.output)[-c(1:2)]
     qtl.peaks <- pullSigQTL(cross, pheno.col=phes,
                             s1.output = s1.output,
-                            perm.output = perm.output, returnQTLModel = FALSE, ...)
+                            perm.output = perm.output,
+                            returnQTLModel = FALSE, ...)
     out<-lapply(1:nrow(qtl.peaks), function(j){
       dat<-qtl.peaks[j,]
       phe<-dat$pheno
@@ -90,9 +111,17 @@ calcCis<-function(cross, mod = NULL, s1.output = NULL, pheno.col = NA, perm.outp
       chr<-dat$chr
       pos<-dat$pos
       if(lodint){
-        ciout<-lodint(s1.output,chr=chr,lodcolumn=lodcolumn, drop=drop, expandtomarkers=expandtomarkers)
+        ciout<-lodint(s1.output,
+                      chr=chr,
+                      lodcolumn=lodcolumn,
+                      drop=drop,
+                      expandtomarkers=expandtomarkers)
       }else{
-        ciout<-bayesint(s1.output,chr=chr,lodcolumn=lodcolumn, prob=prob, expandtomarkers=expandtomarkers)
+        ciout<-bayesint(s1.output,
+                        chr=chr,
+                        lodcolumn=lodcolumn,
+                        prob=prob,
+                        expandtomarkers=expandtomarkers)
       }
       lowmarker<-rownames(ciout)[1]
       highmarker<-rownames(ciout)[3]

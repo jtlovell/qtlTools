@@ -47,8 +47,13 @@
 #' @import qtl
 #' @export
 
-qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
-                   calcConfint=TRUE, estEffects = TRUE,
+qtlStats<-function(cross,
+                   mod,
+                   pheno.col,
+                   form=NULL,
+                   covar=NULL,
+                   calcConfint=TRUE,
+                   estEffects = TRUE,
                    model="normal",
                    ...){
 
@@ -133,7 +138,9 @@ qtlStats<-function(cross, mod, pheno.col, form=NULL, covar=NULL,
 
   # 4. Get Cis and merge
   if(calcConfint){
-    cis<-calcCis(cross=cross, mod=mod, qtlnames = NULL)
+    cis<-calcCis(cross=cross,
+                 mod=mod,
+                 qtlnames = NULL, ...)
     cis<-cis[-which(colnames(cis)=="pheno")]
     colnames(cis)[1]<-"terms"
     out<-merge(out, cis, by = "terms", all=T)
