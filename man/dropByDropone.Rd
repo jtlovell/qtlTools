@@ -4,9 +4,9 @@
 \alias{dropByDropone}
 \title{Drop markers that significantly expand the genetic map.}
 \usage{
-dropByDropone(cross, droponeRes, endMarkerThresh = 12, midMarkerThresh = 4,
-  which.map = NULL, map.function = "kosambi", re.est.map = F,
-  sex.sp = F, ...)
+dropByDropone(cross, droponeRes, endMarkerThresh = 12,
+  midMarkerThresh = 4, which.map = NULL, map.function = "kosambi",
+  re.est.map = F, sex.sp = F, ...)
 }
 \arguments{
 \item{cross}{The QTL cross object, with an estimated genetic map}

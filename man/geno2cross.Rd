@@ -4,8 +4,8 @@
 \alias{geno2cross}
 \title{Format a genotype matrix to a R/qtl readable file}
 \usage{
-geno2cross(genomat, chr = NULL, pos = NULL, id = NULL, chrpos.sep = "_",
-  crossfile = "cross.csv")
+geno2cross(genomat, chr = NULL, pos = NULL, id = NULL,
+  chrpos.sep = "_", crossfile = "cross.csv")
 }
 \arguments{
 \item{genomat}{A matrix of individual (row) * marker (col) genotype calls.}

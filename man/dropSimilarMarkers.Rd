@@ -4,9 +4,10 @@
 \alias{dropSimilarMarkers}
 \title{Method to improve a genetic map.}
 \usage{
-dropSimilarMarkers(cross, chr = NULL, rf.threshold = 0.01, sd.weight = 1,
-  na.weight = 1, keepEnds = FALSE, doNotDrop = NULL, verbose = TRUE,
-  blockSize = 100, byChr = TRUE, runFullMatrix = FALSE, ...)
+dropSimilarMarkers(cross, chr = NULL, rf.threshold = 0.01,
+  sd.weight = 1, na.weight = 1, keepEnds = FALSE, doNotDrop = NULL,
+  verbose = TRUE, blockSize = 100, byChr = TRUE,
+  runFullMatrix = FALSE, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object to search}

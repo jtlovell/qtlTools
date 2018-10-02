@@ -7,10 +7,11 @@
 plotGeneModel(gff, snpEffVCF, geneID, upstreamBuffer = 1000,
   downstreamBuffer = 500, features2plot = c("exon", "five_prime_UTR",
   "three_prime_UTR"), colors = c("steelblue3", "lightsteelblue1",
-  "lightsteelblue1"), mutations2annotate = c("missense", "stop", "start"),
-  pchMutation = c(2, 8, 8), colMutation = c("darkblue", "darkred", "green"),
-  orientation = NULL, windowSize = 100, stepSize = 10, scaleBar = 0.1,
-  makePlot = TRUE, returnData = TRUE)
+  "lightsteelblue1"), mutations2annotate = c("missense", "stop",
+  "start"), pchMutation = c(2, 8, 8), colMutation = c("darkblue",
+  "darkred", "green"), orientation = NULL, windowSize = 100,
+  stepSize = 10, scaleBar = 0.1, makePlot = TRUE,
+  returnData = TRUE)
 }
 \arguments{
 \item{gff}{A gene annotation in gff / gff3 format}

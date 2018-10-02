@@ -5,8 +5,8 @@
 \title{Method to improve a genetic map.}
 \usage{
 repRipple(cross, chr = NULL, window = 5, method = "countxo",
-  verbose = T, map.function = "kosambi", sex.sp = F, clean1st = FALSE,
-  ripVerb = TRUE, ...)
+  verbose = T, map.function = "kosambi", sex.sp = F,
+  clean1st = FALSE, ripVerb = TRUE, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object to search}

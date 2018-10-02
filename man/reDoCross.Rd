@@ -4,8 +4,9 @@
 \alias{reDoCross}
 \title{Run a set of functions that improve the genetic map}
 \usage{
-reDoCross(cross, window = 5, min.distance = 1, map.function = "kosambi",
-  sex.sp = F, verbose = T, initialEstMap = TRUE, ...)
+reDoCross(cross, window = 5, min.distance = 1,
+  map.function = "kosambi", sex.sp = F, verbose = T,
+  initialEstMap = TRUE, ...)
 }
 \arguments{
 \item{cross}{The QTL cross object.}

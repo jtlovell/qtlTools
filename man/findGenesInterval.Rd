@@ -5,8 +5,8 @@
 \title{Find candidate genes for QTL.}
 \usage{
 findGenesInterval(findGenecM.output = NULL, calcCis.output = NULL,
-  qtlname = NULL, chr, lowposition, highposition, geneID, geneChr, geneBp,
-  genecM)
+  qtlname = NULL, chr, lowposition, highposition, geneID, geneChr,
+  geneBp, genecM)
 }
 \arguments{
 \item{findGenecM.output}{Output from findGenecM

@@ -5,7 +5,8 @@
 \title{Find the best mapping position for a marker}
 \usage{
 inferMarkerPos(cross, marker.matrix, initial.geno.density = 20,
-  final.step = 0.1, est.ci = FALSE, verbose = T, jitterMars = T, ...)
+  final.step = 0.1, est.ci = FALSE, verbose = T, jitterMars = T,
+  ...)
 }
 \arguments{
 \item{cross}{The QTL cross object.}

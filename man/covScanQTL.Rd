@@ -4,9 +4,10 @@
 \alias{covScanQTL}
 \title{Find the effect of candidate genes based on gene expression.}
 \usage{
-covScanQTL(cross, pheno.col = 1, qtl, addcovar = NULL, intcovar = NULL,
-  which.epiqtl = NULL, focalqtl.index = 1, expression.covariates,
-  qtl.method = "hk", nperm = 0, plotit = TRUE, verbose = TRUE, ...)
+covScanQTL(cross, pheno.col = 1, qtl, addcovar = NULL,
+  intcovar = NULL, which.epiqtl = NULL, focalqtl.index = 1,
+  expression.covariates, qtl.method = "hk", nperm = 0, plotit = TRUE,
+  verbose = TRUE, ...)
 }
 \arguments{
 \item{cross}{The qtl cross object with marker names that need to be changed.}

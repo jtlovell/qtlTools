@@ -4,8 +4,8 @@
 \alias{segmentsOnPeaks}
 \title{Single QTL confidence intervals on LOD curves}
 \usage{
-segmentsOnPeaks(cross, calcCisOutput = NULL, ci.chr = NULL, peak = NULL,
-  l = NULL, h = NULL, s1.output = NULL, mod = NULL,
+segmentsOnPeaks(cross, calcCisOutput = NULL, ci.chr = NULL,
+  peak = NULL, l = NULL, h = NULL, s1.output = NULL, mod = NULL,
   showallchr = FALSE, chr = NULL, pt.pch = 8, pt.cex = 0.8,
   pt.col = "red", int.y = 0, ...)
 }

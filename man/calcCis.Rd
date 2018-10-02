@@ -6,7 +6,7 @@
 \usage{
 calcCis(cross, mod = NULL, s1.output = NULL, pheno.col = NA,
   perm.output = NULL, qtlnames = NULL, lodint = TRUE, drop = 1.5,
-  prob = 0.95, expandtomarkers = FALSE, ...)
+  prob = 0.95, expandtomarkers = FALSE, chr = NULL, ...)
 }
 \arguments{
 \item{cross}{The QTL cross object.}
