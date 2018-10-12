@@ -49,7 +49,7 @@
 #' @export
 tspOrder<-function(cross,
                    concorde_path,
-                   return = "cross"){
+                   return = "cross", ...){
   if(!requireNamespace("TSP", quietly = TRUE)){
     stop("install the TSP package to use tspOrder\n")
   }else{
@@ -74,7 +74,7 @@ tspOrder<-function(cross,
     chr.tsp<-TSP(totsp)
 
     tsp <- insert_dummy(chr.tsp, label = "cut")
-    tour <- solve_TSP(tsp, method="concorde")
+    tour <- solve_TSP(tsp, method="concorde", ...)
     path <- cut_tour(tour, "cut")
 
     ord<-labels(path)
